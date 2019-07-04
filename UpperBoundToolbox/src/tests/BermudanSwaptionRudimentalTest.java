@@ -50,7 +50,7 @@ public class BermudanSwaptionRudimentalTest {
 
 	private final LIBORModelMonteCarloSimulationModel liborModel;
 
-	private final int numberOfPaths = 20000;
+	private final int numberOfPaths = 10000;
 	private final int numberOfFactors = 5; // PCA number of factors
 	private final double correlationDecayParam = 0.3;
 
