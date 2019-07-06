@@ -3,6 +3,7 @@ package drafts;
 import java.util.ArrayList;
 
 import net.finmath.exception.CalculationException;
+import net.finmath.montecarlo.MonteCarloSimulationModel;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 
@@ -53,5 +54,12 @@ public class SimpleUpperBoundEstimation extends AbstractSimpleBoundEstimation {
 
 		return triggerValue;
 
+	}
+
+	@Override
+	public RandomVariable[] getBasisFunctions(double evaluationTime, MonteCarloSimulationModel model)
+			throws CalculationException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import drafts.BermudanSwaption;
 import drafts.SimpleLowerBoundEstimation;
+import drafts.SimpleLowerBoundEstimation.BasisFunctionType;
 import drafts.SimpleUpperBoundEstimation;
 import drafts.SimpleUpperBoundEstimationAndersenBroadie;
 import junit.framework.Assert;
@@ -22,6 +23,8 @@ import net.finmath.exception.CalculationException;
 import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
 import net.finmath.montecarlo.BrownianMotion;
+import net.finmath.montecarlo.conditionalexpectation.RegressionBasisFunctionsFromProducts;
+import net.finmath.montecarlo.conditionalexpectation.RegressionBasisFunctionsProvider;
 import net.finmath.montecarlo.interestrate.CalibrationProduct;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
@@ -112,7 +115,26 @@ public class BermudanSwaptionRudimentalTest {
 			}
 
 			// Value with lower bound method
-			SimpleLowerBoundEstimation lowerBound = new SimpleLowerBoundEstimation();
+			
+			
+			
+			
+			// change regression basis functions via enum:
+						
+						
+						
+			
+			// choose actual basis function method here: BasisFunctionType.
+				// default is using forward rates
+				
+				// SwapRates
+				// ForwardRates (with cross)
+			
+			// more types to be developed
+			 
+			
+			SimpleLowerBoundEstimation lowerBound = new SimpleLowerBoundEstimation();		
+			
 			String currency = "EURO";
 			BermudanSwaption swaptionMonteCarloLowerBound = new BermudanSwaption(currency, startingDate, fixingDates,
 					swapTenor, paymentDates, notionals, true, swaprates, lowerBound);

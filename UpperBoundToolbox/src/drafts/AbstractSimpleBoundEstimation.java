@@ -1,6 +1,7 @@
 package drafts;
 
 import net.finmath.exception.CalculationException;
+import net.finmath.montecarlo.MonteCarloSimulationModel;
 import net.finmath.montecarlo.conditionalexpectation.RegressionBasisFunctionsProvider;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
@@ -8,7 +9,7 @@ import net.finmath.stochastic.Scalar;
 
 public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionValueEstimatorInterface {
 
-	protected RegressionBasisFunctionsProvider regressionBasisFunctionsProvider;
+	RegressionBasisFunctionsProvider regressionBasisFunctionsProvider;
 	BermudanSwaption bermudanOption;
 	RandomVariable[] cacheOptionValues;
 	RandomVariable[] cacheValuesOfUnderlying;
@@ -114,4 +115,7 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 
 	protected abstract RandomVariable calculateTriggerValues(int period, double fixingDate,
 			LIBORModelMonteCarloSimulationModel model) throws CalculationException;
+
+	public abstract RandomVariable[] getBasisFunctions(double evaluationTime, MonteCarloSimulationModel model)
+			throws CalculationException;
 }
