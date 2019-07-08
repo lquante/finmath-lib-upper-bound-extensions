@@ -9,7 +9,7 @@ import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 
-public class SimpleUpperBoundEstimationAndersenBroadie extends AbstractUpperBoundEstimation {
+public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstimation {
 	AbstractSimpleBoundEstimation lowerBoundMethod;
 	SimplestExerciseStrategy exerciseStrategy;
 	private int numberOfSubsimulationsStepA;
@@ -20,7 +20,7 @@ public class SimpleUpperBoundEstimationAndersenBroadie extends AbstractUpperBoun
 	 *                                      to be used as a basis for the upper
 	 *                                      bound.
 	 */
-	public SimpleUpperBoundEstimationAndersenBroadie(AbstractSimpleBoundEstimation lowerBoundMethod,
+	public AndersenBroadieUpperBoundEstimation(AbstractSimpleBoundEstimation lowerBoundMethod,
 			int numberOfSubsimulationsStepA, int numberOfSubsimulationsStepB) {
 		super();
 		this.lowerBoundMethod = lowerBoundMethod;
@@ -63,29 +63,29 @@ public class SimpleUpperBoundEstimationAndersenBroadie extends AbstractUpperBoun
 		int numberOfForwardPeriods = this.bermudanOption.getFixingDates().length - 1;
 		for (int forwardPeriod = 2; forwardPeriod <= numberOfForwardPeriods; forwardPeriod++) {
 			// initialize random variables and models for subsimulation
+			double simulationTime = this.bermudanOption.getFixingDates()[forwardPeriod];
 			RandomVariable subsimulationValue;
 			RandomVariable subsimulatedOptionValue;
 			BermudanSwaption restartedBermudanA = this.bermudanOption
-					.getCloneWithModifiedStartingPeriod(forwardPeriod / 2);
+					.getCloneWithModifiedStartingPeriod(simulationTime);
 			BermudanSwaption restartedBermudanB = this.bermudanOption
-					.getCloneWithModifiedStartingPeriod(forwardPeriod / 2);
-			RandomVariable discountFactor = modelStepA.getNumeraire(forwardPeriod / 2)
+					.getCloneWithModifiedStartingPeriod(simulationTime);
+			RandomVariable discountFactor = modelStepA.getNumeraire(simulationTime)
 					.div(modelStepA.getMonteCarloWeights(forwardPeriod));
 			// case 2a / b subsimulation conducted via trigger values from lower bound:
 			if (forwardPeriod < numberOfForwardPeriods) {
 				subsimulationValue = triggerValues.choose(
-						restartedBermudanA.getValue(forwardPeriod / 2, modelStepA).div(discountFactor),
+						restartedBermudanA.getValue(simulationTime, modelStepA).div(discountFactor),
 						cacheUnderlying[forwardPeriod]);
 			} else
 				subsimulationValue = triggerValues.choose(modelStepA.getRandomVariableForConstant(0),
 						modelStepB.getRandomVariableForConstant(0));
 			// check if forwardPeriod<final period
 			if (forwardPeriod + 1 < numberOfForwardPeriods) {
-				RandomVariable valueCorrectionTerm = restartedBermudanB.getValue(forwardPeriod / 2, modelStepB)
+				RandomVariable valueCorrectionTerm = restartedBermudanB.getValue(simulationTime, modelStepB)
 						.div(discountFactor).sub(cacheUnderlying[forwardPeriod]);
 				subsimulatedOptionValue = triggerValues.choose(modelStepA.getRandomVariableForConstant(0),
 						valueCorrectionTerm);
-
 			} else
 				subsimulatedOptionValue = triggerValues.choose(modelStepA.getRandomVariableForConstant(0),
 						modelStepB.getRandomVariableForConstant(0));
