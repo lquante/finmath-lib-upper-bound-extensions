@@ -2,7 +2,6 @@ package drafts;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.MonteCarloSimulationModel;
-import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAAD;
 import net.finmath.montecarlo.conditionalexpectation.RegressionBasisFunctionsProvider;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
@@ -31,7 +30,7 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 	public RandomVariable getTriggerValues() {
 		return triggerValues;
 	}
-		
+
 	public RandomVariable[] getCacheTriggerValues() {
 		return cacheTriggerValues;
 	}
@@ -68,7 +67,7 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 		cacheOptionValues = new RandomVariable[numberOfPeriods + 1];
 		cacheValuesOfUnderlying = new RandomVariable[numberOfPeriods + 1];
 		cacheConditionalExpectations = new RandomVariable[numberOfPeriods + 1];
-		cacheTriggerValues =new RandomVariable[numberOfPeriods + 1];
+		cacheTriggerValues = new RandomVariable[numberOfPeriods + 1];
 		// Loop backward over the swap periods
 		for (int period = numberOfPeriods; period >= 0; period--) {
 			double fixingDate = bermudanOption.getFixingDates()[period];
@@ -107,7 +106,7 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 			optionValue = triggerValues.choose(continuationValue, exerciseValue);
 
 			exerciseTime = triggerValues.choose(exerciseTime, new Scalar(exerciseDate));
-			
+
 			// caching for upperBound methods
 			cacheTriggerValues[period] = triggerValues;
 			cacheOptionValues[period] = optionValue;
@@ -115,12 +114,10 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 		}
 
 		// Note that values is a relative price - no numeraire division is required
-		RandomVariable numeraireAtZero =  model
-				.getNumeraire(evaluationTime);
+		RandomVariable numeraireAtZero = model.getNumeraire(evaluationTime);
 		RandomVariable monteCarloProbabilitiesAtZero = model.getMonteCarloWeights(evaluationTime);
 
-		optionValue =  optionValue.mult(numeraireAtZero)
-				.div(monteCarloProbabilitiesAtZero);
+		optionValue = optionValue.mult(numeraireAtZero).div(monteCarloProbabilitiesAtZero);
 
 		return optionValue;
 	}

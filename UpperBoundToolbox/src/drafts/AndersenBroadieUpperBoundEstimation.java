@@ -3,7 +3,6 @@ package drafts;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-
 import net.finmath.exception.CalculationException;
 import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurve;
@@ -47,7 +46,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
 			throws CalculationException {
 		numberOfSimulations = cacheOptionValues[0].getRealizations().length;
-		
+
 		double sumOfDeltas = 0;
 		double delta0 = 0;
 		for (int path = 0; path < numberOfSimulations; path++) {
@@ -56,8 +55,8 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 			ArrayList<Double> martingaleCache = new ArrayList<Double>();
 			double martingale = cacheOptionValues[period].get(path);
 			martingaleCache.add(martingale);
-			if (this.bermudanOption.getFixingDates().length > 1 && period+1<cacheOptionValues.length) {
-				martingale = cacheOptionValues[period+1].get(path);
+			if (this.bermudanOption.getFixingDates().length > 1 && period + 1 < cacheOptionValues.length) {
+				martingale = cacheOptionValues[period + 1].get(path);
 				martingaleCache.add(martingale);
 			}
 
@@ -67,10 +66,8 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 			// create model for subsimulations
 			LIBORModelMonteCarloSimulationModel modelStepA = createSubsimulationModel(model, period, path,
 					numberOfSubsimulationsStepA);
-			
-			
-			
-			for (int forwardPeriod = 2+period; forwardPeriod <= numberOfForwardPeriods; forwardPeriod++) {
+
+			for (int forwardPeriod = 2 + period; forwardPeriod <= numberOfForwardPeriods; forwardPeriod++) {
 				// initialize values for subsimulation
 				double simulationTime = model.getTime(forwardPeriod);
 				double discountedExerciseValue = 0;
@@ -79,7 +76,6 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 				// check trigger values for each path of the main simulation:
 				if (triggerValues[period].get(path) >= 0) // case 2a
 				{
-					
 
 					// create option
 					BermudanSwaptionValueEstimatorInterface lowerBoundMethodA = new SimpleLowerBoundEstimation();
@@ -90,70 +86,66 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 							.div(modelStepA.getMonteCarloWeights(forwardPeriod));
 					// calculate discounted option value:
 
-					discountedExerciseValue = restartedBermudanA.getValue(simulationTime, modelStepA).div(discountFactor)
-							.getAverage();
+					discountedExerciseValue = restartedBermudanA.getValue(simulationTime, modelStepA)
+							.div(discountFactor).getAverage();
 
 				} else // case 2b
 				{
 					// create model terminating as soon as triggerValues[path+i] >=0 for i>=1
 					int terminationPeriod;
-					for (terminationPeriod = period;(triggerValues[terminationPeriod].get(path)<0);terminationPeriod++)
-					{
-						if(terminationPeriod>=numberOfForwardPeriods)
+					for (terminationPeriod = period; (triggerValues[terminationPeriod]
+							.get(path) < 0); terminationPeriod++) {
+						if (terminationPeriod >= numberOfForwardPeriods)
 							break;
 					}
 					// calculate discounted option value:
 
 					discountedExerciseValue = cacheUnderlying[forwardPeriod].get(path);
 
-					
 					// create model for subsimulations
-					if (forwardPeriod<terminationPeriod)
-					{
-					LIBORModelMonteCarloSimulationModel modelStepB = createSubsimulationModelTerminating(model, period, terminationPeriod, path,
-							numberOfSubsimulationsStepB);
+					if (forwardPeriod < terminationPeriod) {
+						LIBORModelMonteCarloSimulationModel modelStepB = createSubsimulationModelTerminating(model,
+								period, terminationPeriod, path, numberOfSubsimulationsStepB);
 
-						
-						
-					// create option
-					BermudanSwaptionValueEstimatorInterface lowerBoundMethodB = new SimpleLowerBoundEstimation();
-					BermudanSwaption BermudanB = this.bermudanOption
-							.getBermudanSwaptionWithChangedValuationMethod(lowerBoundMethodB);
-					BermudanSwaption restartedBermudanB = BermudanB.getCloneWithModifiedStartingPeriod(simulationTime);
-					double forwardOptionTime = modelStepB.getTime(forwardPeriod-period);
-					RandomVariable discountFactor = modelStepB.getRandomVariableForConstant(0);
-					 discountFactor = modelStepB.getNumeraire(forwardOptionTime)
-							.div(modelStepB.getMonteCarloWeights(forwardPeriod-period+1));
-					
-					
-					// check if forwardPeriod<final period
-					if (terminationPeriod < forwardPeriod & forwardPeriod+1 < numberOfForwardPeriods) {
-						RandomVariable valueOptionB = restartedBermudanB.getValue(forwardOptionTime, modelStepB);
-						discountedFutureExerciseValue = valueOptionB
-								.div(discountFactor).getAverage();
-					}
+						// create option
+						BermudanSwaptionValueEstimatorInterface lowerBoundMethodB = new SimpleLowerBoundEstimation();
+						BermudanSwaption BermudanB = this.bermudanOption
+								.getBermudanSwaptionWithChangedValuationMethod(lowerBoundMethodB);
+						BermudanSwaption restartedBermudanB = BermudanB
+								.getCloneWithModifiedStartingPeriod(simulationTime);
+						double forwardOptionTime = modelStepB.getTime(forwardPeriod - period);
+						RandomVariable discountFactor = modelStepB.getRandomVariableForConstant(0);
+						discountFactor = modelStepB.getNumeraire(forwardOptionTime)
+								.div(modelStepB.getMonteCarloWeights(forwardPeriod - period + 1));
+
+						// check if forwardPeriod<final period
+						if (terminationPeriod < forwardPeriod & forwardPeriod + 1 < numberOfForwardPeriods) {
+							RandomVariable valueOptionB = restartedBermudanB.getValue(forwardOptionTime, modelStepB);
+							discountedFutureExerciseValue = valueOptionB.div(discountFactor).getAverage();
+						}
 					}
 				}
 
 				int previousExerciseIndicator;
-				if (triggerValues[martingaleIndex-1].get(path)>=0)
+				if (triggerValues[martingaleIndex - 1].get(path) >= 0)
 					previousExerciseIndicator = 1;
 				else
 					previousExerciseIndicator = 0;
 				double previousExerciseValue = 0;
-				martingale = martingaleCache.get(martingaleIndex-1) - (cacheOptionValues[martingaleIndex-1].get(path))
-						+ (discountedExerciseValue)-discountedFutureExerciseValue-previousExerciseIndicator*previousExerciseValue;
+				martingale = martingaleCache.get(martingaleIndex - 1)
+						- (cacheOptionValues[martingaleIndex - 1].get(path)) + (discountedExerciseValue)
+						- discountedFutureExerciseValue - previousExerciseIndicator * previousExerciseValue;
 				martingaleCache.add(martingale);
-				martingaleIndex +=1;
+				martingaleIndex += 1;
 				previousExerciseValue = discountedExerciseValue;
 			}
-			
+
 			// calculate the maximum from the simulated martingale for each remaining period
-			for (int forwardPeriod = 0; forwardPeriod <= numberOfForwardPeriods-period; forwardPeriod++)
+			for (int forwardPeriod = 0; forwardPeriod <= numberOfForwardPeriods - period; forwardPeriod++)
 				delta0 = Math.max(delta0,
 						cacheUnderlying[forwardPeriod].get(path) - martingaleCache.get(forwardPeriod));
 			sumOfDeltas += delta0;
-			
+
 		}
 
 		double deltaZeroApproximation = sumOfDeltas / numberOfSimulations;
@@ -161,7 +153,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 		RandomVariable numeraireAtPeriod = model.getNumeraire(model.getTime(period));
 		RandomVariable monteCarloProbabilitiesAtSimulationTime = model.getMonteCarloWeights(period);
 		RandomVariable discountFactor = numeraireAtPeriod.div(monteCarloProbabilitiesAtSimulationTime);
-		
+
 		RandomVariable upperBoundValue = cacheOptionValues[period].mult(discountFactor).add(deltaZeroApproximation);
 
 		return upperBoundValue;
@@ -170,18 +162,17 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 
 	private LIBORModelMonteCarloSimulationModel createSubsimulationModel(LIBORModelMonteCarloSimulationModel model,
 			int period, int path, int numberOfSubsimulations) throws CalculationException {
-				int numberOfTimes = model.getLiborPeriodDiscretization().getNumberOfTimes();
-				
-		return createSubsimulationModelTerminating( model,
-			 period,numberOfTimes , path, numberOfSubsimulations);
+		int numberOfTimes = model.getLiborPeriodDiscretization().getNumberOfTimes();
+
+		return createSubsimulationModelTerminating(model, period, numberOfTimes, path, numberOfSubsimulations);
 	}
 
-	public LIBORModelMonteCarloSimulationModel createSubsimulationModelTerminating(LIBORModelMonteCarloSimulationModel model,
-			int startingPeriod, int endPeriod, int component, int numberOfSubsimulationPaths) throws CalculationException {
+	public LIBORModelMonteCarloSimulationModel createSubsimulationModelTerminating(
+			LIBORModelMonteCarloSimulationModel model, int startingPeriod, int endPeriod, int component,
+			int numberOfSubsimulationPaths) throws CalculationException {
 
-		
 		TimeDiscretization shortenedLiborDiscretization = new TimeDiscretizationFromArray(Arrays
-				.copyOfRange(model.getLiborPeriodDiscretization().getAsDoubleArray(), startingPeriod, endPeriod+1));
+				.copyOfRange(model.getLiborPeriodDiscretization().getAsDoubleArray(), startingPeriod, endPeriod + 1));
 		int numberOfShortendTimes = shortenedLiborDiscretization.getNumberOfTimes();
 		// get initial LIBOR rates as forward curve starting point
 		// get inital value of forward curve
@@ -243,9 +234,8 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 				forwardCurve, discountCurve, covarianceModel, null, null);
 
 		// adjust process
-		BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(
-				shortenedLiborDiscretization, model.getBrownianMotion().getNumberOfFactors(),
-				numberOfSubsimulationsStepA, 3141);
+		BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(shortenedLiborDiscretization,
+				model.getBrownianMotion().getNumberOfFactors(), numberOfSubsimulationsStepA, 3141);
 		MonteCarloProcess process = new EulerSchemeFromProcessModel(brownianMotion,
 				EulerSchemeFromProcessModel.Scheme.PREDICTOR_CORRECTOR);
 

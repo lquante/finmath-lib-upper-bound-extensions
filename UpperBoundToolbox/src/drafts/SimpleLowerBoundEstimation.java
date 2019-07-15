@@ -68,7 +68,7 @@ public class SimpleLowerBoundEstimation extends AbstractSimpleBoundEstimation
 
 		cacheValuesOfUnderlying[period] = exerciseValue;
 		cacheConditionalExpectations[period] = triggerValuesDiscounted.add(exerciseValue).cache();
-		
+
 		return triggerValues;
 
 	}
