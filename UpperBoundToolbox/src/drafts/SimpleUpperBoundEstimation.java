@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.MonteCarloSimulationModel;
+import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAAD;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 
@@ -23,7 +24,7 @@ public class SimpleUpperBoundEstimation extends AbstractSimpleBoundEstimation {
 	}
 
 	@Override
-	protected RandomVariable calculateTriggerValues(int period, double fixingDate,
+	protected RandomVariableDifferentiableAAD calculateTriggerValues(int period, double fixingDate,
 			LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		// calculate lower bound values for dual method:
 
@@ -45,14 +46,16 @@ public class SimpleUpperBoundEstimation extends AbstractSimpleBoundEstimation {
 
 		}
 		// Calculate upper bound backward
-		continuationValue = lowerBoundMethod.getCacheConditionalExpectations()[numberOfForwardPeriods]
-				.sub(martingaleCache.get(numberOfForwardPeriods));
+		continuationValue = (RandomVariableDifferentiableAAD) lowerBoundMethod
+				.getCacheConditionalExpectations()[numberOfForwardPeriods]
+						.sub(martingaleCache.get(numberOfForwardPeriods));
 		RandomVariable triggerValue = null;
 
-		exerciseValue = lowerBoundMethod.getCacheValuesOfUnderlying()[period].sub(martingaleCache.get(period));
+		exerciseValue = (RandomVariableDifferentiableAAD) lowerBoundMethod.getCacheValuesOfUnderlying()[period]
+				.sub(martingaleCache.get(period));
 		triggerValue = exerciseStrategy.getExerciseIndicators(continuationValue, exerciseValue);
 
-		return triggerValue;
+		return (RandomVariableDifferentiableAAD) triggerValue;
 
 	}
 

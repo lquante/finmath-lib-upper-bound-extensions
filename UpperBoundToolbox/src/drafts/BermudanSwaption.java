@@ -24,10 +24,17 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 		this.valuationMethod = valuationMethod;
 	}
 
+	public BermudanSwaption getBermudanSwaptionWithChangedValuationMethod(
+			BermudanSwaptionValueEstimatorInterface valuationMethod) {
+		return new BermudanSwaption(this.getCurrency(), this.getIsPeriodStartDateExerciseDate(), this.getFixingDates(),
+				this.getPeriodLengths(), this.getPaymentDates(), this.getPeriodNotionals(), this.isCallable(),
+				this.swaprates, valuationMethod);
+	}
+
 	@Override
 	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationModel model)
 			throws CalculationException {
-		return valuationMethod.getValueEstimation(this, evaluationTime, model);
+		return valuationMethod.getValueEstimation(this, evaluationTime, model, null);
 	}
 
 	// method to produce clone with same properties, but later starting date:

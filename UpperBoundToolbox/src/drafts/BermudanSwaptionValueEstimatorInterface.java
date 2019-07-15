@@ -17,6 +17,7 @@ public interface BermudanSwaptionValueEstimatorInterface {
 	 * @return The value random variable of <code>bermudanOption</code>.
 	 * @throws CalculationException
 	 */
-	RandomVariable getValueEstimation(BermudanSwaption bermudanSwaption, double evaluationTime,
-			LIBORModelMonteCarloSimulationModel model) throws CalculationException;
+
+	RandomVariable getValueEstimation(BermudanSwaption bermudanOption, double evaluationTime,
+			LIBORModelMonteCarloSimulationModel model, RandomVariable triggerValues) throws CalculationException;
 }

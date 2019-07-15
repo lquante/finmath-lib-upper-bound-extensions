@@ -6,6 +6,7 @@ import java.util.Arrays;
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.MonteCarloSimulationModel;
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;
+import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAAD;
 import net.finmath.montecarlo.conditionalexpectation.MonteCarloConditionalExpectationRegression;
 import net.finmath.montecarlo.conditionalexpectation.RegressionBasisFunctionsProvider;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
@@ -40,7 +41,7 @@ public class SimpleLowerBoundEstimation extends AbstractSimpleBoundEstimation
 		return triggerValues;
 	}
 
-	public void setTriggerValues(RandomVariable triggerValues) {
+	public void setTriggerValues(RandomVariableDifferentiableAAD triggerValues) {
 		this.triggerValues = triggerValues;
 	}
 
@@ -67,7 +68,7 @@ public class SimpleLowerBoundEstimation extends AbstractSimpleBoundEstimation
 
 		cacheValuesOfUnderlying[period] = exerciseValue;
 		cacheConditionalExpectations[period] = triggerValuesDiscounted.add(exerciseValue).cache();
-
+		
 		return triggerValues;
 
 	}
@@ -163,8 +164,8 @@ public class SimpleLowerBoundEstimation extends AbstractSimpleBoundEstimation
 	public RegressionBasisFunctionsProvider getBasisFunctionsProviderWithSwapRates() {
 		return new RegressionBasisFunctionsProvider() {
 			@Override
-			public RandomVariable[] getBasisFunctions(double evaluationTime, MonteCarloSimulationModel monteCarloModel)
-					throws CalculationException {
+			public RandomVariableDifferentiableAAD[] getBasisFunctions(double evaluationTime,
+					MonteCarloSimulationModel monteCarloModel) throws CalculationException {
 				LIBORModelMonteCarloSimulationModel model = (LIBORModelMonteCarloSimulationModel) monteCarloModel;
 
 				double[] exerciseDates = bermudanOption.getFixingDates();
@@ -210,7 +211,7 @@ public class SimpleLowerBoundEstimation extends AbstractSimpleBoundEstimation
 				basisFunctions.add(rateShort);
 				basisFunctions.add(rateShort.pow(2.0));
 
-				return basisFunctions.toArray(new RandomVariable[basisFunctions.size()]);
+				return basisFunctions.toArray(new RandomVariableDifferentiableAAD[basisFunctions.size()]);
 			}
 		};
 	}
