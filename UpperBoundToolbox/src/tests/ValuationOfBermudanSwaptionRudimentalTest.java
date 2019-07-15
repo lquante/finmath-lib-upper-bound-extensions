@@ -43,7 +43,7 @@ import net.finmath.time.TimeDiscretizationFromArray;
  * @author Christian Fries
  * @author Lorenzo Torricelli
  */
-public class BermudanSwaptionRudimentalTest {
+public class ValuationOfBermudanSwaptionRudimentalTest {
 
 	private static DecimalFormat formatterMaturity = new DecimalFormat("00.00",
 			new DecimalFormatSymbols(Locale.ENGLISH));
@@ -54,15 +54,15 @@ public class BermudanSwaptionRudimentalTest {
 
 	private final LIBORModelMonteCarloSimulationModel liborModel;
 
-	private final int numberOfPaths = 1000;
+	private final int numberOfPaths = 10000;
 	private final int numberOfSubsimulationsStepA = 100;
-	private final int numberOfSubsimulationsStepB = 10;
+	private final int numberOfSubsimulationsStepB = 100;
 	private final int numberOfFactors = 3; // PCA number of factors
 	private final double correlationDecayParam = 0.3;
 	private AbstractRandomVariableFactory randomVariableFactory= new RandomVariableFactory();
 
-	public BermudanSwaptionRudimentalTest() throws CalculationException {
-		liborModel = BermudanSwaptionRudimentalTest.createLIBORMarketModel(randomVariableFactory, numberOfPaths, numberOfFactors,
+	public ValuationOfBermudanSwaptionRudimentalTest() throws CalculationException {
+		liborModel = ValuationOfBermudanSwaptionRudimentalTest.createLIBORMarketModel(randomVariableFactory, numberOfPaths, numberOfFactors,
 				correlationDecayParam);
 		
 	}
@@ -75,8 +75,8 @@ public class BermudanSwaptionRudimentalTest {
 		//print head of comparison table
 		System.out.println("Bermudan Swaption prices:\n");
 		System.out.println(
-				"Maturity      Lower Bound       Upper Bound(AB)        Upper Bound(subsimfree)          Deviation(AB)        Deviation(subsimfree)");
-		
+				//"Maturity      Lower Bound       Upper Bound(AB)        Upper Bound(subsimfree)          Deviation(AB)        Deviation(subsimfree)");
+				"Maturity      Lower Bound       Upper Bound(AB)                  Deviation(AB)        ");
 		
 		// Create libor Market model
 		for (int maturityIndex = 1; maturityIndex <= liborModel.getNumberOfLibors() - 10; maturityIndex++) {
