@@ -7,7 +7,7 @@ public class SimplestExerciseStrategy implements ExerciseStrategyInterface {
 	@Override
 	public RandomVariable getExerciseIndicators(RandomVariable continuationValue, RandomVariable exerciseValue) {
 
-		return continuationValue.sub(exerciseValue);
+		return exerciseValue.sub(continuationValue);
 	}
 
 }

@@ -235,7 +235,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 
 		// adjust process
 		BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(shortenedLiborDiscretization,
-				model.getBrownianMotion().getNumberOfFactors(), numberOfSubsimulationsStepA, 3141);
+				model.getBrownianMotion().getNumberOfFactors(), numberOfSubsimulationPaths, 3141);
 		MonteCarloProcess process = new EulerSchemeFromProcessModel(brownianMotion,
 				EulerSchemeFromProcessModel.Scheme.PREDICTOR_CORRECTOR);
 

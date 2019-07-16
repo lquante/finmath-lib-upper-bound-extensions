@@ -7,6 +7,7 @@ package tests;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -54,9 +55,9 @@ public class ValuationOfBermudanSwaptionRudimentalTest {
 
 	private final LIBORModelMonteCarloSimulationModel liborModel;
 
-	private final int numberOfPaths = 10000;
-	private final int numberOfSubsimulationsStepA = 100;
-	private final int numberOfSubsimulationsStepB = 100;
+	private final int numberOfPaths = 100;
+	private final int numberOfSubsimulationsStepA = 1;
+	private final int numberOfSubsimulationsStepB = 1;
 	private final int numberOfFactors = 3; // PCA number of factors
 	private final double correlationDecayParam = 0.3;
 	private AbstractRandomVariableFactory randomVariableFactory= new RandomVariableFactory();
@@ -75,8 +76,8 @@ public class ValuationOfBermudanSwaptionRudimentalTest {
 		//print head of comparison table
 		System.out.println("Bermudan Swaption prices:\n");
 		System.out.println(
-				//"Maturity      Lower Bound       Upper Bound(AB)        Upper Bound(subsimfree)          Deviation(AB)        Deviation(subsimfree)");
-				"Maturity      Lower Bound       Upper Bound(AB)                  Deviation(AB)        ");
+				//"EvaluationDate      Lower Bound       Upper Bound(AB)        Upper Bound(subsimfree)          Deviation(AB)        Deviation(subsimfree)");
+				"EvaluationDate      Lower Bound       Upper Bound(AB)                  Deviation(AB)        ");
 		
 		// Create libor Market model
 		for (int maturityIndex = 1; maturityIndex <= liborModel.getNumberOfLibors() - 10; maturityIndex++) {
@@ -113,7 +114,7 @@ public class ValuationOfBermudanSwaptionRudimentalTest {
 			// swapPeriodLength;
 
 			// Swaptions swap rate
-			double swaprate = 0.015; // getParSwaprate(liborModel, swapTenor);
+			double swaprate = 0.02; // getParSwaprate(liborModel, swapTenor);
 
 			// Set swap rates for each period
 			double[] swaprates = new double[numberOfPeriods];
@@ -145,18 +146,20 @@ public class ValuationOfBermudanSwaptionRudimentalTest {
 					swapTenor, paymentDates, notionals, true, swaprates, lowerBound);
 			double lowerBoundValue = swaptionMonteCarlo.getValue(liborModel);
 			System.out.print(formatterValue.format(lowerBoundValue) + "          ");
-
+			
+			// print exercise probabilities
+			System.out.println("Exercise probabilites:"+Arrays.toString(lowerBound.getExerciseProbablities()));
 			
 			SimpleLowerBoundEstimation lowerBoundForUpper = new SimpleLowerBoundEstimation();
 			  // Value of the AB upper bound approximation
 			BermudanSwaption upperBoundSwaptionMonteCarlo = new BermudanSwaption(currency, startingDate, fixingDates,
 					swapTenor, paymentDates, notionals, true, swaprates, lowerBoundForUpper);
-			AndersenBroadieUpperBoundEstimation ABupperBound = new AndersenBroadieUpperBoundEstimation(lowerBoundForUpper, numberOfSubsimulationsStepA, numberOfSubsimulationsStepB);
-				upperBoundSwaptionMonteCarlo.setValuationMethod(ABupperBound); 
-				double ABupperBoundValue=   upperBoundSwaptionMonteCarlo.getValue(liborModel);
-			  System.out.print(formatterValue.format(ABupperBoundValue) + "          ");
-			 
-			
+			AndersenBroadieUpperBoundEstimation ABupperBound = new AndersenBroadieUpperBoundEstimation(
+					lowerBoundForUpper, numberOfSubsimulationsStepA, numberOfSubsimulationsStepB);
+			upperBoundSwaptionMonteCarlo.setValuationMethod(ABupperBound);
+			double ABupperBoundValue = upperBoundSwaptionMonteCarlo.getValue(liborModel);
+			System.out.print(formatterValue.format(ABupperBoundValue) + "          ");
+
 //			// Value of the sub simulation free upper bound approximation
 //			SubSimulationFreeUpperBoundEstimation subSimFreeUpperBound = new SubSimulationFreeUpperBoundEstimation(lowerBound, 100, 100);
 //			swaptionMonteCarlo.setValuationMethod(subSimFreeUpperBound);
