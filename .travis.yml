@@ -1,7 +1,20 @@
-language: java
-jdk:
-  - oraclejdk8
-sudo: required 
-dist: trusty
+jdk: oraclejdk8 # JDK to use for the build.
+language: java  # The programming language of the project.
+sudo: false     # No need to run this as root
 
-script: "mvn checkstyle:check test -B -V -P"
+# For maven projects, the default installation phase can be skipped
+install: true
+
+# The branches to build.
+# Can either include or exclude branches.
+# Here only changes to the master branch will be build.
+branches:
+  only:
+  - master
+
+# Cache the maven repository to not need to download all dependencies on every build.
+cache:
+  directories:
+  - "$HOME/.m2/repository"
+
+
