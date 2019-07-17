@@ -3,7 +3,22 @@
   <groupId>UpperBoundToolbox</groupId>
   <artifactId>UpperBoundToolbox</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  <properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<src.dir>src</src.dir>
+		<test.dir>test</test.dir>
+		<junit.version>4.12</junit.version>
+	</properties>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
   <build>
+  <defaultGoal>clean install </defaultGoal>
     <sourceDirectory>src</sourceDirectory>
     <resources>
       <resource>
@@ -44,11 +59,6 @@
   			finmath-lib-automaticdifferentiation-extensions
   		</artifactId>
   		<version>1.1.0</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>net.finmath</groupId>
-  		<artifactId>finmath-lib-plot-extensions</artifactId>
-  		<version>0.0.4-SNAPSHOT</version>
   	</dependency>
   </dependencies>
 </project>

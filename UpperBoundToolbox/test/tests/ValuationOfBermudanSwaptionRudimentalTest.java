@@ -1,5 +1,5 @@
 /*
-dsd * (c) Copyright Christian P. Fries, Germany. Contact: email@christian-fries.de.
+ * (c) Copyright Christian P. Fries, Germany. Contact: email@christian-fries.de.
  *
  * Created on 28 Feb 2015
  */
@@ -7,7 +7,6 @@ package tests;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -18,15 +17,13 @@ import org.junit.Test;
 import drafts.AndersenBroadieUpperBoundEstimation;
 import drafts.BermudanSwaption;
 import drafts.SimpleLowerBoundEstimation;
-import drafts.SimpleLowerBoundEstimation.BasisFunctionType;
-import drafts.SubSimulationFreeUpperBoundEstimation;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.BrownianMotion;
 import net.finmath.montecarlo.RandomVariableFactory;
-import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
 import net.finmath.montecarlo.interestrate.CalibrationProduct;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
