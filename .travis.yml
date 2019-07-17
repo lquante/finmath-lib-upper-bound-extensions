@@ -1,14 +1,11 @@
-jdk: oraclejdk8 # JDK to use for the build.
 language: java  # The programming language of the project.
-sudo: required     # No need to run this as root
-
+jdk: oraclejdk8 # JDK to use for the build.
 mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 mvn test -B
 # Here only changes to the master branch will be build.
 branches:
   only:
   - master
-
 # Cache the maven repository to not need to download all dependencies on every build.
 cache:
   directories:
