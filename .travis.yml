@@ -3,6 +3,5 @@ jdk:
   - oraclejdk8
 sudo: required 
 dist: trusty
-branches:
-  only:
-  - master
+
+script: "mvn checkstyle:check test -B -V -P"
