@@ -1,6 +1,6 @@
 jdk: oraclejdk8 # JDK to use for the build.
 language: java  # The programming language of the project.
-sudo: true     # No need to run this as root
+sudo: required     # No need to run this as root
 
 mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 mvn test -B
