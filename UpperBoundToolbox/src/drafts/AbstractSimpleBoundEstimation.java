@@ -41,7 +41,7 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 	RandomVariable triggerValues;
 	RandomVariable[] cacheTriggerValues;
 	double[] exerciseProbablities;
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -70,7 +70,7 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 		cacheValuesOfUnderlying = new RandomVariable[numberOfPeriods + 1];
 		cacheConditionalExpectations = new RandomVariable[numberOfPeriods + 1];
 		cacheTriggerValues = new RandomVariable[numberOfPeriods + 1];
-		
+
 		exerciseProbablities = new double[numberOfPeriods + 1];
 		// Loop backward over the swap periods
 		for (int period = numberOfPeriods; period >= 0; period--) {
@@ -107,35 +107,25 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 			}
 			// Apply the exercise criteria
 
-			optionValue = triggerValues.choose(exerciseValue,continuationValue);
+			optionValue = triggerValues.choose(exerciseValue, continuationValue).floor(0);
 
 			exerciseTime = triggerValues.choose(exerciseTime, new Scalar(exerciseDate));
 
 			// caching for upperBound methods
 			cacheTriggerValues[period] = triggerValues;
 			cacheOptionValues[period] = optionValue;
-			
-			
+
 		}
-		
-		
-		// forward calculation of exercise probability
-		RandomVariable one = model.getRandomVariableForConstant(1);	
-		RandomVariable exerciseIndicators;
-		RandomVariable alreadyExercisedPaths = zero;
-		for (int period = 0; period <= numberOfPeriods; period++) {
-			exerciseIndicators = cacheTriggerValues[period].choose(one, zero);
-			exerciseProbablities[period]=exerciseIndicators.sub(alreadyExercisedPaths).floor(zero).getAverage();
-			alreadyExercisedPaths=alreadyExercisedPaths.floor(exerciseIndicators);
-		}
-		
-		
+
+		// exerciseProbablities =
+		// exerciseTime.getHistogram(bermudanOption.getFixingDates());
+
 		// Note that values is a relative price - no numeraire division is required
 		RandomVariable numeraireAtZero = model.getNumeraire(evaluationTime);
 		RandomVariable monteCarloProbabilitiesAtZero = model.getMonteCarloWeights(evaluationTime);
 
 		optionValue = optionValue.mult(numeraireAtZero).div(monteCarloProbabilitiesAtZero);
-		
+
 		return optionValue;
 	}
 
@@ -144,7 +134,7 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 
 	public abstract RandomVariable[] getBasisFunctions(double evaluationTime, MonteCarloSimulationModel model)
 			throws CalculationException;
-	
+
 	public double[] getExerciseProbablities() {
 		return exerciseProbablities;
 	}

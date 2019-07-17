@@ -57,17 +57,43 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 		// shorten all arrays for a new BermudanSwaption
 
 		double[] adjustedFixingDates = Arrays.copyOfRange(this.getFixingDates(), startingIndex,
-				this.getFixingDates().length - 1);
+				this.getFixingDates().length);
 		boolean[] adjustedIsPeriodStartDateExerciseDate = Arrays.copyOfRange(this.getIsPeriodStartDateExerciseDate(),
-				startingIndex, this.getFixingDates().length - 1);
+				startingIndex, this.getFixingDates().length);
 		double[] adjustedPeriodLengths = Arrays.copyOfRange(this.getPeriodLengths(), startingIndex,
-				this.getFixingDates().length - 1);
+				this.getFixingDates().length);
 		double[] adjustedPaymentDates = Arrays.copyOfRange(this.getPaymentDates(), startingIndex,
-				this.getFixingDates().length - 1);
+				this.getFixingDates().length);
 		double[] adjustedPeriodNotionals = Arrays.copyOfRange(this.getPeriodNotionals(), startingIndex,
-				this.getFixingDates().length - 1);
+				this.getFixingDates().length);
 		double[] adjustedSwapRates = Arrays.copyOfRange(this.getSwaprates(), startingIndex,
-				this.getFixingDates().length - 1);
+				this.getFixingDates().length);
+		BermudanSwaptionValueEstimatorInterface unadjustedValuationMethod = this.getValuationMethod();
+		return new BermudanSwaption(this.getCurrency(), adjustedIsPeriodStartDateExerciseDate, adjustedFixingDates,
+				adjustedPeriodLengths, adjustedPaymentDates, adjustedPeriodNotionals, this.isCallable(),
+				adjustedSwapRates, unadjustedValuationMethod);
+
+	}
+
+	public BermudanSwaption getCloneWithModifiedFinalPeriod(double finalDate) {
+		int finalIndex = this.getPaymentDates().length - 1;
+		// determine last payment date to be used
+		for (int i = this.getPaymentDates().length - 1; i >= 0; i--) {
+			if (this.getPaymentDates()[i] == finalDate) {
+				finalIndex = i + 1;
+				break;
+			}
+		}
+
+		// shorten all arrays for a new BermudanSwaption
+
+		double[] adjustedFixingDates = Arrays.copyOfRange(this.getFixingDates(), 0, finalIndex);
+		boolean[] adjustedIsPeriodStartDateExerciseDate = Arrays.copyOfRange(this.getIsPeriodStartDateExerciseDate(), 0,
+				finalIndex);
+		double[] adjustedPeriodLengths = Arrays.copyOfRange(this.getPeriodLengths(), 0, finalIndex);
+		double[] adjustedPaymentDates = Arrays.copyOfRange(this.getPaymentDates(), 0, finalIndex);
+		double[] adjustedPeriodNotionals = Arrays.copyOfRange(this.getPeriodNotionals(), 0, finalIndex);
+		double[] adjustedSwapRates = Arrays.copyOfRange(this.getSwaprates(), 0, finalIndex);
 		BermudanSwaptionValueEstimatorInterface unadjustedValuationMethod = this.getValuationMethod();
 		return new BermudanSwaption(this.getCurrency(), adjustedIsPeriodStartDateExerciseDate, adjustedFixingDates,
 				adjustedPeriodLengths, adjustedPaymentDates, adjustedPeriodNotionals, this.isCallable(),

@@ -55,9 +55,9 @@ public class ValuationOfBermudanSwaptionRudimentalTest {
 
 	private final LIBORModelMonteCarloSimulationModel liborModel;
 
-	private final int numberOfPaths = 100;
-	private final int numberOfSubsimulationsStepA = 1;
-	private final int numberOfSubsimulationsStepB = 1;
+	private final int numberOfPaths = 1000;
+	private final int numberOfSubsimulationsStepA = 100;
+	private final int numberOfSubsimulationsStepB = 100;
 	private final int numberOfFactors = 3; // PCA number of factors
 	private final double correlationDecayParam = 0.3;
 	private AbstractRandomVariableFactory randomVariableFactory= new RandomVariableFactory();
@@ -78,13 +78,13 @@ public class ValuationOfBermudanSwaptionRudimentalTest {
 		System.out.println(
 				//"EvaluationDate      Lower Bound       Upper Bound(AB)        Upper Bound(subsimfree)          Deviation(AB)        Deviation(subsimfree)");
 				"EvaluationDate      Lower Bound       Upper Bound(AB)                  Deviation(AB)        ");
-		
+		int numberOfPeriods = 10;
 		// Create libor Market model
-		for (int maturityIndex = 1; maturityIndex <= liborModel.getNumberOfLibors() - 10; maturityIndex++) {
+		for (int maturityIndex = 1; maturityIndex < liborModel.getNumberOfLibors() - numberOfPeriods; maturityIndex++) {
 			double exerciseDate = liborModel.getLiborPeriod(maturityIndex);
 			
-
-			int numberOfPeriods = 10;
+			
+			
 
 			// Create a rudimental bermudan swaption
 
@@ -148,7 +148,7 @@ public class ValuationOfBermudanSwaptionRudimentalTest {
 			System.out.print(formatterValue.format(lowerBoundValue) + "          ");
 			
 			// print exercise probabilities
-			System.out.println("Exercise probabilites:"+Arrays.toString(lowerBound.getExerciseProbablities()));
+			//System.out.println("Exercise probabilites:"+Arrays.toString(lowerBound.getExerciseProbablities()));
 			
 			SimpleLowerBoundEstimation lowerBoundForUpper = new SimpleLowerBoundEstimation();
 			  // Value of the AB upper bound approximation

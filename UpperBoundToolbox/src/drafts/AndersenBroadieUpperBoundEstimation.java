@@ -52,6 +52,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 		for (int path = 0; path < numberOfSimulations; path++) {
 
 			// initialize martingale as lower bound value for period 0 and 1.
+
 			ArrayList<Double> martingaleCache = new ArrayList<Double>();
 			double martingale = cacheOptionValues[period].get(path);
 			martingaleCache.add(martingale);
@@ -62,65 +63,69 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 
 			// determine number of additional martingale components to be estimated
 			int numberOfForwardPeriods = this.bermudanOption.getFixingDates().length - 1;
-
-			// create model for subsimulations
-			LIBORModelMonteCarloSimulationModel modelStepA = createSubsimulationModel(model, period, path,
-					numberOfSubsimulationsStepA);
+			double startingPeriodBermudan = this.bermudanOption.getFixingDates()[0];
+			int startingShift = model.getTimeIndex(startingPeriodBermudan);
 
 			for (int forwardPeriod = 2 + period; forwardPeriod <= numberOfForwardPeriods; forwardPeriod++) {
 				// initialize values for subsimulation
-				double simulationTime = model.getTime(forwardPeriod);
+				int forwardPeriodOption = forwardPeriod + startingShift;
+				double simulationTime = model.getTime(forwardPeriodOption);
 				double discountedExerciseValue = 0;
 				double discountedFutureExerciseValue = 0;
 				int martingaleIndex = 2;
 				// check trigger values for each path of the main simulation:
-				if (triggerValues[period].get(path) >= 0) // case 2a
+				if (triggerValues[forwardPeriod].get(path) >= 0) // case 2a
 				{
+					// create model for subsimulations
+					LIBORModelMonteCarloSimulationModel modelStepA = createSubsimulationModel(model,
+							forwardPeriodOption, path, numberOfSubsimulationsStepA);
 
 					// create option
 					BermudanSwaptionValueEstimatorInterface lowerBoundMethodA = new SimpleLowerBoundEstimation();
-					BermudanSwaption BermudanA = this.bermudanOption
-							.getBermudanSwaptionWithChangedValuationMethod(lowerBoundMethodA);
-					BermudanSwaption restartedBermudanA = BermudanA.getCloneWithModifiedStartingPeriod(simulationTime);
+					BermudanSwaption bermudanA = this.bermudanOption.getCloneWithModifiedStartingPeriod(simulationTime);
+					bermudanA.getBermudanSwaptionWithChangedValuationMethod(lowerBoundMethodA);
 					RandomVariable discountFactor = modelStepA.getNumeraire(simulationTime)
-							.div(modelStepA.getMonteCarloWeights(forwardPeriod));
+							.div(modelStepA.getMonteCarloWeights(1));
 					// calculate discounted option value:
 
-					discountedExerciseValue = restartedBermudanA.getValue(simulationTime, modelStepA)
-							.div(discountFactor).getAverage();
+					discountedExerciseValue = bermudanA.getValue(simulationTime, modelStepA).div(discountFactor)
+							.getAverage();
 
 				} else // case 2b
 				{
 					// create model terminating as soon as triggerValues[path+i] >=0 for i>=1
 					int terminationPeriod;
-					for (terminationPeriod = period; (triggerValues[terminationPeriod]
+					for (terminationPeriod = forwardPeriod; (triggerValues[terminationPeriod]
 							.get(path) < 0); terminationPeriod++) {
 						if (terminationPeriod >= numberOfForwardPeriods)
 							break;
 					}
+
+					double terminationTime = model.getTime(terminationPeriod);
 					// calculate discounted option value:
 
 					discountedExerciseValue = cacheUnderlying[forwardPeriod].get(path);
 
 					// create model for subsimulations
-					if (forwardPeriod < terminationPeriod) {
+					if (forwardPeriodOption < terminationPeriod) {
 						LIBORModelMonteCarloSimulationModel modelStepB = createSubsimulationModelTerminating(model,
-								period, terminationPeriod, path, numberOfSubsimulationsStepB);
+								forwardPeriodOption, terminationPeriod, path, numberOfSubsimulationsStepB);
 
 						// create option
 						BermudanSwaptionValueEstimatorInterface lowerBoundMethodB = new SimpleLowerBoundEstimation();
-						BermudanSwaption BermudanB = this.bermudanOption
-								.getBermudanSwaptionWithChangedValuationMethod(lowerBoundMethodB);
-						BermudanSwaption restartedBermudanB = BermudanB
+						BermudanSwaption bermudanB = this.bermudanOption
 								.getCloneWithModifiedStartingPeriod(simulationTime);
-						double forwardOptionTime = modelStepB.getTime(forwardPeriod - period);
-						RandomVariable discountFactor = modelStepB.getRandomVariableForConstant(0);
-						discountFactor = modelStepB.getNumeraire(forwardOptionTime)
-								.div(modelStepB.getMonteCarloWeights(forwardPeriod - period + 1));
+						bermudanB = bermudanB.getCloneWithModifiedFinalPeriod(terminationTime);
+						bermudanB = bermudanB.getBermudanSwaptionWithChangedValuationMethod(lowerBoundMethodB);
 
-						// check if forwardPeriod<final period
-						if (terminationPeriod < forwardPeriod & forwardPeriod + 1 < numberOfForwardPeriods) {
-							RandomVariable valueOptionB = restartedBermudanB.getValue(forwardOptionTime, modelStepB);
+						double forwardOptionTime = modelStepB.getTime(1);
+						RandomVariable discountFactor = model.getRandomVariableForConstant(0);
+
+						// check if forwardPeriod<termination period
+						if (forwardPeriodOption + 2 < terminationPeriod) {
+							discountFactor = modelStepB.getNumeraire(forwardOptionTime)
+									.div(modelStepB.getMonteCarloWeights(1));
+							RandomVariable valueOptionB = bermudanB.getValue(forwardOptionTime, modelStepB);
 							discountedFutureExerciseValue = valueOptionB.div(discountFactor).getAverage();
 						}
 					}
@@ -235,7 +240,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 
 		// adjust process
 		BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(shortenedLiborDiscretization,
-				model.getBrownianMotion().getNumberOfFactors(), numberOfSubsimulationPaths, 3141);
+				model.getBrownianMotion().getNumberOfFactors(), numberOfSubsimulationPaths, 1234);
 		MonteCarloProcess process = new EulerSchemeFromProcessModel(brownianMotion,
 				EulerSchemeFromProcessModel.Scheme.PREDICTOR_CORRECTOR);
 
