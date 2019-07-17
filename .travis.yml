@@ -1,7 +1,6 @@
 language: java  # The programming language of the project.
 jdk: oraclejdk8 # JDK to use for the build.
-mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
-mvn test -B
+
 # Here only changes to the master branch will be build.
 branches:
   only:
@@ -11,4 +10,5 @@ cache:
   directories:
   - "$HOME/.m2/repository"
 
-
+script: "mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V"
+script: "mvn test -B"
