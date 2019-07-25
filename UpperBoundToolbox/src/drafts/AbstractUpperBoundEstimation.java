@@ -27,7 +27,6 @@ public abstract class AbstractUpperBoundEstimation implements BermudanSwaptionVa
 
 		this.lowerBoundMethod = lowerBoundMethod;
 	}
-
 	/*
 	 * (non-Javadoc)
 	 * 

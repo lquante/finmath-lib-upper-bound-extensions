@@ -1,7 +1,12 @@
 package drafts;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.MonteCarloSimulationModel;
+import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiable;
+import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAAD;
 import net.finmath.montecarlo.conditionalexpectation.RegressionBasisFunctionsProvider;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
@@ -14,6 +19,10 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 	RandomVariable[] cacheOptionValues;
 	RandomVariable[] cacheValuesOfUnderlying;
 	RandomVariable[] cacheConditionalExpectations;
+	Set <Long> liborIDs; 
+	public Set<Long> getLiborIDs() {
+		return liborIDs;
+	}
 
 	public RandomVariable[] getCacheValuesOfUnderlying() {
 		return cacheValuesOfUnderlying;
@@ -34,6 +43,8 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 	public RandomVariable[] getCacheTriggerValues() {
 		return cacheTriggerValues;
 	}
+	
+	
 
 	RandomVariable continuationValue;
 	RandomVariable exerciseValue;
@@ -41,9 +52,10 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 	RandomVariable triggerValues;
 	RandomVariable[] cacheTriggerValues;
 	double[] exerciseProbablities;
+	RandomVariable exerciseTime;
 
-	/*
-	 * (non-Javadoc)
+	
+	 /* (non-Javadoc)
 	 * 
 	 * @see
 	 * drafts.BermudanSwaptionValueEstimatorInterface#getValueEstimation(drafts.
@@ -55,13 +67,13 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 			LIBORModelMonteCarloSimulationModel model, RandomVariable triggerValuesInput) throws CalculationException {
 
 		this.bermudanOption = bermudanOption;
-
+		liborIDs = new HashSet<>();
 		// After the last period the product has value zero: Initialize values to zero.
 		RandomVariable zero = model.getRandomVariableForConstant(0.0);
 		exerciseValue = zero;
 		continuationValue = zero;
 
-		RandomVariable exerciseTime = model.getRandomVariableForConstant(Double.POSITIVE_INFINITY);
+		exerciseTime = model.getRandomVariableForConstant(Double.POSITIVE_INFINITY);
 		triggerValues = triggerValuesInput;
 
 		// initialize cache arrays for calculation
@@ -83,10 +95,9 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 
 			// Get random variables - note that this is the rate at simulation time =
 			// exerciseDate
-			RandomVariable libor = model.getLIBOR(fixingDate, fixingDate, fixingDate + periodLength);
-
-			// foreach(path) values[path] += notional * (libor.get(path) - swaprate) *
-			// periodLength / numeraire.get(path) * monteCarloProbabilities.get(path);
+			RandomVariable libor = ((RandomVariableDifferentiableAAD) model.getLIBOR(fixingDate, fixingDate, fixingDate + periodLength)).getCloneIndependent();
+			Long liborID = ((RandomVariableDifferentiable) libor).getID();
+			liborIDs.add(liborID);
 			RandomVariable payoff = libor.sub(swaprate).mult(periodLength).mult(notional);
 
 			// Apply discounting and Monte-Carlo probabilities
@@ -102,7 +113,6 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 			// Calculate the exercise criteria (exercise if the following trigger is
 			// negative)
 			if (this.bermudanOption.getIsPeriodStartDateExerciseDate()[period]) {
-
 				triggerValues = calculateTriggerValues(period, fixingDate, model);
 			}
 			// Apply the exercise criteria
@@ -111,7 +121,7 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 
 			exerciseTime = triggerValues.choose(exerciseTime, new Scalar(exerciseDate));
 
-			// caching for upperBound methods
+			// caching for upper bound methods
 			cacheTriggerValues[period] = triggerValues;
 			cacheOptionValues[period] = optionValue;
 
@@ -138,5 +148,11 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 	public double[] getExerciseProbablities() {
 		return exerciseProbablities;
 	}
+	
+	public RandomVariable getExerciseTime() {
+		return exerciseTime;
+	}
+
+	
 
 }
