@@ -27,14 +27,14 @@ public class CreateTestBermudanSwaption {
 	String currency = "EURO";
 	double swaprate = 0.02; // getParSwaprate(liborModel, swapTenor);
 	private BermudanSwaption bermudanSwaption;
-	BermudanSwaptionValueEstimatorInterface valuationInterface= new SimpleLowerBoundEstimation(); // valuation interface
-	double firstFixingDate= 0.5;
+	BermudanSwaptionValueEstimatorInterface valuationInterface = new SimpleLowerBoundEstimation(); // valuation
+																									// interface
+	double firstFixingDate = 0.5;
 	double evaluationTime = 0;
 	// model field
 	LIBORModelMonteCarloSimulationModel model;
-	
-	public CreateTestBermudanSwaption()
-			throws CalculationException {
+
+	public CreateTestBermudanSwaption() throws CalculationException {
 		model = CreateTestModel.createLIBORMarketModel();
 		// Create a rudimental bermudan swaption
 
@@ -69,9 +69,8 @@ public class CreateTestBermudanSwaption {
 	@Test
 	public void testSwaptionValuation() throws CalculationException {
 		// test valuation
-		double swaptionValue = bermudanSwaption.getValue(evaluationTime,model).getAverage();
-		System.out.println("Bermudan Swaption value at time "+evaluationTime+": "
-				+ ""+swaptionValue);
-		
+		double swaptionValue = bermudanSwaption.getValue(evaluationTime, model).getAverage();
+		System.out.println("Bermudan Swaption value at time " + evaluationTime + ": " + "" + swaptionValue);
+
 	}
 }

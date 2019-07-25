@@ -3,12 +3,13 @@ package drafts;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-
 import net.finmath.exception.CalculationException;
 import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
 import net.finmath.montecarlo.BrownianMotion;
+import net.finmath.montecarlo.RandomVariableFactory;
+import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.montecarlo.interestrate.LIBORMonteCarloSimulationFromLIBORModel;
@@ -66,7 +67,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 			int numberOfForwardPeriods = this.bermudanOption.getFixingDates().length - 1;
 			double startingPeriodBermudan = this.bermudanOption.getFixingDates()[0];
 			int startingShift = model.getTimeIndex(startingPeriodBermudan);
-			
+
 			for (int forwardPeriod = 2 + period; forwardPeriod <= numberOfForwardPeriods; forwardPeriod++) {
 				// initialize values for subsimulation
 				int forwardPeriodOption = forwardPeriod + startingShift;
@@ -137,13 +138,13 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 					previousExerciseIndicator = 1;
 				else
 					previousExerciseIndicator = 0;
-				double previousExerciseValue = cacheUnderlying[forwardPeriod-1].get(path);
+				double previousExerciseValue = cacheUnderlying[forwardPeriod - 1].get(path);
 				martingale = martingaleCache.get(martingaleIndex - 1)
 						- (cacheOptionValues[martingaleIndex - 1].get(path)) + (discountedExerciseValue)
 						- discountedFutureExerciseValue - previousExerciseIndicator * previousExerciseValue;
 				martingaleCache.add(martingale);
 				martingaleIndex += 1;
-				
+
 			}
 
 			// calculate the maximum from the simulated martingale for each remaining period
@@ -236,8 +237,12 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 		LIBORCovarianceModelFromVolatilityAndCorrelation covarianceModel = new LIBORCovarianceModelFromVolatilityAndCorrelation(
 				shortenedLiborDiscretization, shortenedLiborDiscretization, volatilityModel, correlationModel);
 
+		// create aad random variable factory
+		RandomVariableDifferentiableAADFactory randomVariableFactory = new RandomVariableDifferentiableAADFactory(
+				new RandomVariableFactory());
+
 		LIBORMarketModel liborMarketModel = new LIBORMarketModelFromCovarianceModel(shortenedLiborDiscretization, null,
-				forwardCurve, discountCurve, covarianceModel, null, null);
+				forwardCurve, discountCurve, randomVariableFactory, covarianceModel, null, null);
 
 		// adjust process
 		BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(shortenedLiborDiscretization,

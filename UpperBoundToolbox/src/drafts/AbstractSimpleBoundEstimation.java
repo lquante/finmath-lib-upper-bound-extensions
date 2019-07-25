@@ -19,7 +19,8 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 	RandomVariable[] cacheOptionValues;
 	RandomVariable[] cacheValuesOfUnderlying;
 	RandomVariable[] cacheConditionalExpectations;
-	Set <Long> liborIDs; 
+	Set<Long> liborIDs;
+
 	public Set<Long> getLiborIDs() {
 		return liborIDs;
 	}
@@ -43,8 +44,6 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 	public RandomVariable[] getCacheTriggerValues() {
 		return cacheTriggerValues;
 	}
-	
-	
 
 	RandomVariable continuationValue;
 	RandomVariable exerciseValue;
@@ -54,8 +53,8 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 	double[] exerciseProbablities;
 	RandomVariable exerciseTime;
 
-	
-	 /* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * 
 	 * @see
 	 * drafts.BermudanSwaptionValueEstimatorInterface#getValueEstimation(drafts.
@@ -95,7 +94,8 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 
 			// Get random variables - note that this is the rate at simulation time =
 			// exerciseDate
-			RandomVariable libor = ((RandomVariableDifferentiableAAD) model.getLIBOR(fixingDate, fixingDate, fixingDate + periodLength)).getCloneIndependent();
+			RandomVariable libor = ((RandomVariableDifferentiableAAD) model.getLIBOR(fixingDate, fixingDate,
+					fixingDate + periodLength)).getCloneIndependent();
 			Long liborID = ((RandomVariableDifferentiable) libor).getID();
 			liborIDs.add(liborID);
 			RandomVariable payoff = libor.sub(swaprate).mult(periodLength).mult(notional);
@@ -148,11 +148,9 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 	public double[] getExerciseProbablities() {
 		return exerciseProbablities;
 	}
-	
+
 	public RandomVariable getExerciseTime() {
 		return exerciseTime;
 	}
-
-	
 
 }

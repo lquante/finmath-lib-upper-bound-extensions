@@ -1,10 +1,7 @@
 package tests;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import org.junit.Test;
@@ -31,60 +28,62 @@ import net.finmath.time.TimeDiscretizationFromArray;
 
 public class CreateTestModel {
 
-	// all model parameters are set as fields and used in the creation method to facilitate adjustments
-	 
+	// all model parameters are set as fields and used in the creation method to
+	// facilitate adjustments
+
 	LIBORModelMonteCarloSimulationModel liborModel;
 	// monte carlo simulation parameters
-	 final static int numberOfPaths = 1000;
-	 final static int numberOfFactors = 3; // PCA number of factors
-	 static int seed = 3141; // seed for stochastic driver
-	 
-	 static AbstractRandomVariableFactory randomVariableFactory= new RandomVariableFactory();
-	 
+	final static int numberOfPaths = 1000;
+	final static int numberOfFactors = 3; // PCA number of factors
+	static int seed = 3141; // seed for stochastic driver
+
+	static AbstractRandomVariableFactory randomVariableFactory = new RandomVariableFactory();
+
 	// state space
-			static String stateSpace = LIBORMarketModelFromCovarianceModel.StateSpace.NORMAL.name();
+	static String stateSpace = LIBORMarketModelFromCovarianceModel.StateSpace.NORMAL.name();
 	// simulation scheme
 	private static Scheme scheme = EulerSchemeFromProcessModel.Scheme.PREDICTOR_CORRECTOR;
- 
-	 // time tiscretization properties
-	 
+
+	// time tiscretization properties
+
 	static double lastTime = 20.0;
 	static double dt = 0.5;
-	 
-	 static // properties of the libor model
+
+	static // properties of the libor model
 	double liborRateTimeHorzion = 20.0;
 	static double liborPeriodLength = 0.5;
 	final static double correlationDecayParam = 0.3;
-		// points for interpolaton forward curve
-		static double [] forwardInterpolationTimePoints = new double[] { 0.5, 1.0, 2.0, 5.0, 40.0 };
-		static double [] forwardInterpolationRates = new double[] { 0.02, 0.02, 0.02, 0.02, 0.02 };
-	// parameters of volatility model (instVolatility = (a + b * Math.exp(-c * timeToMaturity)
-		static double a = 0.3;
-		static double b=0.2;
-		static double c=0.25;
+	// points for interpolaton forward curve
+	static double[] forwardInterpolationTimePoints = new double[] { 0.5, 1.0, 2.0, 5.0, 40.0 };
+	static double[] forwardInterpolationRates = new double[] { 0.02, 0.02, 0.02, 0.02, 0.02 };
+	// parameters of volatility model (instVolatility = (a + b * Math.exp(-c *
+	// timeToMaturity)
+	static double a = 0.3;
+	static double b = 0.2;
+	static double c = 0.25;
 	// measure
-		static String measure = LIBORMarketModelFromCovarianceModel.Measure.SPOT.name();
-	
+	static String measure = LIBORMarketModelFromCovarianceModel.Measure.SPOT.name();
+
 	public CreateTestModel() throws CalculationException {
 		liborModel = createLIBORMarketModel();
 	}
+
 	@Test
-	public void testModel() 
-	{
-		
+	public void testModel() {
+
 		// print some model properties
 		TimeDiscretization timeDiscretization = liborModel.getTimeDiscretization();
 		TimeDiscretization liborDiscretization = liborModel.getLiborPeriodDiscretization();
-		System.out.println("TimeDiscretization:"+Arrays.toString(timeDiscretization.getAsDoubleArray()));
-		System.out.println("LiborDiscretization:"+Arrays.toString(liborDiscretization.getAsDoubleArray()));
-		
+		System.out.println("TimeDiscretization:" + Arrays.toString(timeDiscretization.getAsDoubleArray()));
+		System.out.println("LiborDiscretization:" + Arrays.toString(liborDiscretization.getAsDoubleArray()));
+
 		// try to calculate all LIBOR rates
-		for(int i = 0; i<liborDiscretization.getNumberOfTimeSteps();i++)
+		for (int i = 0; i < liborDiscretization.getNumberOfTimeSteps(); i++)
 			try {
 				RandomVariable[] libors = liborModel.getLIBORs(i);
-				System.out.println(i+"thLIBOR spot rate "+libors[i].getAverage());
+				System.out.println(i + "thLIBOR spot rate " + libors[i].getAverage());
 			} catch (CalculationException e) {
-				System.out.println("calculation of libors failed at timepoint"+liborDiscretization.getTime(i));
+				System.out.println("calculation of libors failed at timepoint" + liborDiscretization.getTime(i));
 				e.printStackTrace();
 			}
 	}
@@ -94,23 +93,18 @@ public class CreateTestModel {
 		/*
 		 * Create the libor tenor structure and the initial values
 		 */
-		
-		
+
 		TimeDiscretizationFromArray liborPeriodDiscretization = new TimeDiscretizationFromArray(0.0,
 				(int) (liborRateTimeHorzion / liborPeriodLength), liborPeriodLength);
 
 		// Create the forward curve (initial value of the LIBOR market model)
 		ForwardCurveInterpolation forwardCurveInterpolation = ForwardCurveInterpolation.createForwardCurveFromForwards(
-				"forwardCurve" /* name of the curve */,
-				forwardInterpolationTimePoints,
-				forwardInterpolationRates,
-				liborPeriodLength 
-		);
+				"forwardCurve" /* name of the curve */, forwardInterpolationTimePoints, forwardInterpolationRates,
+				liborPeriodLength);
 
 		/*
 		 * Create a simulation time discretization
 		 */
-		
 
 		TimeDiscretizationFromArray timeDiscretizationFromArray = new TimeDiscretizationFromArray(0.0,
 				(int) (lastTime / dt), dt);
@@ -133,7 +127,7 @@ public class CreateTestModel {
 				} else {
 					instVolatility = (a + b * Math.exp(-c * timeToMaturity))
 							* forwardCurveInterpolation.getForward(null, liborPeriodDiscretization.getTime(liborIndex)); // rescale
-																								// values
+					// values
 				}
 
 				// Store
@@ -169,15 +163,14 @@ public class CreateTestModel {
 		/*
 		 * Create corresponding LIBOR Market Model
 		 */
-		LIBORMarketModel liborMarketModel = new LIBORMarketModelFromCovarianceModel(liborPeriodDiscretization,
-				null, forwardCurveInterpolation, new DiscountCurveFromForwardCurve(forwardCurveInterpolation),randomVariableFactory,
-				covarianceModel, calibrationItems, properties);
+		LIBORMarketModel liborMarketModel = new LIBORMarketModelFromCovarianceModel(liborPeriodDiscretization, null,
+				forwardCurveInterpolation, new DiscountCurveFromForwardCurve(forwardCurveInterpolation),
+				randomVariableFactory, covarianceModel, calibrationItems, properties);
 
 		BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(timeDiscretizationFromArray,
 				numberOfFactors, numberOfPaths, seed /* seed */);
 
-		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion,
-				scheme);
+		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion, scheme);
 
 		return new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModel, process);
 	}

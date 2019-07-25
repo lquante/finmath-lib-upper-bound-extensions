@@ -111,6 +111,6 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 
 	public double[] getSwaprates() {
 		return swaprates;
-	
+
 	}
 }
