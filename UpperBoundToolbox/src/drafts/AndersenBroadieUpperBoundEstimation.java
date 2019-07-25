@@ -46,7 +46,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	@Override
 	protected double calculateDeltaZero(int period, LIBORModelMonteCarloSimulationModel model,
 			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
-					throws CalculationException {
+			throws CalculationException {
 		numberOfSimulations = cacheOptionValues[0].getRealizations().length;
 
 		double sumOfDeltas = 0;
@@ -188,7 +188,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 						numberOfShortendTimes)/* fixings of the forward */,
 				forwardArray, /* forwards */
 				model.getLiborPeriodDiscretization().getTimeStep(startingPeriod) /* period lengths */
-				);
+		);
 
 		DiscountCurveFromForwardCurve discountCurve = new DiscountCurveFromForwardCurve(forwardCurve);
 		// create new model
@@ -196,7 +196,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 		 * Create a volatility structure v[i][j] = sigma_j(t_i)
 		 */
 		double[][] volatility = new double[shortenedLiborDiscretization
-		                                   .getNumberOfTimeSteps()][shortenedLiborDiscretization.getNumberOfTimeSteps()];
+				.getNumberOfTimeSteps()][shortenedLiborDiscretization.getNumberOfTimeSteps()];
 		for (int timeIndex = 0; timeIndex < volatility.length; timeIndex++) {
 			for (int liborIndex = 0; liborIndex < volatility[timeIndex].length; liborIndex++) {
 				// Create a very simple volatility model here

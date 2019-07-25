@@ -12,6 +12,7 @@ import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.BrownianMotion;
 import net.finmath.montecarlo.RandomVariableFactory;
+import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
 import net.finmath.montecarlo.interestrate.CalibrationProduct;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
@@ -37,8 +38,8 @@ public class CreateTestModel {
 	final static int numberOfFactors = 3; // PCA number of factors
 	static int seed = 3141; // seed for stochastic driver
 
-	static AbstractRandomVariableFactory randomVariableFactory = new RandomVariableFactory();
-
+	static AbstractRandomVariableFactory randomVariableFactory = new RandomVariableDifferentiableAADFactory(
+			new RandomVariableFactory());
 	// state space
 	static String stateSpace = LIBORMarketModelFromCovarianceModel.StateSpace.NORMAL.name();
 	// simulation scheme

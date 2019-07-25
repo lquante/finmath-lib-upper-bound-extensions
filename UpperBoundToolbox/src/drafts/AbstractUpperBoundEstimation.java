@@ -51,7 +51,7 @@ public abstract class AbstractUpperBoundEstimation implements BermudanSwaptionVa
 		optionValue = model.getRandomVariableForConstant(0);
 		// calculate value of lower bound
 		int period = model.getTimeIndex(evaluationTime);
-		
+
 		this.bermudanOption.setValuationMethod(lowerBoundMethod);
 		this.bermudanOption.getValue(evaluationTime, model);
 		RandomVariable[] cacheUnderlying = ((SimpleLowerBoundEstimation) this.bermudanOption.getValuationMethod())
@@ -61,8 +61,8 @@ public abstract class AbstractUpperBoundEstimation implements BermudanSwaptionVa
 		RandomVariable[] cacheTriggers = lowerBoundMethod.getCacheTriggerValues();
 		// calculate upper bound
 
-
-		double deltaZeroApproximation = calculateDeltaZero(period, model, cacheUnderlying, cacheOptionValues, cacheTriggers);
+		double deltaZeroApproximation = calculateDeltaZero(period, model, cacheUnderlying, cacheOptionValues,
+				cacheTriggers);
 		// Note that values is a relative price - no numeraire division is required
 		RandomVariable numeraireAtEvaluationTime = model.getNumeraire(evaluationTime);
 		RandomVariable monteCarloProbabilitiesAtEvaluationTime = model.getMonteCarloWeights(evaluationTime);
@@ -72,12 +72,11 @@ public abstract class AbstractUpperBoundEstimation implements BermudanSwaptionVa
 
 		return optionValue;
 
-
 	}
 
 	protected abstract double calculateDeltaZero(int period, LIBORModelMonteCarloSimulationModel model,
 			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
-					throws CalculationException;
+			throws CalculationException;
 
 	public RandomVariable[] getCacheValuesOfUnderlying() {
 		return (cacheValuesOfUnderlying);

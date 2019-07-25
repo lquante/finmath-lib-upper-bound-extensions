@@ -25,7 +25,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 	@Override
 	protected double calculateDeltaZero(int period, LIBORModelMonteCarloSimulationModel model,
 			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
-					throws CalculationException {
+			throws CalculationException {
 		this.model = model;
 		double evaluationTime = this.bermudanOption.getFixingDates()[period];
 		int numberOfOptionPeriods = this.bermudanOption.getFixingDates().length;
@@ -53,107 +53,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 		return deltaZeroApproximation;
 	}
 
-	// 1st step: delta hedge approximation method
-
-	private RandomVariable deltaHedgeApproximation(double evaluationTime, int numberOfPeriods)
-			throws CalculationException {
-		// Ask the model for its discretization
-		int timeIndexEvaluationTime = model.getTimeIndex(evaluationTime);
-
-		/*
-		 * Going forward in time we monitor the hedge portfolio on each path.
-		 */
-
-		long timingValuationStart = System.currentTimeMillis();
-
-		RandomVariableDifferentiable value = (RandomVariableDifferentiable) this.bermudanOption.getValue(0, model);
-
-		long timingValuationEnd = System.currentTimeMillis();
-
-		RandomVariable valueOfOption = model.getRandomVariableForConstant(value.getAverage());
-
-		// Initialize the portfolio to zero bonds and as much cash as the lower bound
-		// valuation predicts.
-
-		RandomVariable numeraireToday = model.getNumeraire(0.0);
-
-		// We store the composition of the hedge portfolio (depending on the path)
-		RandomVariable amountOfNumeraireAsset = valueOfOption.div(numeraireToday);
-		RandomVariable[] amountOfUnderlyingForwards = new RandomVariable[numberOfPeriods];
-		for (int i = 0; i < numberOfPeriods; i++)
-			amountOfUnderlyingForwards[i] = model.getRandomVariableForConstant(0.0);
-
-		// Gradient of option value to replicate
-		long timingDerivativeStart = System.currentTimeMillis();
-		Map<Long, RandomVariable> gradient = value.getGradient();
-		long timingDerivativeEnd = System.currentTimeMillis();
-
-		double lastOperationTimingValuation = (timingValuationEnd - timingValuationStart) / 1000.0;
-		double lastOperationTimingDerivative = (timingDerivativeEnd - timingDerivativeStart) / 1000.0;
-
-		// calculate deltas for every time point between current time (0) and
-		// evaluationTime
-		for (int timeIndex = 0; timeIndex < timeIndexEvaluationTime; timeIndex++) {
-
-			RandomVariable[] deltas = getDeltas(gradient, timeIndex);
-
-			/*
-			 * Change the portfolio according to the trading strategy
-			 */
-			// loop over all fixing dates of the option to calculate each individual hedge
-
-			for (int i = 0; i < numberOfPeriods; i++) {
-				/*
-				 * Change the portfolio according to the trading strategy
-				 */
-				// get times for forward calculation
-				double fixingDate = this.bermudanOption.getFixingDates()[i];
-				double periodLength = this.bermudanOption.getPeriodLengths()[i];
-
-				RandomVariable forwardAtTimeIndex = model.getLIBOR(model.getTime(timeIndex), fixingDate,
-						fixingDate + periodLength);
-
-				RandomVariable forwardValue = forwardAtTimeIndex.mult(periodLength);
-				RandomVariable numeraireAtTimeIndex = model.getNumeraire(timeIndex);
-
-				// Determine the delta hedge
-				RandomVariable newNumberOfForwards = deltas[i];
-				RandomVariable bondsToBuy = newNumberOfForwards.sub(amountOfUnderlyingForwards[i]);
-
-				// Ensure self financing
-				RandomVariable numeraireAssetsToSell = bondsToBuy.mult(forwardValue).div(numeraireAtTimeIndex);
-				RandomVariable newNumberOfNumeraireAsset = amountOfNumeraireAsset.sub(numeraireAssetsToSell);
-
-				// Update portfolio
-				amountOfNumeraireAsset = newNumberOfNumeraireAsset;
-
-				amountOfUnderlyingForwards[i] = newNumberOfForwards;
-			}
-
-		}
-
-		/*
-		 * At maturity, calculate the value of the replication portfolio
-		 */
-
-		// Get value of underlying and numeraire assets
-		RandomVariable numeraireAtEvaluationTime = model.getNumeraire(evaluationTime);
-		RandomVariable portfolioValue = amountOfNumeraireAsset.mult(numeraireAtEvaluationTime);
-
-		for (int i = 0; i < numberOfPeriods; i++) {
-			double fixingDate = this.bermudanOption.getFixingDates()[i];
-			double periodLength = this.bermudanOption.getPeriodLengths()[i];
-
-			RandomVariable forwardValueAtEvaluationTime = ((RandomVariableDifferentiable) model.getLIBOR(evaluationTime,
-					fixingDate, fixingDate + periodLength)).mult(periodLength);
-			portfolioValue = portfolioValue.add(amountOfUnderlyingForwards[i].mult(forwardValueAtEvaluationTime));
-		}
-
-		return portfolioValue;
-
-	}
-
-	// 2nd step: delta martingale approximation method
+	// delta martingale approximation method
 
 	private ArrayList<RandomVariable> deltaMartingaleApproximation(double evaluationTime, int numberOfPeriods)
 			throws CalculationException {
@@ -269,6 +169,8 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 
 	}
 
+	// method creating basis functions
+
 	private ArrayList<RandomVariable> getRegressionBasisFunctionsBinning(RandomVariable underlying,
 			RandomVariable indicator) {
 		ArrayList<RandomVariable> basisFunctions = new ArrayList<RandomVariable>();
@@ -289,6 +191,106 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 		}
 
 		return basisFunctions;
+	}
+
+	// 1st development step: delta hedge approximation method
+
+	private RandomVariable deltaHedgeApproximation(double evaluationTime, int numberOfPeriods)
+			throws CalculationException {
+		// Ask the model for its discretization
+		int timeIndexEvaluationTime = model.getTimeIndex(evaluationTime);
+
+		/*
+		 * Going forward in time we monitor the hedge portfolio on each path.
+		 */
+
+		long timingValuationStart = System.currentTimeMillis();
+
+		RandomVariableDifferentiable value = (RandomVariableDifferentiable) this.bermudanOption.getValue(0, model);
+
+		long timingValuationEnd = System.currentTimeMillis();
+
+		RandomVariable valueOfOption = model.getRandomVariableForConstant(value.getAverage());
+
+		// Initialize the portfolio to zero bonds and as much cash as the lower bound
+		// valuation predicts.
+
+		RandomVariable numeraireToday = model.getNumeraire(0.0);
+
+		// We store the composition of the hedge portfolio (depending on the path)
+		RandomVariable amountOfNumeraireAsset = valueOfOption.div(numeraireToday);
+		RandomVariable[] amountOfUnderlyingForwards = new RandomVariable[numberOfPeriods];
+		for (int i = 0; i < numberOfPeriods; i++)
+			amountOfUnderlyingForwards[i] = model.getRandomVariableForConstant(0.0);
+
+		// Gradient of option value to replicate
+		long timingDerivativeStart = System.currentTimeMillis();
+		Map<Long, RandomVariable> gradient = value.getGradient();
+		long timingDerivativeEnd = System.currentTimeMillis();
+
+		double lastOperationTimingValuation = (timingValuationEnd - timingValuationStart) / 1000.0;
+		double lastOperationTimingDerivative = (timingDerivativeEnd - timingDerivativeStart) / 1000.0;
+
+		// calculate deltas for every time point between current time (0) and
+		// evaluationTime
+		for (int timeIndex = 0; timeIndex < timeIndexEvaluationTime; timeIndex++) {
+
+			RandomVariable[] deltas = getDeltas(gradient, timeIndex);
+
+			/*
+			 * Change the portfolio according to the trading strategy
+			 */
+			// loop over all fixing dates of the option to calculate each individual hedge
+
+			for (int i = 0; i < numberOfPeriods; i++) {
+				/*
+				 * Change the portfolio according to the trading strategy
+				 */
+				// get times for forward calculation
+				double fixingDate = this.bermudanOption.getFixingDates()[i];
+				double periodLength = this.bermudanOption.getPeriodLengths()[i];
+
+				RandomVariable forwardAtTimeIndex = model.getLIBOR(model.getTime(timeIndex), fixingDate,
+						fixingDate + periodLength);
+
+				RandomVariable forwardValue = forwardAtTimeIndex.mult(periodLength);
+				RandomVariable numeraireAtTimeIndex = model.getNumeraire(timeIndex);
+
+				// Determine the delta hedge
+				RandomVariable newNumberOfForwards = deltas[i];
+				RandomVariable bondsToBuy = newNumberOfForwards.sub(amountOfUnderlyingForwards[i]);
+
+				// Ensure self financing
+				RandomVariable numeraireAssetsToSell = bondsToBuy.mult(forwardValue).div(numeraireAtTimeIndex);
+				RandomVariable newNumberOfNumeraireAsset = amountOfNumeraireAsset.sub(numeraireAssetsToSell);
+
+				// Update portfolio
+				amountOfNumeraireAsset = newNumberOfNumeraireAsset;
+
+				amountOfUnderlyingForwards[i] = newNumberOfForwards;
+			}
+
+		}
+
+		/*
+		 * At maturity, calculate the value of the replication portfolio
+		 */
+
+		// Get value of underlying and numeraire assets
+		RandomVariable numeraireAtEvaluationTime = model.getNumeraire(evaluationTime);
+		RandomVariable portfolioValue = amountOfNumeraireAsset.mult(numeraireAtEvaluationTime);
+
+		for (int i = 0; i < numberOfPeriods; i++) {
+			double fixingDate = this.bermudanOption.getFixingDates()[i];
+			double periodLength = this.bermudanOption.getPeriodLengths()[i];
+
+			RandomVariable forwardValueAtEvaluationTime = ((RandomVariableDifferentiable) model.getLIBOR(evaluationTime,
+					fixingDate, fixingDate + periodLength)).mult(periodLength);
+			portfolioValue = portfolioValue.add(amountOfUnderlyingForwards[i].mult(forwardValueAtEvaluationTime));
+		}
+
+		return portfolioValue;
+
 	}
 
 }

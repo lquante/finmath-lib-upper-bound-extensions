@@ -21,30 +21,6 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 	RandomVariable[] cacheConditionalExpectations;
 	Set<Long> liborIDs;
 
-	public Set<Long> getLiborIDs() {
-		return liborIDs;
-	}
-
-	public RandomVariable[] getCacheValuesOfUnderlying() {
-		return cacheValuesOfUnderlying;
-	}
-
-	public RandomVariable[] getCacheConditionalExpectations() {
-		return cacheConditionalExpectations;
-	}
-
-	public RandomVariable[] getCacheOptionValues() {
-		return cacheOptionValues;
-	}
-
-	public RandomVariable getTriggerValues() {
-		return triggerValues;
-	}
-
-	public RandomVariable[] getCacheTriggerValues() {
-		return cacheTriggerValues;
-	}
-
 	RandomVariable continuationValue;
 	RandomVariable exerciseValue;
 	RandomVariable optionValue;
@@ -142,6 +118,8 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 	protected abstract RandomVariable calculateTriggerValues(int period, double fixingDate,
 			LIBORModelMonteCarloSimulationModel model) throws CalculationException;
 
+	// some getters
+
 	public abstract RandomVariable[] getBasisFunctions(double evaluationTime, MonteCarloSimulationModel model)
 			throws CalculationException;
 
@@ -153,4 +131,27 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 		return exerciseTime;
 	}
 
+	public Set<Long> getLiborIDs() {
+		return liborIDs;
+	}
+
+	public RandomVariable[] getCacheValuesOfUnderlying() {
+		return cacheValuesOfUnderlying;
+	}
+
+	public RandomVariable[] getCacheConditionalExpectations() {
+		return cacheConditionalExpectations;
+	}
+
+	public RandomVariable[] getCacheOptionValues() {
+		return cacheOptionValues;
+	}
+
+	public RandomVariable getTriggerValues() {
+		return triggerValues;
+	}
+
+	public RandomVariable[] getCacheTriggerValues() {
+		return cacheTriggerValues;
+	}
 }

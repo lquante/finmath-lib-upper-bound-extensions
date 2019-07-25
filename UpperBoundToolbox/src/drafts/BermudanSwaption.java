@@ -101,6 +101,8 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 
 	}
 
+	// some getters
+
 	public BermudanSwaptionValueEstimatorInterface getValuationMethod() {
 		return valuationMethod;
 	}

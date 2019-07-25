@@ -22,25 +22,37 @@ import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 
 public class CreateTestBermudanSwaption {
 	// option parameters
-	int numberOfPeriods = 10; // number of (possible) exercise dates
-	double swapPeriodLength = 0.5;
-	String currency = "EURO";
-	double swaprate = 0.02; // getParSwaprate(liborModel, swapTenor);
-	private BermudanSwaption bermudanSwaption;
-	BermudanSwaptionValueEstimatorInterface valuationInterface = new SimpleLowerBoundEstimation(); // valuation
-																									// interface
-	double firstFixingDate = 0.5;
-	double evaluationTime = 0;
+	static int numberOfPeriods = 10; // number of (possible) exercise dates
+	static double swapPeriodLength = 0.5;
+	static String currency = "EURO";
+	static double swaprate = 0.02; // getParSwaprate(liborModel, swapTenor);
+	static BermudanSwaption bermudanSwaption;
+	static BermudanSwaptionValueEstimatorInterface valuationInterface = new SimpleLowerBoundEstimation(); // valuation
+	// interface
+	static double firstFixingDate = 0.5;
+
+	static double evaluationTime = 0;
 	// model field
 	LIBORModelMonteCarloSimulationModel model;
 
 	public CreateTestBermudanSwaption() throws CalculationException {
 		model = CreateTestModel.createLIBORMarketModel();
+		this.bermudanSwaption = createBermudanSwaption();
+	}
+
+	@Test
+	public void testSwaptionValuation() throws CalculationException {
+		// test valuation
+		double swaptionValue = bermudanSwaption.getValue(evaluationTime, model).getAverage();
+		System.out.println("Bermudan Swaption value at time " + evaluationTime + ": " + "" + swaptionValue);
+
+	}
+
+	public static BermudanSwaption createBermudanSwaption() {
 		// Create a rudimental bermudan swaption
 
 		double[] fixingDates = new double[numberOfPeriods];
-		double[] paymentDates = new double[numberOfPeriods]; // simply a merge of fixing and payment dates (which
-																// obviously overlap)
+		double[] paymentDates = new double[numberOfPeriods];
 
 		double[] notionals = new double[numberOfPeriods + 1];
 		boolean[] startingDate = new boolean[numberOfPeriods + 1];
@@ -62,15 +74,24 @@ public class CreateTestBermudanSwaption {
 			swaprates[periodStartIndex] = swaprate;
 		}
 
-		this.bermudanSwaption = new BermudanSwaption(currency, startingDate, fixingDates, swapTenor, paymentDates,
-				notionals, true, swaprates, valuationInterface);
+		return new BermudanSwaption(currency, startingDate, fixingDates, swapTenor, paymentDates, notionals, true,
+				swaprates, valuationInterface);
 	}
 
-	@Test
-	public void testSwaptionValuation() throws CalculationException {
-		// test valuation
-		double swaptionValue = bermudanSwaption.getValue(evaluationTime, model).getAverage();
-		System.out.println("Bermudan Swaption value at time " + evaluationTime + ": " + "" + swaptionValue);
+	// some getters and setters
 
+	/**
+	 * @return firstFixingDate
+	 */
+	public static double getFirstFixingDate() {
+		return firstFixingDate;
 	}
+
+	/**
+	 * @param firstFixingDate the firstFixingDate to set
+	 */
+	public static void setFirstFixingDate(double firstFixingDate) {
+		CreateTestBermudanSwaption.firstFixingDate = firstFixingDate;
+	}
+
 }

@@ -306,6 +306,7 @@ public class SimpleLowerBoundEstimation extends AbstractSimpleBoundEstimation
 
 	}
 
+	// some getters
 	@Override
 	public RandomVariable[] getCacheValuesOfUnderlying() {
 		return cacheValuesOfUnderlying;

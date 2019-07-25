@@ -75,10 +75,11 @@ public class ValuationOfBermudanSwaptionRudimentalTest {
 		System.out.println("Bermudan Swaption prices:\n");
 		System.out.println(
 				"FirstFixingDate\tLower Bound\tUpper Bound(AB)\tDeltaHedge\tDeviation(AB)\tDeviation(subSimFree)");
-		//				"EvaluationDate      Lower Bound       Upper Bound(AB)                  Deviation(AB)        ");
+		// "EvaluationDate Lower Bound Upper Bound(AB) Deviation(AB) ");
 		int numberOfPeriods = 10;
 		// Create libor Market model
-		for (int maturityIndex = 1; maturityIndex <= liborModel.getNumberOfLibors() - numberOfPeriods; maturityIndex++) {
+		for (int maturityIndex = 1; maturityIndex <= liborModel.getNumberOfLibors()
+				- numberOfPeriods; maturityIndex++) {
 			double firstFixingDate = liborModel.getLiborPeriod(maturityIndex);
 
 			// Create a rudimental bermudan swaption
@@ -191,7 +192,7 @@ public class ValuationOfBermudanSwaptionRudimentalTest {
 				new double[] { 0.5, 1.0, 2.0, 5.0, 40.0 } /* fixings of the forward */,
 				new double[] { 0.02, 0.02, 0.02, 0.02, 0.02 } /* forwards */,
 				liborPeriodLength /* tenor / period length */
-				);
+		);
 
 		/*
 		 * Create a simulation time discretization
@@ -206,7 +207,7 @@ public class ValuationOfBermudanSwaptionRudimentalTest {
 		 * Create a volatility structure v[i][j] = sigma_j(t_i)
 		 */
 		double[][] volatility = new double[timeDiscretizationFromArray.getNumberOfTimeSteps()][liborPeriodDiscretization
-		                                                                                       .getNumberOfTimeSteps()];
+				.getNumberOfTimeSteps()];
 		for (int timeIndex = 0; timeIndex < volatility.length; timeIndex++) {
 			for (int liborIndex = 0; liborIndex < volatility[timeIndex].length; liborIndex++) {
 				// Create a very simple volatility model here
