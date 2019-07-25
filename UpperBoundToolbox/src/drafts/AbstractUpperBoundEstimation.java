@@ -42,40 +42,42 @@ public abstract class AbstractUpperBoundEstimation implements BermudanSwaptionVa
 
 		this.bermudanOption = bermudanOption;
 
-		// After the last period the product has value zero: Initialize values to zero.
-		exerciseValue = model.getRandomVariableForConstant(0.0);
-		continuationValue = model.getRandomVariableForConstant(0.0);
-		RandomVariable exerciseTime = model.getRandomVariableForConstant(Double.POSITIVE_INFINITY);
-		triggerValues = null;
-
 		// initialize cache arrays for calculation
-		int numberOfPeriods = bermudanOption.getFixingDates().length - 1;
-		cacheOptionValues = new RandomVariable[numberOfPeriods + 1];
-		cacheValuesOfUnderlying = new RandomVariable[numberOfPeriods + 1];
-		cacheConditionalExpectations = new RandomVariable[numberOfPeriods + 1];
-		cacheTriggerValues = new RandomVariable[numberOfPeriods + 1];
+		int numberOfPeriods = bermudanOption.getFixingDates().length;
+		cacheOptionValues = new RandomVariable[numberOfPeriods];
+		cacheValuesOfUnderlying = new RandomVariable[numberOfPeriods];
+		cacheConditionalExpectations = new RandomVariable[numberOfPeriods];
+		cacheTriggerValues = new RandomVariable[numberOfPeriods];
 		optionValue = model.getRandomVariableForConstant(0);
 		// calculate value of lower bound
-		int period = 0;
-		double valuationTime = this.bermudanOption.getFixingDates()[period];
+		int period = model.getTimeIndex(evaluationTime);
+		
 		this.bermudanOption.setValuationMethod(lowerBoundMethod);
-		this.bermudanOption.getValue(valuationTime, model);
+		this.bermudanOption.getValue(evaluationTime, model);
 		RandomVariable[] cacheUnderlying = ((SimpleLowerBoundEstimation) this.bermudanOption.getValuationMethod())
 				.getCacheValuesOfUnderlying();
 		RandomVariable[] cacheOptionValues = lowerBoundMethod.getCacheOptionValues();
 		// Check exercise condition of lower bound method
 		RandomVariable[] cacheTriggers = lowerBoundMethod.getCacheTriggerValues();
 		// calculate upper bound
-		if (this.bermudanOption.getIsPeriodStartDateExerciseDate()[period])
-			optionValue = calculateOptionValue(period, model, cacheUnderlying, cacheOptionValues, cacheTriggers);
-		// the returned upper bound has to be already discounted to evaluation time and
-		// monte carlo weights applied
+
+
+		double deltaZeroApproximation = calculateDeltaZero(period, model, cacheUnderlying, cacheOptionValues, cacheTriggers);
+		// Note that values is a relative price - no numeraire division is required
+		RandomVariable numeraireAtEvaluationTime = model.getNumeraire(evaluationTime);
+		RandomVariable monteCarloProbabilitiesAtEvaluationTime = model.getMonteCarloWeights(evaluationTime);
+		RandomVariable discountFactor = numeraireAtEvaluationTime.div(monteCarloProbabilitiesAtEvaluationTime);
+
+		optionValue = cacheOptionValues[period].mult(discountFactor).add(deltaZeroApproximation);
+
 		return optionValue;
+
+
 	}
 
-	protected abstract RandomVariable calculateOptionValue(int period, LIBORModelMonteCarloSimulationModel model,
+	protected abstract double calculateDeltaZero(int period, LIBORModelMonteCarloSimulationModel model,
 			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
-			throws CalculationException;
+					throws CalculationException;
 
 	public RandomVariable[] getCacheValuesOfUnderlying() {
 		return (cacheValuesOfUnderlying);

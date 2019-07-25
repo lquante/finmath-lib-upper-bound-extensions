@@ -69,34 +69,34 @@ public class ValuationOfBermudanSwaptionRudimentalTest {
 	@Test
 	public void testSwaption() throws CalculationException {
 		// set tolerance for difference upper and lower bound
-		double tolerance = 0.001; // should be tightened pending further improvement
+		double tolerance = 0.01; // should be tightened pending further improvement
 
 		// print head of comparison table
 		System.out.println("Bermudan Swaption prices:\n");
 		System.out.println(
-				"EvaluationDate      Lower Bound       Upper Bound(AB)        DeltaHedge          Deviation(AB)        Deviation(subSimFree)");
-//				"EvaluationDate      Lower Bound       Upper Bound(AB)                  Deviation(AB)        ");
+				"FirstFixingDate\tLower Bound\tUpper Bound(AB)\tDeltaHedge\tDeviation(AB)\tDeviation(subSimFree)");
+		//				"EvaluationDate      Lower Bound       Upper Bound(AB)                  Deviation(AB)        ");
 		int numberOfPeriods = 10;
 		// Create libor Market model
-		for (int maturityIndex = 1; maturityIndex < liborModel.getNumberOfLibors() - numberOfPeriods; maturityIndex++) {
-			double exerciseDate = liborModel.getLiborPeriod(maturityIndex);
+		for (int maturityIndex = 1; maturityIndex <= liborModel.getNumberOfLibors() - numberOfPeriods; maturityIndex++) {
+			double firstFixingDate = liborModel.getLiborPeriod(maturityIndex);
 
 			// Create a rudimental bermudan swaption
 
 			double[] fixingDates = new double[numberOfPeriods];
 			double[] paymentDates = new double[numberOfPeriods]; // simply a merge of fixing and payment dates (which
-																	// obviously overlap)
+			// obviously overlap)
 
 			double[] notionals = new double[numberOfPeriods + 1];
 			boolean[] startingDate = new boolean[numberOfPeriods + 1];
 			double[] swapTenor = new double[numberOfPeriods]; // to be passed to the analytical approximation method
 			double swapPeriodLength = 0.5; // Use instead -> liborMarketModel.getLiborTimediscretisation to make the
-											// libor discretisation
+			// libor discretisation
 			// coincide with the swap time discretisation
 
 			for (int periodStartIndex = 0; periodStartIndex < numberOfPeriods; periodStartIndex++) {
-				fixingDates[periodStartIndex] = exerciseDate + periodStartIndex * swapPeriodLength;
-				paymentDates[periodStartIndex] = exerciseDate + (periodStartIndex + 1) * swapPeriodLength;
+				fixingDates[periodStartIndex] = firstFixingDate + periodStartIndex * swapPeriodLength;
+				paymentDates[periodStartIndex] = firstFixingDate + (periodStartIndex + 1) * swapPeriodLength;
 				swapTenor[periodStartIndex] = swapPeriodLength;
 				notionals[periodStartIndex] = 1;
 				startingDate[periodStartIndex] = true;
@@ -107,7 +107,7 @@ public class ValuationOfBermudanSwaptionRudimentalTest {
 			// swapPeriodLength;
 
 			// Swaptions swap rate
-			double swaprate = 0.02; // getParSwaprate(liborModel, swapTenor);
+			double swaprate = 0.015; // getParSwaprate(liborModel, swapTenor);
 
 			// Set swap rates for each period
 			double[] swaprates = new double[numberOfPeriods];
@@ -119,7 +119,7 @@ public class ValuationOfBermudanSwaptionRudimentalTest {
 			 * Value a bermudan swaption
 			 */
 
-			System.out.print(formatterTime.format(exerciseDate) + "          ");
+			System.out.print(formatterTime.format(firstFixingDate) + "          ");
 			// Value with lower bound method
 
 			// change regression basis functions via enum:
@@ -150,7 +150,7 @@ public class ValuationOfBermudanSwaptionRudimentalTest {
 					numberOfSubsimulationsStepA, numberOfSubsimulationsStepB);
 			swaptionMonteCarlo.setValuationMethod(ABupperBound);
 			double ABupperBoundValue = swaptionMonteCarlo.getValue(liborModel);
-			System.out.print(formatterValue.format(ABupperBoundValue) + "          ");
+			System.out.print(formatterValue.format(ABupperBoundValue) + "\t");
 
 			// test hedging portfolio
 
@@ -158,15 +158,15 @@ public class ValuationOfBermudanSwaptionRudimentalTest {
 
 			swaptionMonteCarlo.setValuationMethod(DeltaUpperBound);
 			double DeltaUpperBoundValue = swaptionMonteCarlo.getValue(liborModel);
-			System.out.print(formatterValue.format(DeltaUpperBoundValue) + "          ");
+			System.out.print(formatterValue.format(DeltaUpperBoundValue) + "\t");
 
 			// Absolute error AB method
 			double deviationAB = Math.abs(lowerBoundValue - ABupperBoundValue);
-			System.out.print(formatterDeviation.format(deviationAB) + "          ");
+			System.out.print(formatterDeviation.format(deviationAB) + "\t");
 
 			// Absolute error delta Hedge method
 			double deviationDeltaHedge = Math.abs(lowerBoundValue - DeltaUpperBoundValue);
-			System.out.println(formatterDeviation.format(deviationDeltaHedge) + "          ");
+			System.out.println(formatterDeviation.format(deviationDeltaHedge) + "\t");
 
 			Assert.assertEquals(lowerBoundValue, ABupperBoundValue, tolerance);
 			Assert.assertEquals(lowerBoundValue, DeltaUpperBoundValue, tolerance);
@@ -191,7 +191,7 @@ public class ValuationOfBermudanSwaptionRudimentalTest {
 				new double[] { 0.5, 1.0, 2.0, 5.0, 40.0 } /* fixings of the forward */,
 				new double[] { 0.02, 0.02, 0.02, 0.02, 0.02 } /* forwards */,
 				liborPeriodLength /* tenor / period length */
-		);
+				);
 
 		/*
 		 * Create a simulation time discretization
@@ -206,7 +206,7 @@ public class ValuationOfBermudanSwaptionRudimentalTest {
 		 * Create a volatility structure v[i][j] = sigma_j(t_i)
 		 */
 		double[][] volatility = new double[timeDiscretizationFromArray.getNumberOfTimeSteps()][liborPeriodDiscretization
-				.getNumberOfTimeSteps()];
+		                                                                                       .getNumberOfTimeSteps()];
 		for (int timeIndex = 0; timeIndex < volatility.length; timeIndex++) {
 			for (int liborIndex = 0; liborIndex < volatility[timeIndex].length; liborIndex++) {
 				// Create a very simple volatility model here

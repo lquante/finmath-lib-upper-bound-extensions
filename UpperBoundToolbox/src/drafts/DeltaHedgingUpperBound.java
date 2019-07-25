@@ -23,9 +23,9 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 	}
 
 	@Override
-	protected RandomVariable calculateOptionValue(int period, LIBORModelMonteCarloSimulationModel model,
+	protected double calculateDeltaZero(int period, LIBORModelMonteCarloSimulationModel model,
 			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
-			throws CalculationException {
+					throws CalculationException {
 		this.model = model;
 		double evaluationTime = this.bermudanOption.getFixingDates()[period];
 		int numberOfOptionPeriods = this.bermudanOption.getFixingDates().length;
@@ -47,15 +47,10 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 		for (int forwardPeriod = 0; forwardPeriod < martingaleCache.size()
 				&& forwardPeriod < numberOfOptionPeriods; forwardPeriod++)
 			delta0 = delta0.floor(cacheUnderlying[forwardPeriod].sub(martingaleCache.get(forwardPeriod)));
+
+		// return approximation of martingale process
 		double deltaZeroApproximation = delta0.getAverage();
-		// Note that values is a relative price - no numeraire division is required
-		RandomVariable numeraireAtPeriod = model.getNumeraire(model.getTime(period));
-		RandomVariable monteCarloProbabilitiesAtSimulationTime = model.getMonteCarloWeights(period);
-		RandomVariable discountFactor = numeraireAtPeriod.div(monteCarloProbabilitiesAtSimulationTime);
-
-		RandomVariable upperBoundValue = cacheOptionValues[period].mult(discountFactor).add(deltaZeroApproximation);
-
-		return upperBoundValue;
+		return deltaZeroApproximation;
 	}
 
 	// 1st step: delta hedge approximation method
