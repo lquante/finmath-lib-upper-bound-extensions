@@ -28,7 +28,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	SimplestExerciseStrategy exerciseStrategy;
 	private int numberOfSubsimulationsStepA;
 	private int numberOfSubsimulationsStepB;
-	private int numberOfSimulations;
+	
 
 	/**
 	 * @param AbstractSimpleBoundEstimation lowerBoundMethod The lower bound method
@@ -47,7 +47,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	protected double calculateDeltaZero(int period, LIBORModelMonteCarloSimulationModel model,
 			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
 			throws CalculationException {
-		numberOfSimulations = cacheOptionValues[0].getRealizations().length;
+		int numberOfSimulations = cacheOptionValues[0].getRealizations().length;
 
 		double sumOfDeltas = 0;
 		double delta0 = 0;
@@ -64,11 +64,11 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 			}
 
 			// determine number of additional martingale components to be estimated
-			int numberOfForwardPeriods = this.bermudanOption.getFixingDates().length - 1;
+			int numberOfForwardPeriods = this.bermudanOption.getFixingDates().length;
 			double startingPeriodBermudan = this.bermudanOption.getFixingDates()[0];
 			int startingShift = model.getTimeIndex(startingPeriodBermudan);
 
-			for (int forwardPeriod = 2 + period; forwardPeriod <= numberOfForwardPeriods; forwardPeriod++) {
+			for (int forwardPeriod = 2 + period; forwardPeriod < numberOfForwardPeriods; forwardPeriod++) {
 				// initialize values for subsimulation
 				int forwardPeriodOption = forwardPeriod + startingShift;
 				double simulationTime = model.getTime(forwardPeriodOption);
@@ -99,7 +99,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 					int terminationPeriod;
 					for (terminationPeriod = forwardPeriod; (triggerValues[terminationPeriod]
 							.get(path) < 0); terminationPeriod++) {
-						if (terminationPeriod >= numberOfForwardPeriods)
+						if (terminationPeriod == numberOfForwardPeriods-1)
 							break;
 					}
 
@@ -124,7 +124,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 						RandomVariable discountFactor = model.getRandomVariableForConstant(0);
 
 						// check if forwardPeriod<termination period
-						if (forwardPeriodOption + 2 < terminationPeriod) {
+						if (forwardPeriodOption< terminationPeriod) {
 							discountFactor = modelStepB.getNumeraire(forwardOptionTime)
 									.div(modelStepB.getMonteCarloWeights(1));
 							RandomVariable valueOptionB = bermudanB.getValue(forwardOptionTime, modelStepB);
@@ -148,7 +148,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 			}
 
 			// calculate the maximum from the simulated martingale for each remaining period
-			for (int forwardPeriod = 0; forwardPeriod <= numberOfForwardPeriods - period; forwardPeriod++)
+			for (int forwardPeriod = 0; forwardPeriod < numberOfForwardPeriods - period; forwardPeriod++)
 				delta0 = Math.max(delta0,
 						cacheUnderlying[forwardPeriod].get(path) - martingaleCache.get(forwardPeriod));
 			sumOfDeltas += delta0;

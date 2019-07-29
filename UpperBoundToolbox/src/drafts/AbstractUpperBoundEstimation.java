@@ -50,7 +50,7 @@ public abstract class AbstractUpperBoundEstimation implements BermudanSwaptionVa
 		cacheTriggerValues = new RandomVariable[numberOfPeriods];
 		optionValue = model.getRandomVariableForConstant(0);
 		// calculate value of lower bound
-		int period = model.getTimeIndex(evaluationTime);
+		int evaluationTimeIndex = model.getTimeIndex(evaluationTime);
 
 		this.bermudanOption.setValuationMethod(lowerBoundMethod);
 		this.bermudanOption.getValue(evaluationTime, model);
@@ -61,14 +61,14 @@ public abstract class AbstractUpperBoundEstimation implements BermudanSwaptionVa
 		RandomVariable[] cacheTriggers = lowerBoundMethod.getCacheTriggerValues();
 		// calculate upper bound
 
-		double deltaZeroApproximation = calculateDeltaZero(period, model, cacheUnderlying, cacheOptionValues,
+		double deltaZeroApproximation = calculateDeltaZero(evaluationTimeIndex, model, cacheUnderlying, cacheOptionValues,
 				cacheTriggers);
 		// Note that values is a relative price - no numeraire division is required
 		RandomVariable numeraireAtEvaluationTime = model.getNumeraire(evaluationTime);
 		RandomVariable monteCarloProbabilitiesAtEvaluationTime = model.getMonteCarloWeights(evaluationTime);
 		RandomVariable discountFactor = numeraireAtEvaluationTime.div(monteCarloProbabilitiesAtEvaluationTime);
 
-		optionValue = cacheOptionValues[period].mult(discountFactor).add(deltaZeroApproximation);
+		optionValue = cacheOptionValues[evaluationTimeIndex].mult(discountFactor).add(deltaZeroApproximation);
 
 		return optionValue;
 

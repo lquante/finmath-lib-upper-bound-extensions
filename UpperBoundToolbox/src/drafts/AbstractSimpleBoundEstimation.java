@@ -1,6 +1,8 @@
 package drafts;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import net.finmath.exception.CalculationException;
@@ -19,7 +21,7 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 	RandomVariable[] cacheOptionValues;
 	RandomVariable[] cacheValuesOfUnderlying;
 	RandomVariable[] cacheConditionalExpectations;
-	Set<Long> liborIDs;
+	Map<Double,Long> liborIDs;
 
 	RandomVariable continuationValue;
 	RandomVariable exerciseValue;
@@ -42,7 +44,7 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 			LIBORModelMonteCarloSimulationModel model, RandomVariable triggerValuesInput) throws CalculationException {
 
 		this.bermudanOption = bermudanOption;
-		liborIDs = new HashSet<>();
+		liborIDs = new HashMap<>();
 		// After the last period the product has value zero: Initialize values to zero.
 		RandomVariable zero = model.getRandomVariableForConstant(0.0);
 		exerciseValue = zero;
@@ -73,7 +75,7 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 			RandomVariable libor = ((RandomVariableDifferentiableAAD) model.getLIBOR(fixingDate, fixingDate,
 					fixingDate + periodLength)).getCloneIndependent();
 			Long liborID = ((RandomVariableDifferentiable) libor).getID();
-			liborIDs.add(liborID);
+			liborIDs.put(fixingDate, liborID);
 			RandomVariable payoff = libor.sub(swaprate).mult(periodLength).mult(notional);
 
 			// Apply discounting and Monte-Carlo probabilities
@@ -95,7 +97,7 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 
 			optionValue = triggerValues.choose(exerciseValue, continuationValue).floor(0);
 
-			exerciseTime = triggerValues.choose(exerciseTime, new Scalar(exerciseDate));
+			exerciseTime = triggerValues.choose(new Scalar(exerciseDate),exerciseTime);
 
 			// caching for upper bound methods
 			cacheTriggerValues[period] = triggerValues;
@@ -131,7 +133,7 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 		return exerciseTime;
 	}
 
-	public Set<Long> getLiborIDs() {
+	public Map<Double, Long> getLiborIDs() {
 		return liborIDs;
 	}
 

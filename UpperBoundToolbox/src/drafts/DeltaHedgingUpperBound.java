@@ -27,7 +27,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
 			throws CalculationException {
 		this.model = model;
-		double evaluationTime = this.bermudanOption.getFixingDates()[period];
+		double evaluationTime =model.getTime(period);
 		int numberOfOptionPeriods = this.bermudanOption.getFixingDates().length;
 
 		// initialize martingale as lower bound value for period 0 and 1.
@@ -57,21 +57,16 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 
 	private ArrayList<RandomVariable> deltaMartingaleApproximation(double evaluationTime, int numberOfPeriods)
 			throws CalculationException {
-		// Ask the model for its discretization
-		int timeIndexEvaluationTime = model.getTimeIndex(evaluationTime);
-		if (timeIndexEvaluationTime > 40)
-			System.out.println("warning");
+	
 		/*
 		 * Going forward in time we monitor the hedge deltas on each path.
 		 */
 
 		long timingValuationStart = System.currentTimeMillis();
 
-		RandomVariableDifferentiable value = (RandomVariableDifferentiable) this.bermudanOption.getValue(0, model);
+		RandomVariableDifferentiable value = (RandomVariableDifferentiable) this.bermudanOption.getValue(evaluationTime, model);
 
 		long timingValuationEnd = System.currentTimeMillis();
-
-		RandomVariable valueOfOption = model.getRandomVariableForConstant(value.getAverage());
 
 		// Gradient of option value to replicate
 		long timingDerivativeStart = System.currentTimeMillis();
@@ -86,7 +81,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 		// initialize martingale cache
 		ArrayList<RandomVariable> martingaleCache = new ArrayList<RandomVariable>();
 
-		for (int timeIndex = 0; timeIndex < timeIndexEvaluationTime; timeIndex++) {
+		for (int timeIndex = 2; timeIndex < numberOfPeriods; timeIndex++) {
 			// calculate deltas for every fixing date
 			RandomVariable[] deltas = getDeltas(gradient, timeIndex);
 			/*
@@ -99,11 +94,11 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 				double fixingDate = this.bermudanOption.getFixingDates()[i];
 				double periodLength = this.bermudanOption.getPeriodLengths()[i];
 
-				RandomVariable bondAtTimeIndex = model.getLIBOR(model.getTime(timeIndex), fixingDate,
+				RandomVariable rateAtTimeInde = model.getLIBOR(model.getTime(timeIndex), fixingDate,
 						fixingDate + periodLength);
-				RandomVariable bondValue = bondAtTimeIndex.mult(periodLength);
-				RandomVariable forwardAtTimeIndex = model.getLIBOR(model.getTime(timeIndex), fixingDate,
-						fixingDate + periodLength);
+				RandomVariable bondValue = rateAtTimeInde.mult(periodLength);
+				RandomVariable forwardAtTimeIndex = model.getLIBOR(model.getTime(timeIndex), fixingDate+periodLength,
+						fixingDate + periodLength*2);
 				RandomVariable forwardValue = forwardAtTimeIndex.mult(periodLength);
 
 				// calculate martingale according to 5.1 of Joshi / Tang (2014)
@@ -128,7 +123,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 			SimpleLowerBoundEstimation valuationMethod = (SimpleLowerBoundEstimation) this.bermudanOption
 					.getValuationMethod();
 			RandomVariable exerciseTime = valuationMethod.getExerciseTime();
-			Set<Long> liborIDs = valuationMethod.getLiborIDs();
+			Map<Double, Long> liborIDs = valuationMethod.getLiborIDs();
 			// get times for forward calculation
 			double fixingDate = this.bermudanOption.getFixingDates()[i];
 			double periodLength = this.bermudanOption.getPeriodLengths()[i];
@@ -138,7 +133,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 			RandomVariable numeraireAtTimeIndex = model.getNumeraire(model.getTime(timeIndex));
 			// get gradient with respect to the forward rate (liborID's are calculated in
 			// backward algorithm thus inversion of index)
-			RandomVariable delta = gradient.get(liborIDs.toArray()[numberOfPeriods - 1 - i]);
+			RandomVariable delta = gradient.get(liborIDs.get(fixingDate));
 
 			if (delta == null) {
 				delta = forwardAtTimeIndex.mult(0.0);

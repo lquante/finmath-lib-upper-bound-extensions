@@ -22,7 +22,7 @@ import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 
 public class CreateTestBermudanSwaption {
 	// option parameters
-	static int numberOfPeriods = 10; // number of (possible) exercise dates
+	static int numberOfExercisePeriods = 10; // number of (possible) exercise dates
 	static double swapPeriodLength = 0.5;
 	static String currency = "EURO";
 	static double swaprate = 0.02; // getParSwaprate(liborModel, swapTenor);
@@ -51,26 +51,26 @@ public class CreateTestBermudanSwaption {
 	public static BermudanSwaption createBermudanSwaption() {
 		// Create a rudimental bermudan swaption
 
-		double[] fixingDates = new double[numberOfPeriods];
-		double[] paymentDates = new double[numberOfPeriods];
+		double[] fixingDates = new double[numberOfExercisePeriods];
+		double[] paymentDates = new double[numberOfExercisePeriods];
 
-		double[] notionals = new double[numberOfPeriods + 1];
-		boolean[] startingDate = new boolean[numberOfPeriods + 1];
-		double[] swapTenor = new double[numberOfPeriods]; // to be passed to the analytical approximation method
+		double[] notionals = new double[numberOfExercisePeriods + 1];
+		boolean[] startingDate = new boolean[numberOfExercisePeriods + 1];
+		double[] swapTenor = new double[numberOfExercisePeriods]; // to be passed to the analytical approximation method
 
-		for (int periodStartIndex = 0; periodStartIndex < numberOfPeriods; periodStartIndex++) {
+		for (int periodStartIndex = 0; periodStartIndex < numberOfExercisePeriods; periodStartIndex++) {
 			fixingDates[periodStartIndex] = firstFixingDate + periodStartIndex * swapPeriodLength;
 			paymentDates[periodStartIndex] = firstFixingDate + (periodStartIndex + 1) * swapPeriodLength;
 			swapTenor[periodStartIndex] = swapPeriodLength;
 			notionals[periodStartIndex] = 1;
 			startingDate[periodStartIndex] = true;
 		}
-		notionals[numberOfPeriods] = 1;
-		startingDate[numberOfPeriods] = true;
+		notionals[numberOfExercisePeriods] = 1;
+		startingDate[numberOfExercisePeriods] = true;
 
 		// Set swap rates for each period
-		double[] swaprates = new double[numberOfPeriods];
-		for (int periodStartIndex = 0; periodStartIndex < numberOfPeriods; periodStartIndex++) {
+		double[] swaprates = new double[numberOfExercisePeriods];
+		for (int periodStartIndex = 0; periodStartIndex < numberOfExercisePeriods; periodStartIndex++) {
 			swaprates[periodStartIndex] = swaprate;
 		}
 
@@ -79,6 +79,13 @@ public class CreateTestBermudanSwaption {
 	}
 
 	// some getters and setters
+
+	/**
+	 * @param numberOfPeriods the numberOfPeriods to set
+	 */
+	public static void setNumberOfExercisePeriods(int numberOfPeriods) {
+		CreateTestBermudanSwaption.numberOfExercisePeriods = numberOfPeriods;
+	}
 
 	/**
 	 * @return firstFixingDate
