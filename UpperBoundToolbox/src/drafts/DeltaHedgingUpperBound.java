@@ -80,8 +80,8 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 		// components
 		// initialize martingale cache
 		ArrayList<RandomVariable> martingaleCache = new ArrayList<RandomVariable>();
-
-		for (int timeIndex = 2; timeIndex < numberOfPeriods; timeIndex++) {
+		int startingShift = model.getTimeIndex(this.bermudanOption.getFixingDates()[0]);
+		for (int timeIndex = 2+startingShift; timeIndex < numberOfPeriods+startingShift; timeIndex++) {
 			// calculate deltas for every fixing date
 			RandomVariable[] deltas = getDeltas(gradient, timeIndex);
 			/*

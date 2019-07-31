@@ -124,7 +124,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 						RandomVariable discountFactor = model.getRandomVariableForConstant(0);
 
 						// check if forwardPeriod<termination period
-						if (forwardPeriodOption< terminationPeriod) {
+						if (forwardPeriodOption+2< terminationPeriod) {
 							discountFactor = modelStepB.getNumeraire(forwardOptionTime)
 									.div(modelStepB.getMonteCarloWeights(1));
 							RandomVariable valueOptionB = bermudanB.getValue(forwardOptionTime, modelStepB);
@@ -140,7 +140,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 					previousExerciseIndicator = 0;
 				double previousExerciseValue = cacheUnderlying[forwardPeriod - 1].get(path);
 				martingale = martingaleCache.get(martingaleIndex - 1)
-						- (cacheOptionValues[martingaleIndex - 1].get(path)) + (discountedExerciseValue)
+						- (cacheOptionValues[martingaleIndex - 1].get(path)) + discountedExerciseValue
 						- discountedFutureExerciseValue - previousExerciseIndicator * previousExerciseValue;
 				martingaleCache.add(martingale);
 				martingaleIndex += 1;
@@ -239,8 +239,9 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 				forwardCurve, discountCurve, randomVariableFactory, covarianceModel, null, null);
 
 		// adjust process
+		int seed=1234;
 		BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(shortenedLiborDiscretization,
-				model.getBrownianMotion().getNumberOfFactors(), numberOfSubsimulationPaths, 1234);
+				model.getBrownianMotion().getNumberOfFactors(), numberOfSubsimulationPaths, seed+component);
 		MonteCarloProcess process = new EulerSchemeFromProcessModel(brownianMotion,
 				EulerSchemeFromProcessModel.Scheme.PREDICTOR_CORRECTOR);
 

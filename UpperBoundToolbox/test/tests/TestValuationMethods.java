@@ -29,7 +29,7 @@ public class TestValuationMethods {
 
 	// set tolerance for difference between upper and lower bound methods
 	double tolerance = 0.01; // should be tightened pending further improvement
-	int numberOfExercisePeriods = 3;
+	int numberOfExercisePeriods = 10;
 	private int numberOfSubsimulationsStepA=1000;
 	private int numberOfSubsimulationsStepB=1000;
 	
@@ -41,7 +41,7 @@ public class TestValuationMethods {
 		// print head of comparison table
 		System.out.println("Bermudan Swaption prices:\n");
 		System.out.println(
-				"FirstFixingDate Lower Bound \t Upper Bound(AB)  \t UpperBound(Deltas)\t  Deviation(AB)\t Deviation(Delta subsimfree)");
+				"FirstFixingDate\tLower Bound\tUpper Bound(AB)\tUpperBound(Deltas)\tDeviation(AB)\tDeviation(Delta subsimfree)");
 		// "EvaluationDate Lower Bound Upper Bound(AB) Deviation(AB) ");
 
 
@@ -56,7 +56,7 @@ public class TestValuationMethods {
 			 * Value a bermudan swaption
 			 */
 
-			System.out.print(formatterTime.format(firstFixingDate) + "\t\t");
+			System.out.print(formatterTime.format(firstFixingDate) + "\t");
 			
 
 			SimpleLowerBoundEstimation lowerBound = new SimpleLowerBoundEstimation();
@@ -72,8 +72,8 @@ public class TestValuationMethods {
 			double DeltaUpperBoundValue = timingValuationTest(DeltaUpperBound, testSwaption, liborModel);
 
 			// Absolute error AB method
-			double deviationAB = Math.abs(lowerBoundValue - ABupperBoundValue);
-			System.out.print(formatterDeviation.format(deviationAB) + "\t");
+			 double deviationAB = Math.abs(lowerBoundValue - ABupperBoundValue);
+			 System.out.print(formatterDeviation.format(deviationAB) + "\t");
 
 			// Absolute error delta Hedge method
 			double deviationDeltaHedge = Math.abs(lowerBoundValue - DeltaUpperBoundValue);
@@ -85,7 +85,7 @@ public class TestValuationMethods {
 		}
 	}
 	
-	
+	//help method for calculation and printing of values and calculation time
 	private double timingValuationTest (BermudanSwaptionValueEstimatorInterface valuationMethod, BermudanSwaption swaption, LIBORModelMonteCarloSimulationModel liborModel) throws CalculationException
 	{
 		swaption.setValuationMethod(valuationMethod);
@@ -93,7 +93,7 @@ public class TestValuationMethods {
 		double simulatedValue = swaption.getValue(liborModel);
 		long timingValuationEnd = System.currentTimeMillis();
 		double lastOperationTimingValuation = (timingValuationEnd - timingValuationStart) / 1000.0;
-		System.out.print(formatterValue.format(simulatedValue));
+		System.out.print(formatterValue.format(simulatedValue)+"\t");
 		System.out.print(formattterTime.format(lastOperationTimingValuation)+ "\t");
 		return simulatedValue;
 	}

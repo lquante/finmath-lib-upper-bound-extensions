@@ -34,7 +34,7 @@ public class CreateTestModel {
 
 	LIBORModelMonteCarloSimulationModel liborModel;
 	// monte carlo simulation parameters
-	final static int numberOfPaths = 1000;
+	final static int numberOfPaths = 10000;
 	final static int numberOfFactors = 3; // PCA number of factors
 	static int seed = 3141; // seed for stochastic driver
 
