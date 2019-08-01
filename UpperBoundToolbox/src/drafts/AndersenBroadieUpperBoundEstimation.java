@@ -109,7 +109,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 					discountedExerciseValue = cacheUnderlying[forwardPeriod].get(path);
 
 					// create model for subsimulations
-					if (forwardPeriodOption < terminationPeriod) {
+					if (forwardPeriodOption+2 < terminationPeriod) {
 						LIBORModelMonteCarloSimulationModel modelStepB = createSubsimulationModelTerminating(model,
 								forwardPeriodOption, terminationPeriod, path, numberOfSubsimulationsStepB);
 

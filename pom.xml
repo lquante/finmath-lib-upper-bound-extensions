@@ -42,8 +42,7 @@
 	<build>
 		<defaultGoal>clean install </defaultGoal>
 		<sourceDirectory>UpperBoundToolbox/src</sourceDirectory>
-<!-- 		 <testSourceDirectory>UpperBoundToolbox/test</testSourceDirectory> need to use modified linear algebra file to enable test--> 
-		
+		<testSourceDirectory>UpperBoundToolbox/test</testSourceDirectory> 
 		<plugins>
 			
 			<plugin>
@@ -60,7 +59,7 @@
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.4.0</version>
 				<configuration>
-				<mainClass>test.TestRunnerForSSH</mainClass>
+				<mainClass>tests.TestRunnerForSSH</mainClass>
 				</configuration>
 			</plugin>
 		</plugins>
