@@ -34,8 +34,8 @@ public class CreateTestModel {
 
 	LIBORModelMonteCarloSimulationModel liborModel;
 	// monte carlo simulation parameters
-	final static int numberOfPaths = 10000;
-	final static int numberOfFactors = 3; // PCA number of factors
+	static int numberOfPaths = 10000;
+	static int numberOfFactors = 3; // PCA number of factors
 	static int seed = 3141; // seed for stochastic driver
 
 	static AbstractRandomVariableFactory randomVariableFactory = new RandomVariableDifferentiableAADFactory(
@@ -174,5 +174,47 @@ public class CreateTestModel {
 		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion, scheme);
 
 		return new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModel, process);
+	}
+
+	/**
+	 * @return the numberOfPaths
+	 */
+	public static int getNumberOfPaths() {
+		return numberOfPaths;
+	}
+
+	/**
+	 * @param numberOfPaths the numberOfPaths to set
+	 */
+	public static void setNumberOfPaths(int numberOfPaths) {
+		CreateTestModel.numberOfPaths = numberOfPaths;
+	}
+
+	/**
+	 * @return the numberOfFactors
+	 */
+	public static int getNumberOfFactors() {
+		return numberOfFactors;
+	}
+
+	/**
+	 * @param numberOfFactors the numberOfFactors to set
+	 */
+	public static void setNumberOfFactors(int numberOfFactors) {
+		CreateTestModel.numberOfFactors = numberOfFactors;
+	}
+
+	/**
+	 * @return the seed
+	 */
+	public static int getSeed() {
+		return seed;
+	}
+
+	/**
+	 * @param seed the seed to set
+	 */
+	public static void setSeed(int seed) {
+		CreateTestModel.seed = seed;
 	}
 }

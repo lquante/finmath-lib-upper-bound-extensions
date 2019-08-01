@@ -28,14 +28,14 @@ public class TestValuationMethods {
 			new DecimalFormatSymbols(Locale.ENGLISH));
 
 	// set tolerance for difference between upper and lower bound methods
-	double tolerance = 0.01; // should be tightened pending further improvement
-	int numberOfExercisePeriods = 10;
-	private int numberOfSubsimulationsStepA=1000;
-	private int numberOfSubsimulationsStepB=1000;
+	static double tolerance = 0.01; // should be tightened pending further improvement
+	static int numberOfExercisePeriods = 10;
+	private static int numberOfSubsimulationsStepA=1000;
+	private static int numberOfSubsimulationsStepB=1000;
 	
 
 	@Test
-	public void testSwaptionValuationMethod() throws CalculationException {
+	public static void testSwaptionValuationMethod() throws CalculationException {
 
 		LIBORModelMonteCarloSimulationModel liborModel = CreateTestModel.createLIBORMarketModel();
 		// print head of comparison table
@@ -86,7 +86,7 @@ public class TestValuationMethods {
 	}
 	
 	//help method for calculation and printing of values and calculation time
-	private double timingValuationTest (BermudanSwaptionValueEstimatorInterface valuationMethod, BermudanSwaption swaption, LIBORModelMonteCarloSimulationModel liborModel) throws CalculationException
+	private static double timingValuationTest (BermudanSwaptionValueEstimatorInterface valuationMethod, BermudanSwaption swaption, LIBORModelMonteCarloSimulationModel liborModel) throws CalculationException
 	{
 		swaption.setValuationMethod(valuationMethod);
 		long timingValuationStart = System.currentTimeMillis();
@@ -98,4 +98,33 @@ public class TestValuationMethods {
 		return simulatedValue;
 	}
 
+	/**
+	 * @return the numberOfSubsimulationsStepA
+	 */
+	public static int getNumberOfSubsimulationsStepA() {
+		return numberOfSubsimulationsStepA;
+	}
+
+	/**
+	 * @param numberOfSubsimulationsStepA the numberOfSubsimulationsStepA to set
+	 */
+	public static void setNumberOfSubsimulationsStepA(int numberOfSubsimulationsStepA) {
+		TestValuationMethods.numberOfSubsimulationsStepA = numberOfSubsimulationsStepA;
+	}
+
+	/**
+	 * @return the numberOfSubsimulationsStepB
+	 */
+	public static int getNumberOfSubsimulationsStepB() {
+		return numberOfSubsimulationsStepB;
+	}
+
+	/**
+	 * @param numberOfSubsimulationsStepB the numberOfSubsimulationsStepB to set
+	 */
+	public static void setNumberOfSubsimulationsStepB(int numberOfSubsimulationsStepB) {
+		TestValuationMethods.numberOfSubsimulationsStepB = numberOfSubsimulationsStepB;
+	}
+
+	
 }
