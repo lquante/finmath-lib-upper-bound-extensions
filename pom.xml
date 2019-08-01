@@ -9,6 +9,7 @@
 	<properties>
 	
 		<junit.version>4.12</junit.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<licenses>
@@ -59,7 +60,7 @@
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.4.0</version>
 				<configuration>
-				<mainClass>tests.TestRunnerForSSH</mainClass>
+				<mainClass>test.tests.TestRunnerForSSH</mainClass>
 				</configuration>
 			</plugin>
 		</plugins>

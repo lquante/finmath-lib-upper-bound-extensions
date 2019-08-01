@@ -19,7 +19,7 @@ public class TestRunnerForSSH {
 	
 		// run test
 		
-		TestValuationMethods.testSwaptionValuationMethod();
+		TestValuationMethods.executePrintSwaptionValuationMethods();
 	
 	}
 

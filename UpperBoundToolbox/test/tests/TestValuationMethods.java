@@ -35,7 +35,13 @@ public class TestValuationMethods {
 	
 
 	@Test
-	public static void testSwaptionValuationMethod() throws CalculationException {
+	public void testSwaptionValuationMethods() throws CalculationException
+	{
+		executePrintSwaptionValuationMethods();
+	}
+	
+	
+	public static void executePrintSwaptionValuationMethods() throws CalculationException {
 
 		LIBORModelMonteCarloSimulationModel liborModel = CreateTestModel.createLIBORMarketModel();
 		// print head of comparison table
