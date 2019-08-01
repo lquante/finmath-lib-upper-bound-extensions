@@ -34,7 +34,7 @@ public class TestValuationMethods {
 	private static int numberOfSubsimulationsStepB=1000;
 	
 
-	@Test
+	//@Test
 	public void testSwaptionValuationMethods() throws CalculationException
 	{
 		executePrintSwaptionValuationMethods();

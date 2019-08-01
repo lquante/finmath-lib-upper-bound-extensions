@@ -1,5 +1,7 @@
 package tests;
 
+import org.junit.Test;
+
 import net.finmath.exception.CalculationException;
 
 public class TestRunnerForSSH {
@@ -10,6 +12,12 @@ public class TestRunnerForSSH {
 	static int numberOfSubsimulationPathsB = 10000;
 	
 	static int numberOfPeriods = 10;
+	@Test
+	public void testWithManyPaths() throws CalculationException
+	{
+		main(null);
+	}
+	
 	public  static void main(String[] args) throws CalculationException {
 		// set parameters
 		CreateTestModel.setNumberOfPaths(numberOfPaths);

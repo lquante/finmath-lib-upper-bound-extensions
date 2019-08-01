@@ -59,9 +59,7 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.4.0</version>
-				<configuration>
-				<mainClass>test.tests.TestRunnerForSSH</mainClass>
-				</configuration>
+				
 			</plugin>
 		</plugins>
 	</build>
