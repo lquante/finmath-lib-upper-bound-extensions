@@ -13,6 +13,10 @@ import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.ConditionalExpectationEstimator;
 import net.finmath.stochastic.RandomVariable;
 
+/**
+ * @author (c)Christian P. Fries, modified by Lennart Quante
+ *	Implements a lower bound estimation of a Bermudan Swaption value, based on the regression apporach by Longstaff and Schwartz (2001).
+ */
 public class SimpleLowerBoundEstimation extends AbstractSimpleBoundEstimation
 		implements RegressionBasisFunctionsProvider {
 
@@ -23,6 +27,9 @@ public class SimpleLowerBoundEstimation extends AbstractSimpleBoundEstimation
 	RandomVariable triggerValues;
 	RegressionBasisFunctionsProvider regressionBasisFunctionsProvider;
 
+	/**
+	 * @param basisFunctionType choice of special basis functions to be used
+	 */
 	public SimpleLowerBoundEstimation(BasisFunctionType basisFunctionType) {
 
 		if (basisFunctionType == BasisFunctionType.ForwardRates)
@@ -32,19 +39,19 @@ public class SimpleLowerBoundEstimation extends AbstractSimpleBoundEstimation
 
 	}
 
+	/**
+	 * Generates value estimator with default basis functions
+	 */
 	public SimpleLowerBoundEstimation() {
 
 	}
 
-	@Override
-	public RandomVariable getTriggerValues() {
-		return triggerValues;
-	}
+	
+	
 
-	public void setTriggerValues(RandomVariableDifferentiableAAD triggerValues) {
-		this.triggerValues = triggerValues;
-	}
-
+	/* (non-Javadoc)
+	 * @see drafts.AbstractSimpleBoundEstimation#calculateTriggerValues(int, double, net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel)
+	 */
 	@Override
 	protected RandomVariable calculateTriggerValues(int period, double fixingDate,
 			LIBORModelMonteCarloSimulationModel model) throws CalculationException {
@@ -95,6 +102,9 @@ public class SimpleLowerBoundEstimation extends AbstractSimpleBoundEstimation
 		return condExpEstimator;
 	}
 
+	/* (non-Javadoc)
+	 * @see drafts.AbstractSimpleBoundEstimation#getBasisFunctions(double, net.finmath.montecarlo.MonteCarloSimulationModel)
+	 */
 	@Override
 	public RandomVariable[] getBasisFunctions(double evaluationTime, MonteCarloSimulationModel model)
 			throws CalculationException {
@@ -161,6 +171,15 @@ public class SimpleLowerBoundEstimation extends AbstractSimpleBoundEstimation
 	 * Some popular variants to create regression basis functions
 	 */
 
+	/**
+	 * @param evaluationTime The evaluation time \( t \) at which the basis function
+	 *                       should be observed.
+	 * @param model          The Monte-Carlo model used to derive the basis
+	 *                       function.
+	 * @return An \( \mathcal{F}_{t} \)-measurable random variable, basis functions using swap rate estimation
+	 * @throws CalculationException Thrown if derivation of the basis function
+	 *                              fails.
+	 */
 	public RegressionBasisFunctionsProvider getBasisFunctionsProviderWithSwapRates() {
 		return new RegressionBasisFunctionsProvider() {
 			@Override
@@ -215,7 +234,15 @@ public class SimpleLowerBoundEstimation extends AbstractSimpleBoundEstimation
 			}
 		};
 	}
-
+	/**
+	 * @param evaluationTime The evaluation time \( t \) at which the basis function
+	 *                       should be observed.
+	 * @param model          The Monte-Carlo model used to derive the basis
+	 *                       function.
+	 * @return An \( \mathcal{F}_{t} \)-measurable random variable, basis functions using forward rates and a cross.
+	 * @throws CalculationException Thrown if derivation of the basis function
+	 *                              fails.
+	 */
 	public RegressionBasisFunctionsProvider getBasisFunctionsProviderWithForwardRates() {
 		return new RegressionBasisFunctionsProvider() {
 			@Override
@@ -306,13 +333,22 @@ public class SimpleLowerBoundEstimation extends AbstractSimpleBoundEstimation
 
 	}
 
-	// some getters
-	@Override
+	// some getters and setters
+	
+	public RandomVariable getTriggerValues() {
+		return triggerValues;
+	}
+
+	public void setTriggerValues(RandomVariableDifferentiableAAD triggerValues) {
+		this.triggerValues = triggerValues;
+	}
+	
+	
 	public RandomVariable[] getCacheValuesOfUnderlying() {
 		return cacheValuesOfUnderlying;
 	}
 
-	@Override
+	
 	public RandomVariable[] getCacheConditionalExpectations() {
 		return cacheConditionalExpectations;
 	}

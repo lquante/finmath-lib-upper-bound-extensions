@@ -74,8 +74,10 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 			// exerciseDate
 			RandomVariable libor = ((RandomVariableDifferentiableAAD) model.getLIBOR(fixingDate, fixingDate,
 					fixingDate + periodLength)).getCloneIndependent();
+			// store liborIDs for use in automatic differentiation methods 
 			Long liborID = ((RandomVariableDifferentiable) libor).getID();
 			liborIDs.put(fixingDate, liborID);
+			// calculate payoff
 			RandomVariable payoff = libor.sub(swaprate).mult(periodLength).mult(notional);
 
 			// Apply discounting and Monte-Carlo probabilities
@@ -89,7 +91,7 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 				continuationValue = continuationValue.add(payoff); // cancelable
 			}
 			// Calculate the exercise criteria (exercise if the following trigger is
-			// negative)
+			// negative)- trigger values calculated by specified method
 			if (this.bermudanOption.getIsPeriodStartDateExerciseDate()[period]) {
 				triggerValues = calculateTriggerValues(period, fixingDate, model);
 			}

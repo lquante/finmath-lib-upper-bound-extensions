@@ -22,7 +22,7 @@ public abstract class AbstractLIBORBermudanOption extends AbstractLIBORMonteCarl
 	 * @param isPeriodStartDateExerciseDate Boolean vector, true if this period is
 	 *                                      exercise period
 	 * @param fixingDates                   Array of fixing dates
-	 * @param periodLengths                 Array of period lenghts
+	 * @param periodLengths                 Array of period lengths
 	 * @param paymentDates                  Array of payment dates
 	 * @param periodNotionals               Array of notionals
 	 * @param isCallable                    True if the option is callable,
@@ -43,9 +43,12 @@ public abstract class AbstractLIBORBermudanOption extends AbstractLIBORMonteCarl
 	@Override
 	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationModel model)
 			throws CalculationException {
-		// TODO Auto-generated method stub
-		return null;
+		
+		throw(new CalculationException("The general valuation of Bermudan options is not yet implemented."));
+		
+		
 	}
+	
 
 	@Override
 	public Map<String, Object> getValues(double evaluationTime, LIBORModelMonteCarloSimulationModel model)

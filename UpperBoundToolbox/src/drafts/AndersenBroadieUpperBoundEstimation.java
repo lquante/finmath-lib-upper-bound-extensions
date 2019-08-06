@@ -28,7 +28,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	SimplestExerciseStrategy exerciseStrategy;
 	private int numberOfSubsimulationsStepA;
 	private int numberOfSubsimulationsStepB;
-	
+
 
 	/**
 	 * @param AbstractSimpleBoundEstimation lowerBoundMethod The lower bound method
@@ -46,11 +46,13 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	@Override
 	protected double calculateDeltaZero(int period, LIBORModelMonteCarloSimulationModel model,
 			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
-			throws CalculationException {
+					throws CalculationException {
 		int numberOfSimulations = cacheOptionValues[0].getRealizations().length;
 
 		double sumOfDeltas = 0;
 		double delta0 = 0;
+
+		// pathwise calculation, as for every path depending on the exercise indicator step A or step B requires a different model (with the starting values of the path) and product
 		for (int path = 0; path < numberOfSimulations; path++) {
 
 			// initialize martingale as lower bound value for period 0 and 1.
@@ -70,7 +72,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 
 			for (int forwardPeriod = 2 + period; forwardPeriod < numberOfForwardPeriods; forwardPeriod++) {
 				// initialize values for subsimulation
-				int forwardPeriodOption = forwardPeriod + startingShift;
+				int forwardPeriodOption = forwardPeriod + startingShift; // shifting if swaption starts in later period
 				double simulationTime = model.getTime(forwardPeriodOption);
 				double discountedExerciseValue = 0;
 				double discountedFutureExerciseValue = 0;
@@ -78,7 +80,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 				// check trigger values for each path of the main simulation:
 				if (triggerValues[forwardPeriod].get(path) >= 0) // case 2a
 				{
-					// create model for subsimulations
+					// create model for subsimulation
 					LIBORModelMonteCarloSimulationModel modelStepA = createSubsimulationModel(model,
 							forwardPeriodOption, path, numberOfSubsimulationsStepA);
 
@@ -96,20 +98,22 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 				} else // case 2b
 				{
 					// create model terminating as soon as triggerValues[path+i] >=0 for i>=1
+					// determine termination period:
 					int terminationPeriod;
 					for (terminationPeriod = forwardPeriod; (triggerValues[terminationPeriod]
 							.get(path) < 0); terminationPeriod++) {
 						if (terminationPeriod == numberOfForwardPeriods-1)
 							break;
 					}
-
+					// shift termination period to fit option periods:
+					terminationPeriod+= startingShift;
 					double terminationTime = model.getTime(terminationPeriod);
 					// calculate discounted option value:
 
 					discountedExerciseValue = cacheUnderlying[forwardPeriod].get(path);
 
 					// create model for subsimulations
-					if (forwardPeriodOption+2 < terminationPeriod) {
+					if (forwardPeriodOption+2< terminationPeriod) {
 						LIBORModelMonteCarloSimulationModel modelStepB = createSubsimulationModelTerminating(model,
 								forwardPeriodOption, terminationPeriod, path, numberOfSubsimulationsStepB);
 
@@ -119,20 +123,17 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 								.getCloneWithModifiedStartingPeriod(simulationTime);
 						bermudanB = bermudanB.getCloneWithModifiedFinalPeriod(terminationTime);
 						bermudanB = bermudanB.getBermudanSwaptionWithChangedValuationMethod(lowerBoundMethodB);
-
+						// calculate discount factor
 						double forwardOptionTime = modelStepB.getTime(1);
-						RandomVariable discountFactor = model.getRandomVariableForConstant(0);
-
-						// check if forwardPeriod<termination period
-						if (forwardPeriodOption+2< terminationPeriod) {
-							discountFactor = modelStepB.getNumeraire(forwardOptionTime)
-									.div(modelStepB.getMonteCarloWeights(1));
-							RandomVariable valueOptionB = bermudanB.getValue(forwardOptionTime, modelStepB);
-							discountedFutureExerciseValue = valueOptionB.div(discountFactor).getAverage();
-						}
-					}
+						RandomVariable discountFactor = modelStepB.getNumeraire(forwardOptionTime)
+								.div(modelStepB.getMonteCarloWeights(1));
+						// calculate discounted option value
+						RandomVariable valueOptionB = bermudanB.getValue(forwardOptionTime, modelStepB);
+						discountedFutureExerciseValue = valueOptionB.div(discountFactor).getAverage();						}
 				}
 
+
+				// determine previous exercise value for martingale calculation
 				int previousExerciseIndicator;
 				if (triggerValues[martingaleIndex - 1].get(path) >= 0)
 					previousExerciseIndicator = 1;
@@ -141,7 +142,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 				double previousExerciseValue = cacheUnderlying[forwardPeriod - 1].get(path);
 				martingale = martingaleCache.get(martingaleIndex - 1)
 						- (cacheOptionValues[martingaleIndex - 1].get(path)) + discountedExerciseValue
-						- discountedFutureExerciseValue - previousExerciseIndicator * previousExerciseValue;
+						-  previousExerciseIndicator * (discountedFutureExerciseValue+previousExerciseValue);
 				martingaleCache.add(martingale);
 				martingaleIndex += 1;
 
@@ -188,7 +189,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 						numberOfShortendTimes)/* fixings of the forward */,
 				forwardArray, /* forwards */
 				model.getLiborPeriodDiscretization().getTimeStep(startingPeriod) /* period lengths */
-		);
+				);
 
 		DiscountCurveFromForwardCurve discountCurve = new DiscountCurveFromForwardCurve(forwardCurve);
 		// create new model
@@ -196,7 +197,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 		 * Create a volatility structure v[i][j] = sigma_j(t_i)
 		 */
 		double[][] volatility = new double[shortenedLiborDiscretization
-				.getNumberOfTimeSteps()][shortenedLiborDiscretization.getNumberOfTimeSteps()];
+		                                   .getNumberOfTimeSteps()][shortenedLiborDiscretization.getNumberOfTimeSteps()];
 		for (int timeIndex = 0; timeIndex < volatility.length; timeIndex++) {
 			for (int liborIndex = 0; liborIndex < volatility[timeIndex].length; liborIndex++) {
 				// Create a very simple volatility model here
