@@ -7,9 +7,9 @@ import net.finmath.exception.CalculationException;
 public class TestRunnerForSSH {
 	
 	// main parameters to adjust for simulation
-	static int numberOfPaths = 100000;
-	static int numberOfSubsimulationPathsA = 10000;
-	static int numberOfSubsimulationPathsB = 10000;
+	static int numberOfPaths = 10000;
+	static int numberOfSubsimulationPathsA = 1000;
+	static int numberOfSubsimulationPathsB = 1000;
 	
 	static int numberOfPeriods = 10;
 	@Test

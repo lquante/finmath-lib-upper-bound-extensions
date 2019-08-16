@@ -113,22 +113,24 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 					discountedExerciseValue = cacheUnderlying[forwardPeriod].get(path);
 
 					// create model for subsimulations
-					if (forwardPeriodOption+2< terminationPeriod) {
+					if (forwardPeriodOption+2< terminationPeriod && forwardPeriodOption < numberOfForwardPeriods-1) {
 						LIBORModelMonteCarloSimulationModel modelStepB = createSubsimulationModelTerminating(model,
 								forwardPeriodOption, terminationPeriod, path, numberOfSubsimulationsStepB);
 
 						// create option
+						double forwardOptionTime = modelStepB.getTime(1);
 						BermudanSwaptionValueEstimatorInterface lowerBoundMethodB = new SimpleLowerBoundEstimation();
 						BermudanSwaption bermudanB = this.bermudanOption
-								.getCloneWithModifiedStartingPeriod(simulationTime);
+								.getCloneWithModifiedStartingPeriod(forwardOptionTime);
 						bermudanB = bermudanB.getCloneWithModifiedFinalPeriod(terminationTime);
 						bermudanB = bermudanB.getBermudanSwaptionWithChangedValuationMethod(lowerBoundMethodB);
-						// calculate discount factor
-						double forwardOptionTime = modelStepB.getTime(1);
-						RandomVariable discountFactor = modelStepB.getNumeraire(forwardOptionTime)
-								.div(modelStepB.getMonteCarloWeights(1));
+						
 						// calculate discounted option value
 						RandomVariable valueOptionB = bermudanB.getValue(forwardOptionTime, modelStepB);
+						// calculate discount factor
+						
+						RandomVariable discountFactor = modelStepB.getNumeraire(forwardOptionTime)
+								.div(modelStepB.getMonteCarloWeights(forwardOptionTime));
 						discountedFutureExerciseValue = valueOptionB.div(discountFactor).getAverage();						}
 				}
 
