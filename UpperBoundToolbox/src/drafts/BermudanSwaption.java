@@ -40,22 +40,16 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 	// method to produce clone with same properties, but later starting date:
 
 	/**
-	 * @param startingDate timepoint at which the option should restart (first
-	 *                     implementation: only from the exisiting fixing dates)
+	 * @param startingIndex  only from the exisiting fixing dates)
 	 * @return
 	 */
-	public BermudanSwaption getCloneWithModifiedStartingPeriod(double startingDate) {
-		int startingIndex = 0;
-		// determine first fixing date to be used
-		for (int i = 0; i < this.getFixingDates().length; i++) {
-			if (this.getFixingDates()[i] == startingDate) {
-				startingIndex = i;
-				break;
-			}
-		}
-
+	public BermudanSwaption getCloneWithModifiedStartingPeriod(int startingIndex) {
+		
+		if (startingIndex >=this.getFixingDates().length)
+			startingIndex=this.getFixingDates().length-1;
+		
 		// shorten all arrays for a new BermudanSwaption
-
+		
 		double[] adjustedFixingDates = Arrays.copyOfRange(this.getFixingDates(), startingIndex,
 				this.getFixingDates().length);
 		boolean[] adjustedIsPeriodStartDateExerciseDate = Arrays.copyOfRange(this.getIsPeriodStartDateExerciseDate(),
@@ -75,29 +69,27 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 
 	}
 
-	public BermudanSwaption getCloneWithModifiedFinalPeriod(double finalDate) {
-		int finalIndex = this.getPaymentDates().length - 1;
-		// determine last payment date to be used
-		for (int i = this.getPaymentDates().length - 1; i >= 0; i--) {
-			if (this.getPaymentDates()[i] == finalDate) {
-				finalIndex = i + 1;
-				break;
-			}
-		}
-
+	public BermudanSwaption getCloneWithModifiedStartingAndFinalPeriod(int startingIndex,int finalIndex) {
+		
+		if (startingIndex >=this.getFixingDates().length)
+			startingIndex=this.getFixingDates().length-1;
+		finalIndex+=1;
+		if (finalIndex >=this.getFixingDates().length)
+			finalIndex=this.getFixingDates().length;
+		
 		// shorten all arrays for a new BermudanSwaption
 
-		double[] adjustedFixingDates = Arrays.copyOfRange(this.getFixingDates(), 0, finalIndex);
-		boolean[] adjustedIsPeriodStartDateExerciseDate = Arrays.copyOfRange(this.getIsPeriodStartDateExerciseDate(), 0,
+		double[] adjustedFixingDates = Arrays.copyOfRange(this.getFixingDates(), startingIndex, finalIndex);
+		boolean[] adjustedIsPeriodStartDateExerciseDate = Arrays.copyOfRange(this.getIsPeriodStartDateExerciseDate(), startingIndex,
 				finalIndex);
-		double[] adjustedPeriodLengths = Arrays.copyOfRange(this.getPeriodLengths(), 0, finalIndex);
-		double[] adjustedPaymentDates = Arrays.copyOfRange(this.getPaymentDates(), 0, finalIndex);
-		double[] adjustedPeriodNotionals = Arrays.copyOfRange(this.getPeriodNotionals(), 0, finalIndex);
-		double[] adjustedSwapRates = Arrays.copyOfRange(this.getSwaprates(), 0, finalIndex);
-		BermudanSwaptionValueEstimatorInterface unadjustedValuationMethod = this.getValuationMethod();
+		double[] adjustedPeriodLengths = Arrays.copyOfRange(this.getPeriodLengths(), startingIndex, finalIndex);
+		double[] adjustedPaymentDates = Arrays.copyOfRange(this.getPaymentDates(), startingIndex, finalIndex);
+		double[] adjustedPeriodNotionals = Arrays.copyOfRange(this.getPeriodNotionals(), startingIndex, finalIndex);
+		double[] adjustedSwapRates = Arrays.copyOfRange(this.getSwaprates(), startingIndex, finalIndex);
+		
 		return new BermudanSwaption(this.getCurrency(), adjustedIsPeriodStartDateExerciseDate, adjustedFixingDates,
 				adjustedPeriodLengths, adjustedPaymentDates, adjustedPeriodNotionals, this.isCallable(),
-				adjustedSwapRates, unadjustedValuationMethod);
+				adjustedSwapRates, this.getValuationMethod());
 
 	}
 

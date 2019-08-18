@@ -73,7 +73,7 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 			// Get random variables - note that this is the rate at simulation time =
 			// exerciseDate
 			RandomVariable libor = ((RandomVariableDifferentiableAAD) model.getLIBOR(fixingDate, fixingDate,
-					fixingDate + periodLength)).getCloneIndependent();
+					paymentDate)).getCloneIndependent();
 			// store liborIDs for use in automatic differentiation methods 
 			Long liborID = ((RandomVariableDifferentiable) libor).getID();
 			liborIDs.put(fixingDate, liborID);
