@@ -1,4 +1,4 @@
-package drafts;
+package bermudanSwaptionFramework;
 
 import java.util.HashMap;
 import java.util.Map;

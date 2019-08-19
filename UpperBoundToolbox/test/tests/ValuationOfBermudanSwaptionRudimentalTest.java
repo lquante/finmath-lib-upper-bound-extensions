@@ -14,10 +14,8 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
-import drafts.AndersenBroadieUpperBoundEstimation;
-import drafts.BermudanSwaption;
-import drafts.DeltaHedgingUpperBound;
-import drafts.SimpleLowerBoundEstimation;
+import bermudanSwaptionFramework.BermudanSwaption;
+import lowerBoundMethods.SimpleLowerBoundEstimation;
 import net.finmath.exception.CalculationException;
 import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
@@ -35,6 +33,8 @@ import net.finmath.montecarlo.interestrate.models.covariance.LIBORCovarianceMode
 import net.finmath.montecarlo.interestrate.models.covariance.LIBORVolatilityModelFromGivenMatrix;
 import net.finmath.montecarlo.process.EulerSchemeFromProcessModel;
 import net.finmath.time.TimeDiscretizationFromArray;
+import upperBoundMethods.AndersenBroadieUpperBoundEstimation;
+import upperBoundMethods.DeltaHedgingUpperBound;
 
 /**
  * This class tests the LIBOR market model and products.

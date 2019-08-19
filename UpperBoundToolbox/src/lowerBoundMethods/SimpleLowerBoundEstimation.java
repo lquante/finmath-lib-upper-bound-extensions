@@ -1,8 +1,9 @@
-package drafts;
+package lowerBoundMethods;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import bermudanSwaptionFramework.SimplestExerciseStrategy;
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.MonteCarloSimulationModel;
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;

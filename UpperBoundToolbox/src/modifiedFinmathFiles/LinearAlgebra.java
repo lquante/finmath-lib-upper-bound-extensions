@@ -4,7 +4,7 @@
  * Created on 23.02.2004
  */
 
-package modifiedFinmathFilesProcess;
+package modifiedFinmathFiles;
 
 import java.util.ArrayList;
 import java.util.Collections;

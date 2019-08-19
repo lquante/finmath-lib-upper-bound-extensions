@@ -1,4 +1,4 @@
-package drafts;
+package bermudanSwaptionFramework;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;

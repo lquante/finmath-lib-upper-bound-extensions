@@ -1,4 +1,4 @@
-package drafts;
+package bermudanSwaptionFramework;
 
 import net.finmath.stochastic.RandomVariable;
 

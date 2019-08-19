@@ -8,13 +8,13 @@ import java.util.Locale;
 import org.junit.Assert;
 import org.junit.Test;
 
-import drafts.AndersenBroadieUpperBoundEstimation;
-import drafts.BermudanSwaption;
-import drafts.BermudanSwaptionValueEstimatorInterface;
-import drafts.DeltaHedgingUpperBound;
-import drafts.SimpleLowerBoundEstimation;
+import bermudanSwaptionFramework.BermudanSwaption;
+import bermudanSwaptionFramework.BermudanSwaptionValueEstimatorInterface;
+import lowerBoundMethods.SimpleLowerBoundEstimation;
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
+import upperBoundMethods.AndersenBroadieUpperBoundEstimation;
+import upperBoundMethods.DeltaHedgingUpperBound;
 
 public class TestValuationMethods {
 	// formatter for values

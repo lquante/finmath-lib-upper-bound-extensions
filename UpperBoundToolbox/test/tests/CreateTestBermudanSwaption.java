@@ -7,9 +7,9 @@ package tests;
 
 import org.junit.Test;
 
-import drafts.BermudanSwaption;
-import drafts.BermudanSwaptionValueEstimatorInterface;
-import drafts.SimpleLowerBoundEstimation;
+import bermudanSwaptionFramework.BermudanSwaption;
+import bermudanSwaptionFramework.BermudanSwaptionValueEstimatorInterface;
+import lowerBoundMethods.SimpleLowerBoundEstimation;
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 

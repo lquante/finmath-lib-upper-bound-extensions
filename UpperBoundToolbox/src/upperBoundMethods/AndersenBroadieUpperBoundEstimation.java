@@ -1,8 +1,11 @@
-package drafts;
+package upperBoundMethods;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import bermudanSwaptionFramework.BermudanSwaption;
+import bermudanSwaptionFramework.SimplestExerciseStrategy;
+import lowerBoundMethods.AbstractSimpleBoundEstimation;
 import net.finmath.exception.CalculationException;
 import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurve;
