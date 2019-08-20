@@ -14,6 +14,11 @@ import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.ConditionalExpectationEstimator;
 import net.finmath.stochastic.RandomVariable;
 
+/**
+ * Implements the upper bound estimation using AAD delta estimations as proposed by Joshi and Tang 2014
+ * @author Lennart Quante
+ *
+ */
 public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 
 	LIBORModelMonteCarloSimulationModel model;

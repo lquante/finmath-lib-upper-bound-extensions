@@ -2,6 +2,11 @@ package bermudanSwaptionFramework;
 
 import net.finmath.stochastic.RandomVariable;
 
+/**
+  Implementing the basic exercise strategy: Exercise if the exercise value is bigger or equal the continuation value.
+ * @author Lennart Quante
+ * @version 1.0
+ */
 public class SimplestExerciseStrategy implements ExerciseStrategyInterface {
 
 	/** 

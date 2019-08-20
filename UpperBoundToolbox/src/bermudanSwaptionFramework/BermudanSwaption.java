@@ -6,6 +6,11 @@ import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 
+/**
+ * Implements a Bermudan swaption product..
+ * @author Lennart Quante
+ * @version 1.0
+ */
 public class BermudanSwaption extends AbstractLIBORBermudanOption {
 
 	private final double[] swaprates; // Vector of strikes

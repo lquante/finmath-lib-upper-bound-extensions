@@ -12,7 +12,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.junit.Assert;
-import org.junit.Test;
 
 import bermudanSwaptionFramework.BermudanSwaption;
 import lowerBoundMethods.SimpleLowerBoundEstimation;

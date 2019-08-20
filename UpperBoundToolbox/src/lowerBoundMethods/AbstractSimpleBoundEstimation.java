@@ -13,6 +13,11 @@ import net.finmath.stochastic.Scalar;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Provides a framework for a lower bound estimation, based on a specific method to calculate the exercise trigger values.
+ * @author Lennart Quante
+ * @version 1.0
+ */
 public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionValueEstimatorInterface {
 
 	RegressionBasisFunctionsProvider regressionBasisFunctionsProvider;

@@ -10,12 +10,14 @@ import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 
 /**
- * @author Lennart Quante
- * @version 1.0
- * This class implements the framework of an upper bound estimation 
- * based on an abstract estimation of a martingale process following the primal-dual approach.
+ *  This class provides the framework for an upper bound estimation 
+ *   based on an abstract estimation of a martingale process following the primal-dual approach.
  * 
  * The abstract method calculateMartingaleApproximation needs to be implemented depending on the specific method.
+ * @author Lennart Quante
+ * @version 1.0
+ *
+
  */
 public abstract class AbstractUpperBoundEstimation implements BermudanSwaptionValueEstimatorInterface {
 	// basis functions used in the lower bound

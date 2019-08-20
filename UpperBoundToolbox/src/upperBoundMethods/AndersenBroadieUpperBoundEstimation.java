@@ -27,9 +27,10 @@ import net.finmath.time.TimeDiscretization;
 import net.finmath.time.TimeDiscretizationFromArray;
 
 /**
+ * Implements the Andersen-Broadie method of martingale approximation using sub-simulations.
  * @author Lennart Quante
  * @version 1.0
- * Implements the Andersen-Broadie method of martingale approximation using sub-simulations.
+ * 
  */
 public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstimation {
 	AbstractSimpleBoundEstimation lowerBoundMethod;

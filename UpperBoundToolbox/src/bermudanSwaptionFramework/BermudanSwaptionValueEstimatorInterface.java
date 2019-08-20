@@ -4,10 +4,15 @@ import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 
+/**
+ * Interface to enable valuation using different methods through this interface.
+ * @author Lennart Quante
+ *
+ */
 public interface BermudanSwaptionValueEstimatorInterface {
 
 	/**
-	 * Return the value estimation of a given Bermudan option using a given
+	 * Returns the value estimation of a given Bermudan option using a given
 	 * LIBORMonteCarloModel and evaluation time. The definition of the valuation
 	 * method is part of the object implementing this interface.
 	 *

@@ -8,6 +8,11 @@ import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
 import net.finmath.stochastic.RandomVariable;
 
+/**
+ * Provides a basic object for Bermudan interest rate options.
+ * @author Lennart Quante
+ * @version 1.0
+ */
 public abstract class AbstractLIBORBermudanOption extends AbstractLIBORMonteCarloProduct {
 
 	private final boolean[] isPeriodStartDateExerciseDate; // Exercise date
