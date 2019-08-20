@@ -19,7 +19,7 @@ import net.finmath.stochastic.RandomVariable;
  * @author (c)Christian P. Fries, modified by Lennart Quante
  *	
  */
-public class SimpleLowerBoundEstimation extends AbstractSimpleBoundEstimation
+public class SimpleLowerBoundEstimation extends AbstractLowerBoundEstimation
 		implements RegressionBasisFunctionsProvider {
 
 	public enum BasisFunctionType {
@@ -47,10 +47,6 @@ public class SimpleLowerBoundEstimation extends AbstractSimpleBoundEstimation
 	public SimpleLowerBoundEstimation() {
 
 	}
-
-	
-	
-
 	/* (non-Javadoc)
 	 * @see drafts.AbstractSimpleBoundEstimation#calculateTriggerValues(int, double, net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel)
 	 */
@@ -61,20 +57,18 @@ public class SimpleLowerBoundEstimation extends AbstractSimpleBoundEstimation
 		SimplestExerciseStrategy exerciseStrategy = new SimplestExerciseStrategy();
 		// Calculate the exercise criteria (exercise if the following trigger is
 		// negative)
-		RandomVariable triggerValuesDiscounted = exerciseStrategy.getExerciseIndicators(continuationValue,
+		RandomVariable triggerValuesDiscounted = exerciseStrategy.getTriggerValues (continuationValue,
 				exerciseValue);
 
 		// Remove foresight through condition expectation
 		ConditionalExpectationEstimator conditionalExpectationOperator = getConditionalExpectationEstimator(fixingDate,
 				model);
 
-		// Calculate conditional expectation. Note that no discounting (numeraire
-		// division) is required!
+		// Calculate conditional expectation. Note that no discounting (numeraire division) is required!
 		triggerValues = triggerValuesDiscounted.getConditionalExpectation(conditionalExpectationOperator);
 
 		// cache values of underlying (including perfect foresight) and E[U_i|F_T_i-1]
-		// as needed in 18.24
-
+		
 		cacheValuesOfUnderlying[period] = exerciseValue;
 		cacheConditionalExpectations[period] = triggerValuesDiscounted.add(exerciseValue).cache();
 

@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 import bermudanSwaptionFramework.BermudanSwaption;
 import bermudanSwaptionFramework.SimplestExerciseStrategy;
-import lowerBoundMethods.AbstractSimpleBoundEstimation;
+import lowerBoundMethods.AbstractLowerBoundEstimation;
 import net.finmath.exception.CalculationException;
 import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurve;
@@ -33,20 +33,20 @@ import net.finmath.time.TimeDiscretizationFromArray;
  * 
  */
 public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstimation {
-	AbstractSimpleBoundEstimation lowerBoundMethod;
+	AbstractLowerBoundEstimation lowerBoundMethod;
 	SimplestExerciseStrategy exerciseStrategy;
 	private int pathsSubsimulationsStepA;
 	private int pathsSubsimulationsStepB;
 
 
 	/**
-	 * @param AbstractSimpleBoundEstimation lowerBoundMethod The lower bound method
+	 * @param AbstractLowerBoundEstimation lowerBoundMethod The lower bound method
 	 *                                      to be used as a basis for the upper
 	 *                                      bound.
 	 * @param pathsSubsimulationsStepA number of subsimulation Paths in case 2a of A-B algorithm, i.e. if exercise at current simulation time.
 	 * @param pathsSubsimulationsStepB number of subsimulation Paths in case 2b of A-B algorithm, i.e. if no exercise at current simulation time.                                     
 	 */
-	public AndersenBroadieUpperBoundEstimation(AbstractSimpleBoundEstimation lowerBoundMethod,
+	public AndersenBroadieUpperBoundEstimation(AbstractLowerBoundEstimation lowerBoundMethod,
 			int pathsSubsimulationsStepA, int pathsSubsimulationsStepB) {
 		super(lowerBoundMethod);
 		this.pathsSubsimulationsStepA = pathsSubsimulationsStepA;

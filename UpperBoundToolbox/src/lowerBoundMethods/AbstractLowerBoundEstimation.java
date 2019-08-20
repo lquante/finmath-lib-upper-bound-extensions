@@ -14,11 +14,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Provides a framework for a lower bound estimation, based on a specific method to calculate the exercise trigger values.
+ * Provides a framework for a lower bound estimation via the backward algorithm, based on a specific method to calculate the exercise trigger values.
  * @author Lennart Quante
  * @version 1.0
  */
-public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionValueEstimatorInterface {
+public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionValueEstimatorInterface {
 
 	RegressionBasisFunctionsProvider regressionBasisFunctionsProvider;
 	BermudanSwaption bermudanOption;
@@ -58,15 +58,15 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 		triggerValues = triggerValuesInput;
 
 		// initialize cache arrays for calculation
-		int numberOfPeriods = bermudanOption.getFixingDates().length - 1;
-		cacheOptionValues = new RandomVariable[numberOfPeriods + 1];
-		cacheValuesOfUnderlying = new RandomVariable[numberOfPeriods + 1];
-		cacheConditionalExpectations = new RandomVariable[numberOfPeriods + 1];
-		cacheTriggerValues = new RandomVariable[numberOfPeriods + 1];
+		int numberOfFixingDates = bermudanOption.getFixingDates().length - 1;
+		cacheOptionValues = new RandomVariable[numberOfFixingDates + 1];
+		cacheValuesOfUnderlying = new RandomVariable[numberOfFixingDates + 1];
+		cacheConditionalExpectations = new RandomVariable[numberOfFixingDates + 1];
+		cacheTriggerValues = new RandomVariable[numberOfFixingDates + 1];
 
-		exerciseProbablities = new double[numberOfPeriods + 1];
+		exerciseProbablities = new double[numberOfFixingDates + 1];
 		// Loop backward over the swap periods
-		for (int period = numberOfPeriods; period >= 0; period--) {
+		for (int period = numberOfFixingDates; period >= 0; period--) {
 			double fixingDate = bermudanOption.getFixingDates()[period];
 			double exerciseDate = fixingDate;
 			double periodLength = bermudanOption.getPeriodLengths()[period];
@@ -118,9 +118,7 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 		RandomVariable numeraireAtZero = model.getNumeraire(evaluationTime);
 		RandomVariable monteCarloProbabilitiesAtZero = model.getMonteCarloWeights(evaluationTime);
 
-		optionValue = optionValue.mult(numeraireAtZero).div(monteCarloProbabilitiesAtZero);
-
-		return optionValue;
+		return optionValue.mult(numeraireAtZero).div(monteCarloProbabilitiesAtZero);
 	}
 
 	protected abstract RandomVariable calculateTriggerValues(int period, double fixingDate,

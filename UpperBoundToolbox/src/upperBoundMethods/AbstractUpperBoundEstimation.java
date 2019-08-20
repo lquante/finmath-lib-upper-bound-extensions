@@ -2,7 +2,7 @@ package upperBoundMethods;
 
 import bermudanSwaptionFramework.BermudanSwaption;
 import bermudanSwaptionFramework.BermudanSwaptionValueEstimatorInterface;
-import lowerBoundMethods.AbstractSimpleBoundEstimation;
+import lowerBoundMethods.AbstractLowerBoundEstimation;
 import lowerBoundMethods.SimpleLowerBoundEstimation;
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.conditionalexpectation.RegressionBasisFunctionsProvider;
@@ -34,13 +34,13 @@ public abstract class AbstractUpperBoundEstimation implements BermudanSwaptionVa
 	RandomVariable optionValue;
 	RandomVariable triggerValues;
 
-	private AbstractSimpleBoundEstimation lowerBoundMethod;
+	private AbstractLowerBoundEstimation lowerBoundMethod;
 	RandomVariable[] cacheTriggerValues;
 
 	/**
 	 * @param lowerBoundMethod The lower bound method to be used as input for the upper bound approximation.
 	 */
-	public AbstractUpperBoundEstimation(AbstractSimpleBoundEstimation lowerBoundMethod) {
+	public AbstractUpperBoundEstimation(AbstractLowerBoundEstimation lowerBoundMethod) {
 
 		this.lowerBoundMethod = lowerBoundMethod;
 	}

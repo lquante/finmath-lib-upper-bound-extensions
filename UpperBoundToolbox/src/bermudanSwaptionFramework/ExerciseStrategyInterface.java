@@ -20,5 +20,5 @@ public interface ExerciseStrategyInterface {
 	 * @return The random variable of exercise indicators
 	 */
 
-	RandomVariable getExerciseIndicators(RandomVariable continuationValue, RandomVariable exerciseValue);
+	RandomVariable getTriggerValues(RandomVariable continuationValue, RandomVariable exerciseValue);
 }
