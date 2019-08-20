@@ -1,10 +1,5 @@
 package lowerBoundMethods;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import bermudanSwaptionFramework.BermudanSwaption;
 import bermudanSwaptionFramework.BermudanSwaptionValueEstimatorInterface;
 import net.finmath.exception.CalculationException;
@@ -15,6 +10,8 @@ import net.finmath.montecarlo.conditionalexpectation.RegressionBasisFunctionsPro
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 import net.finmath.stochastic.Scalar;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionValueEstimatorInterface {
 
@@ -23,7 +20,7 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 	RandomVariable[] cacheOptionValues;
 	RandomVariable[] cacheValuesOfUnderlying;
 	RandomVariable[] cacheConditionalExpectations;
-	Map<Double,Long> liborIDs;
+	Map<Double, Long> liborIDs;
 
 	RandomVariable continuationValue;
 	RandomVariable exerciseValue;
@@ -76,7 +73,7 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 			// exerciseDate
 			RandomVariable libor = ((RandomVariableDifferentiableAAD) model.getLIBOR(fixingDate, fixingDate,
 					paymentDate)).getCloneIndependent();
-			// store liborIDs for use in automatic differentiation methods 
+			// store liborIDs for use in automatic differentiation methods
 			Long liborID = ((RandomVariableDifferentiable) libor).getID();
 			liborIDs.put(fixingDate, liborID);
 			// calculate payoff
@@ -101,7 +98,7 @@ public abstract class AbstractSimpleBoundEstimation implements BermudanSwaptionV
 
 			optionValue = triggerValues.choose(exerciseValue, continuationValue).floor(0);
 
-			exerciseTime = triggerValues.choose(new Scalar(exerciseDate),exerciseTime);
+			exerciseTime = triggerValues.choose(new Scalar(exerciseDate), exerciseTime);
 
 			// caching for upper bound methods
 			cacheTriggerValues[period] = triggerValues;

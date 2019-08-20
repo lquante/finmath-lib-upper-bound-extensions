@@ -9,6 +9,14 @@ import net.finmath.montecarlo.conditionalexpectation.RegressionBasisFunctionsPro
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 
+/**
+ * @author Lennart Quante
+ * @version 1.0
+ * This class implements the framework of an upper bound estimation 
+ * based on an abstract estimation of a martingale process following the primal-dual approach.
+ * 
+ * The abstract method calculateMartingaleApproximation needs to be implemented depending on the specific method.
+ */
 public abstract class AbstractUpperBoundEstimation implements BermudanSwaptionValueEstimatorInterface {
 	// basis functions used in the lower bound
 	protected RegressionBasisFunctionsProvider regressionBasisFunctionsProvider;
@@ -27,6 +35,9 @@ public abstract class AbstractUpperBoundEstimation implements BermudanSwaptionVa
 	private AbstractSimpleBoundEstimation lowerBoundMethod;
 	RandomVariable[] cacheTriggerValues;
 
+	/**
+	 * @param lowerBoundMethod The lower bound method to be used as input for the upper bound approximation.
+	 */
 	public AbstractUpperBoundEstimation(AbstractSimpleBoundEstimation lowerBoundMethod) {
 
 		this.lowerBoundMethod = lowerBoundMethod;
@@ -65,23 +76,35 @@ public abstract class AbstractUpperBoundEstimation implements BermudanSwaptionVa
 		RandomVariable[] cacheTriggers = lowerBoundMethod.getCacheTriggerValues();
 		// calculate upper bound
 
-		double deltaZeroApproximation = calculateDeltaZero(evaluationTimeIndex, model, cacheUnderlying, cacheOptionValues,
+		double martingaleApproximation = calculateMartingaleApproximation(evaluationTimeIndex, model, cacheUnderlying, cacheOptionValues,
 				cacheTriggers);
 		// Note that values is a relative price - no numeraire division is required
 		RandomVariable numeraireAtEvaluationTime = model.getNumeraire(evaluationTime);
 		RandomVariable monteCarloProbabilitiesAtEvaluationTime = model.getMonteCarloWeights(evaluationTime);
 		RandomVariable discountFactor = numeraireAtEvaluationTime.div(monteCarloProbabilitiesAtEvaluationTime);
 
-		optionValue = cacheOptionValues[evaluationTimeIndex].mult(discountFactor).add(deltaZeroApproximation);
+		optionValue = cacheOptionValues[evaluationTimeIndex].mult(discountFactor).add(martingaleApproximation);
 
 		return optionValue;
 
 	}
 
-	protected abstract double calculateDeltaZero(int period, LIBORModelMonteCarloSimulationModel model,
+	/**
+	 * This method needs to be specified to estimate the martingale component of the upper bound estimation using the following parameters:
+	 * @param period period of the evaluation time in the model time discretization
+	 * @param model  the LIBORModelMonteCarloSimulationModel to be used
+	 * @param cacheUnderlying The cached exercise values from the lower bound method.
+	 * @param cacheOptionValues The cached option values from the lower bound method.
+	 * @param triggerValues The cached trigger values from the lower bound method.
+	 * @return The Monte Carlo average of the martingale component, as a double.
+	 * @throws CalculationException
+	 */
+	protected abstract double calculateMartingaleApproximation(int period, LIBORModelMonteCarloSimulationModel model,
 			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
 			throws CalculationException;
 
+	// some getters
+	
 	public RandomVariable[] getCacheValuesOfUnderlying() {
 		return (cacheValuesOfUnderlying);
 	}

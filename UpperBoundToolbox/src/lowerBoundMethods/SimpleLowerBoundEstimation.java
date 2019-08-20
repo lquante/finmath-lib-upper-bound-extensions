@@ -16,7 +16,7 @@ import net.finmath.stochastic.RandomVariable;
 
 /**
  * @author (c)Christian P. Fries, modified by Lennart Quante
- *	Implements a lower bound estimation of a Bermudan Swaption value, based on the regression apporach by Longstaff and Schwartz (2001).
+ *	Implements a lower bound estimation of a Bermudan Swaption value, based on the regression approach by Longstaff and Schwartz (2001).
  */
 public class SimpleLowerBoundEstimation extends AbstractSimpleBoundEstimation
 		implements RegressionBasisFunctionsProvider {

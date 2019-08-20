@@ -24,6 +24,10 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 		this.valuationMethod = valuationMethod;
 	}
 
+	/**
+	 * @param valuationMethod
+	 * @return A Bermudan Swaption with the input valuation method
+	 */
 	public BermudanSwaption getBermudanSwaptionWithChangedValuationMethod(
 			BermudanSwaptionValueEstimatorInterface valuationMethod) {
 		return new BermudanSwaption(this.getCurrency(), this.getIsPeriodStartDateExerciseDate(), this.getFixingDates(),
@@ -31,6 +35,9 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 				this.swaprates, valuationMethod);
 	}
 
+	/**
+	 * Method using the valuation method specified in the option.
+	 */
 	@Override
 	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationModel model)
 			throws CalculationException {
@@ -40,8 +47,9 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 	// method to produce clone with same properties, but later starting date:
 
 	/**
-	 * @param startingIndex  only from the exisiting fixing dates)
-	 * @return
+	 * Shifts the first exercise date of an Bermudan swaption needed e.g. in method of Andersen-Broadie.
+	 * @param startingIndex  first fixing date to be kept
+	 * @return Clone of the BermudanSwaption with the input starting index.
 	 */
 	public BermudanSwaption getCloneWithModifiedStartingPeriod(int startingIndex) {
 		
@@ -69,6 +77,12 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 
 	}
 
+	/**
+	 *   Shifts the first and final exercise date of an Bermudan swaption needed e.g. in method of Andersen-Broadie.
+	 * @param startingIndex  first fixing date to be kept
+	 * @param finalIndex last fixing date to be kept (inclusive)
+	 * @return Clone of the BermudanSwaption with the input starting index and final incex.
+	 */
 	public BermudanSwaption getCloneWithModifiedStartingAndFinalPeriod(int startingIndex,int finalIndex) {
 		
 		if (startingIndex >=this.getFixingDates().length)
@@ -95,14 +109,24 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 
 	// some getters
 
+	/**
+	 * @return the valuation method of the Bermudan swaption
+	 */
 	public BermudanSwaptionValueEstimatorInterface getValuationMethod() {
 		return valuationMethod;
 	}
 
+	/**
+	 * Changes the valuation method of an Bermudan swaption without generating a new object.
+	 * @param valuationMethod
+	 */
 	public void setValuationMethod(BermudanSwaptionValueEstimatorInterface valuationMethod) {
 		this.valuationMethod = valuationMethod;
 	}
 
+	/**
+	 * @return The swaprates of the Bermudan swaption.
+	 */
 	public double[] getSwaprates() {
 		return swaprates;
 

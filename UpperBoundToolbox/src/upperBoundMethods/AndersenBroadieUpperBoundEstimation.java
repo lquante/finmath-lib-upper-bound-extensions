@@ -26,28 +26,35 @@ import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.TimeDiscretization;
 import net.finmath.time.TimeDiscretizationFromArray;
 
+/**
+ * @author Lennart Quante
+ * @version 1.0
+ * Implements the Andersen-Broadie method of martingale approximation using sub-simulations.
+ */
 public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstimation {
 	AbstractSimpleBoundEstimation lowerBoundMethod;
 	SimplestExerciseStrategy exerciseStrategy;
-	private int numberOfSubsimulationsStepA;
-	private int numberOfSubsimulationsStepB;
+	private int pathsSubsimulationsStepA;
+	private int pathsSubsimulationsStepB;
 
 
 	/**
 	 * @param AbstractSimpleBoundEstimation lowerBoundMethod The lower bound method
 	 *                                      to be used as a basis for the upper
 	 *                                      bound.
+	 * @param pathsSubsimulationsStepA number of subsimulation Paths in case 2a of A-B algorithm, i.e. if exercise at current simulation time.
+	 * @param pathsSubsimulationsStepB number of subsimulation Paths in case 2b of A-B algorithm, i.e. if no exercise at current simulation time.                                     
 	 */
 	public AndersenBroadieUpperBoundEstimation(AbstractSimpleBoundEstimation lowerBoundMethod,
-			int numberOfSubsimulationsStepA, int numberOfSubsimulationsStepB) {
+			int pathsSubsimulationsStepA, int pathsSubsimulationsStepB) {
 		super(lowerBoundMethod);
-		this.numberOfSubsimulationsStepA = numberOfSubsimulationsStepA;
-		this.numberOfSubsimulationsStepB = numberOfSubsimulationsStepB;
+		this.pathsSubsimulationsStepA = pathsSubsimulationsStepA;
+		this.pathsSubsimulationsStepB = pathsSubsimulationsStepB;
 		exerciseStrategy = new SimplestExerciseStrategy();
 	}
 
 	@Override
-	protected double calculateDeltaZero(int evaluationPeriod, LIBORModelMonteCarloSimulationModel model,
+	protected double calculateMartingaleApproximation(int evaluationPeriod, LIBORModelMonteCarloSimulationModel model,
 			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
 					throws CalculationException {
 		int numberOfSimulations = cacheOptionValues[0].getRealizations().length;
@@ -87,7 +94,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 				{
 					// create model for subsimulation
 					LIBORModelMonteCarloSimulationModel modelStepA = createSubsimulationModel(model,
-							modelPeriod, path, numberOfSubsimulationsStepA);
+							modelPeriod, path, pathsSubsimulationsStepA);
 
 					// create option
 					BermudanSwaption bermudanA = this.bermudanOption.getCloneWithModifiedStartingPeriod(modelPeriod);
@@ -118,7 +125,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 					// create model for subsimulations (only if not only degenerated swaptions, thus at least 2 additional periods necessary)
 					if (optionPeriod+2< terminationPeriod && terminationPeriod < numberOfOptionPeriods) {
 						LIBORModelMonteCarloSimulationModel modelStepB = createSubsimulationModelTerminating(model,
-								modelPeriod, terminationPeriod+startingShift, path, numberOfSubsimulationsStepB);
+								modelPeriod, terminationPeriod+startingShift, path, pathsSubsimulationsStepB);
 
 						// create option
 						double futureExerciseTime = modelStepB.getTime(1);
@@ -163,13 +170,32 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 
 	}
 
+	/**
+	 * This method creates a new model with a changed starting date and initializes the LIBOR rates according to the given path of the input model.
+	 * @param  LIBORModelMonteCarloSimulationModel to be used
+	 * @param startingPeriod Period when the new model should start.
+	 * @param path Path of the original model to be used for starting values.
+	 * @param pathsOfSubsimulation Number of paths for the new model.
+	 * @return The model to be used for subsimulations.
+	 * @throws CalculationException
+	 */
 	private LIBORModelMonteCarloSimulationModel createSubsimulationModel(LIBORModelMonteCarloSimulationModel model,
-			int period, int path, int numberOfSubsimulations) throws CalculationException {
+			int startingPeriod, int path, int pathsOfSubsimulation) throws CalculationException {
 		int numberOfTimes = model.getLiborPeriodDiscretization().getNumberOfTimes();
 
-		return createSubsimulationModelTerminating(model, period, numberOfTimes, path, numberOfSubsimulations);
+		return createSubsimulationModelTerminating(model, startingPeriod, numberOfTimes, path, pathsOfSubsimulation);
 	}
 
+	/**
+	 * This method creates a new model with a changed starting and final date and initializes the LIBOR rates according to the given path of the input model.
+	 * @param  LIBORModelMonteCarloSimulationModel to be used
+	 * @param startingPeriod Period when the new model should start.
+	 * @parm endPeriod Period when the new model should stop (inclusive).
+	 * @param path Path of the original model to be used for starting values.
+	 * @param pathsOfSubsimulation Number of paths for the new model.
+	 * @return The model to be used for subsimulations.
+	 * @throws CalculationException
+	 */
 	public LIBORModelMonteCarloSimulationModel createSubsimulationModelTerminating(
 			LIBORModelMonteCarloSimulationModel model, int startingPeriod, int endPeriod, int component,
 			int numberOfSubsimulationPaths) throws CalculationException {
