@@ -19,6 +19,7 @@ public interface BermudanSwaptionValueEstimatorInterface {
 	 * @param bermudanOption Given Bermudan option.
 	 * @param model          The used LIBOR model.
 	 * @param evaluationTime The time on which the evaluation should be performed.
+	 * @param triggerValues to be used as externaly given
 	 * @return The value random variable of <code>bermudanOption</code>.
 	 * @throws CalculationException
 	 */

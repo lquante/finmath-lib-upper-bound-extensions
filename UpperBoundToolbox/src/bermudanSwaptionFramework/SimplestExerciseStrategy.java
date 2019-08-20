@@ -11,7 +11,7 @@ public class SimplestExerciseStrategy implements ExerciseStrategyInterface {
 
 	/** 
 	 * Implements the simplest exercise strategy: Exercise if the exercise value is bigger or equal the continuation value.
-	 * @see drafts.ExerciseStrategyInterface#getTriggerValues(net.finmath.stochastic.RandomVariable, net.finmath.stochastic.RandomVariable)
+	 * @see bermudanSwaptionFramework.ExerciseStrategyInterface#getTriggerValues(net.finmath.stochastic.RandomVariable, net.finmath.stochastic.RandomVariable)
 	 */
 	@Override
 	public RandomVariable getTriggerValues(RandomVariable continuationValue, RandomVariable exerciseValue) {

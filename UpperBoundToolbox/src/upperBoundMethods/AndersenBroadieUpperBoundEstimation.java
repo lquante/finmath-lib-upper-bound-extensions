@@ -40,7 +40,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 
 
 	/**
-	 * @param AbstractLowerBoundEstimation lowerBoundMethod The lower bound method
+	 * @param lowerBoundMethod The lower bound method
 	 *                                      to be used as a basis for the upper
 	 *                                      bound.
 	 * @param pathsSubsimulationsStepA number of subsimulation Paths in case 2a of A-B algorithm, i.e. if exercise at current simulation time.
@@ -189,17 +189,17 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 
 	/**
 	 * This method creates a new model with a changed starting and final date and initializes the LIBOR rates according to the given path of the input model.
-	 * @param  LIBORModelMonteCarloSimulationModel to be used
+	 * @param model LIBORModelMonteCarloSimulationModel to be used.
 	 * @param startingPeriod Period when the new model should start.
-	 * @parm endPeriod Period when the new model should stop (inclusive).
+	 * @param endPeriod Period when the new model should stop (inclusive).
 	 * @param path Path of the original model to be used for starting values.
 	 * @param pathsOfSubsimulation Number of paths for the new model.
 	 * @return The model to be used for subsimulations.
 	 * @throws CalculationException
 	 */
 	public LIBORModelMonteCarloSimulationModel createSubsimulationModelTerminating(
-			LIBORModelMonteCarloSimulationModel model, int startingPeriod, int endPeriod, int component,
-			int numberOfSubsimulationPaths) throws CalculationException {
+			LIBORModelMonteCarloSimulationModel model, int startingPeriod, int endPeriod, int path,
+			int pathsOfSubsimulation) throws CalculationException {
 
 		TimeDiscretization shortenedLiborDiscretization = new TimeDiscretizationFromArray(Arrays
 				.copyOfRange(model.getLiborPeriodDiscretization().getAsDoubleArray(), startingPeriod, endPeriod + 1));
@@ -209,7 +209,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 		RandomVariable[] forwardCurveRandomVariable = model.getLIBORs(startingPeriod);
 		double[] forwardArray = new double[numberOfShortendTimes - 1];
 		for (int i = 0; i < numberOfShortendTimes - 1; i++)
-			forwardArray[i] = forwardCurveRandomVariable[i].get(component);
+			forwardArray[i] = forwardCurveRandomVariable[i].get(path);
 
 		ForwardCurve forwardCurve = ForwardCurveInterpolation.createForwardCurveFromForwards(
 				"forwardCurve" /* name of the curve */,
@@ -270,7 +270,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 		// adjust process
 		int seed=1234;
 		BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(shortenedLiborDiscretization,
-				model.getBrownianMotion().getNumberOfFactors(), numberOfSubsimulationPaths, seed+component);
+				model.getBrownianMotion().getNumberOfFactors(), pathsOfSubsimulation, seed+path);
 		MonteCarloProcess process = new EulerSchemeFromProcessModel(brownianMotion,
 				EulerSchemeFromProcessModel.Scheme.PREDICTOR_CORRECTOR);
 

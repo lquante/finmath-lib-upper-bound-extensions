@@ -32,6 +32,7 @@ public abstract class AbstractLIBORBermudanOption extends AbstractLIBORMonteCarl
 	 * @param periodNotionals               Array of notionals
 	 * @param isCallable                    True if the option is callable,
 	 *                                      otherwise cancelable
+	 * @param currency The optional currency name of the option as a string.                                     
 	 */
 
 	public AbstractLIBORBermudanOption(String currency, boolean[] isPeriodStartDateExerciseDate, double[] fixingDates,

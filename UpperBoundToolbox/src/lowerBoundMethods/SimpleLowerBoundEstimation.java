@@ -120,7 +120,7 @@ public class SimpleLowerBoundEstimation extends AbstractLowerBoundEstimation
 	 * @throws CalculationException Thrown if derivation of the basis function
 	 *                              fails.
 	 */
-	public RandomVariable[] getBasisFunctions(double fixingDate, LIBORModelMonteCarloSimulationModel model)
+	public RandomVariable[] getBasisFunctions(double evaluationTime, LIBORModelMonteCarloSimulationModel model)
 			throws CalculationException {
 
 		ArrayList<RandomVariable> basisFunctions = new ArrayList<>();
@@ -130,7 +130,7 @@ public class SimpleLowerBoundEstimation extends AbstractLowerBoundEstimation
 		RandomVariable one = new RandomVariableFromDoubleArray(1.0);
 		basisFunctions.add(one);
 
-		int fixingDateIndex = Arrays.binarySearch(fixingDates, fixingDate);
+		int fixingDateIndex = Arrays.binarySearch(fixingDates, evaluationTime);
 		if (fixingDateIndex < 0) {
 			fixingDateIndex = -fixingDateIndex;
 		}
@@ -139,14 +139,14 @@ public class SimpleLowerBoundEstimation extends AbstractLowerBoundEstimation
 		}
 
 		// forward rate to the next period
-		RandomVariable rateShort = model.getLIBOR(fixingDate, fixingDate, paymentDates[fixingDateIndex]);
-		RandomVariable discountShort = rateShort.mult(paymentDates[fixingDateIndex] - fixingDate).add(1.0).invert();
+		RandomVariable rateShort = model.getLIBOR(evaluationTime, evaluationTime, paymentDates[fixingDateIndex]);
+		RandomVariable discountShort = rateShort.mult(paymentDates[fixingDateIndex] - evaluationTime).add(1.0).invert();
 		basisFunctions.add(discountShort);
 		basisFunctions.add(discountShort.pow(2.0));
 		// basisFunctions.add(rateShort.pow(3.0));
 
 		// forward rate to the end of the product
-		RandomVariable rateLong = model.getLIBOR(fixingDate, fixingDates[fixingDateIndex],
+		RandomVariable rateLong = model.getLIBOR(evaluationTime, fixingDates[fixingDateIndex],
 				paymentDates[paymentDates.length - 1]);
 		RandomVariable discountLong = rateLong
 				.mult(paymentDates[paymentDates.length - 1] - fixingDates[fixingDateIndex]).add(1.0).invert();
@@ -155,7 +155,7 @@ public class SimpleLowerBoundEstimation extends AbstractLowerBoundEstimation
 		// basisFunctions.add(rateLong.pow(3.0));
 
 		// Numeraire
-		RandomVariable numeraire = model.getNumeraire(fixingDate).invert();
+		RandomVariable numeraire = model.getNumeraire(evaluationTime).invert();
 		basisFunctions.add(numeraire);
 		// basisFunctions.add(numeraire.pow(2.0));
 		// basisFunctions.add(numeraire.pow(3.0));
@@ -168,13 +168,9 @@ public class SimpleLowerBoundEstimation extends AbstractLowerBoundEstimation
 	 */
 
 	/**
-	 * @param evaluationTime The evaluation time \( t \) at which the basis function
-	 *                       should be observed.
-	 * @param model          The Monte-Carlo model used to derive the basis
-	 *                       function.
+	 *
 	 * @return An \( \mathcal{F}_{t} \)-measurable random variable, basis functions using swap rate estimation
-	 * @throws CalculationException Thrown if derivation of the basis function
-	 *                              fails.
+	 * 
 	 */
 	public RegressionBasisFunctionsProvider getBasisFunctionsProviderWithSwapRates() {
 		return new RegressionBasisFunctionsProvider() {
@@ -231,13 +227,9 @@ public class SimpleLowerBoundEstimation extends AbstractLowerBoundEstimation
 		};
 	}
 	/**
-	 * @param evaluationTime The evaluation time \( t \) at which the basis function
-	 *                       should be observed.
-	 * @param model          The Monte-Carlo model used to derive the basis
-	 *                       function.
+
 	 * @return An \( \mathcal{F}_{t} \)-measurable random variable, basis functions using forward rates and a cross.
-	 * @throws CalculationException Thrown if derivation of the basis function
-	 *                              fails.
+	
 	 */
 	public RegressionBasisFunctionsProvider getBasisFunctionsProviderWithForwardRates() {
 		return new RegressionBasisFunctionsProvider() {

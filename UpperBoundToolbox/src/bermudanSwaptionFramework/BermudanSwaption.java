@@ -30,7 +30,7 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 	}
 
 	/**
-	 * @param valuationMethod
+	 * @param valuationMethod The valuation method to be used.
 	 * @return A Bermudan Swaption with the input valuation method
 	 */
 	public BermudanSwaption getBermudanSwaptionWithChangedValuationMethod(
@@ -108,7 +108,7 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 
 	/**
 	 * Changes the valuation method of an Bermudan swaption without generating a new object.
-	 * @param valuationMethod
+	 * @param valuationMethod The valuation method to be used.
 	 */
 	public void setValuationMethod(BermudanSwaptionValueEstimatorInterface valuationMethod) {
 		this.valuationMethod = valuationMethod;
