@@ -74,4 +74,5 @@
 
 
 	
+	<description>Tools to enhannce finmath-libs evaluation of Bermudan interest rate options using a primal-dual algorithm.</description>
 </project>
