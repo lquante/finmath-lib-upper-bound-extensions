@@ -27,15 +27,25 @@ public class TestValuationMethods {
 			new DecimalFormatSymbols(Locale.ENGLISH));
 
 	// set tolerance for difference between upper and lower bound methods
-	static double tolerance = 0.01; // should be tightened pending further improvement
+	static double tolerance = 0.1; // should be tightened pending further improvement
+	
+	private static int numberOfPaths = 1000;
 	static int numberOfExercisePeriods = 10;
-	private static int numberOfSubsimulationsStepA=1000;
-	private static int numberOfSubsimulationsStepB=1000;
+	private static int numberOfSubsimulationsStepA=100;
+	private static int numberOfSubsimulationsStepB=100;
 	
 
 	@Test
 	public void testSwaptionValuationMethods() throws CalculationException
 	{
+		// set parameters
+		CreateTestModel.setNumberOfPaths(numberOfPaths);
+		CreateTestBermudanSwaption.setNumberOfExercisePeriods(numberOfExercisePeriods);
+		TestValuationMethods.setNumberOfSubsimulationsStepA(numberOfSubsimulationsStepA);
+		TestValuationMethods.setNumberOfSubsimulationsStepB(numberOfSubsimulationsStepB);
+		
+		
+		
 		executePrintSwaptionValuationMethods();
 	}
 	
