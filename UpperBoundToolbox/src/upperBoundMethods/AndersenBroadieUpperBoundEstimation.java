@@ -101,14 +101,14 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 					BermudanSwaption bermudanA = this.bermudanOption.getCloneWithModifiedStartingPeriod(modelPeriod);
 					// calculate discount factor
 					RandomVariable discountFactor = modelStepA.getNumeraire(currentFixingDate)
-							.div(modelStepA.getMonteCarloWeights(1));
+							.div(modelStepA.getMonteCarloWeights(currentFixingDate));
 					// calculate discounted option value
 					discountedExerciseValue = bermudanA.getValue(currentFixingDate, modelStepA).div(discountFactor)
 							.getAverage();
 
 				} else // case 2b
 				{
-					// create model terminating as soon as triggerValues[path+i] >=0 for i>=1
+					// create model terminating as soon as triggerValues[path+i] >=0 for i>=optionPeriod+1
 					// determine termination period:
 					int terminationPeriod= optionPeriod+1;
 					while(terminationPeriod < numberOfOptionPeriods-1)
@@ -202,21 +202,22 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 			int pathsOfSubsimulation) throws CalculationException {
 
 		TimeDiscretization shortenedLiborDiscretization = new TimeDiscretizationFromArray(Arrays
-				.copyOfRange(model.getLiborPeriodDiscretization().getAsDoubleArray(), startingPeriod, endPeriod + 1));
+				.copyOfRange(model.getLiborPeriodDiscretization().getAsDoubleArray(), startingPeriod, endPeriod+1));
 		int numberOfShortendTimes = shortenedLiborDiscretization.getNumberOfTimes();
 		// get initial LIBOR rates as forward curve starting point
 		// get inital value of forward curve
 		RandomVariable[] forwardCurveRandomVariable = model.getLIBORs(startingPeriod);
-		double[] forwardArray = new double[numberOfShortendTimes - 1];
-		for (int i = 0; i < numberOfShortendTimes - 1; i++)
+		double[] forwardArray = new double[numberOfShortendTimes];
+		double periodLength = model.getLiborPeriodDiscretization().getTimeStep(startingPeriod);
+		for (int i = 0; i < numberOfShortendTimes; i++)
 			forwardArray[i] = forwardCurveRandomVariable[i].get(path);
 
 		ForwardCurve forwardCurve = ForwardCurveInterpolation.createForwardCurveFromForwards(
 				"forwardCurve" /* name of the curve */,
-				Arrays.copyOfRange(shortenedLiborDiscretization.getAsDoubleArray(), 1,
-						numberOfShortendTimes)/* fixings of the forward */,
+				shortenedLiborDiscretization.getAsDoubleArray()
+						/* fixings of the forward */,
 				forwardArray, /* forwards */
-				model.getLiborPeriodDiscretization().getTimeStep(startingPeriod) /* period lengths */
+				periodLength /* period lengths */
 				);
 
 		DiscountCurveFromForwardCurve discountCurve = new DiscountCurveFromForwardCurve(forwardCurve);
@@ -224,8 +225,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 		/*
 		 * Create a volatility structure v[i][j] = sigma_j(t_i)
 		 */
-		double[][] volatility = new double[shortenedLiborDiscretization
-		                                   .getNumberOfTimeSteps()][shortenedLiborDiscretization.getNumberOfTimeSteps()];
+		double[][] volatility = new double[numberOfShortendTimes][numberOfShortendTimes];
 		for (int timeIndex = 0; timeIndex < volatility.length; timeIndex++) {
 			for (int liborIndex = 0; liborIndex < volatility[timeIndex].length; liborIndex++) {
 				// Create a very simple volatility model here
@@ -260,12 +260,12 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 		LIBORCovarianceModelFromVolatilityAndCorrelation covarianceModel = new LIBORCovarianceModelFromVolatilityAndCorrelation(
 				shortenedLiborDiscretization, shortenedLiborDiscretization, volatilityModel, correlationModel);
 
-		// create aad random variable factory
-		RandomVariableDifferentiableAADFactory randomVariableFactory = new RandomVariableDifferentiableAADFactory(
-				new RandomVariableFactory());
+		// create AAD random variable factory
+				RandomVariableDifferentiableAADFactory randomVariableFactory = new RandomVariableDifferentiableAADFactory(
+						new RandomVariableFactory());
 
-		LIBORMarketModel liborMarketModel = new LIBORMarketModelFromCovarianceModel(shortenedLiborDiscretization, null,
-				forwardCurve, discountCurve, randomVariableFactory, covarianceModel, null, null);
+				LIBORMarketModel liborMarketModel = new LIBORMarketModelFromCovarianceModel(shortenedLiborDiscretization, null,
+						forwardCurve, discountCurve, randomVariableFactory, covarianceModel, null, null);
 
 		// adjust process
 		int seed=1234;
