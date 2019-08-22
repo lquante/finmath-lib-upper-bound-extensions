@@ -15,11 +15,11 @@ import net.finmath.stochastic.ConditionalExpectationEstimator;
 import net.finmath.stochastic.RandomVariable;
 
 /**
- * Implements a lower bound estimation of a Bermudan Swaption value which caches values for reuse in upper bound methods.
+ * Implements a lower bound estimation of a Bermudan Swaption value without caching.
  * @author (c)Christian P. Fries, modified by Lennart Quante
  *	
  */
-public class SimpleLowerBoundEstimation extends AbstractLowerBoundEstimationInputForUpperBound
+public class SimpleLowerBoundEstimationWithoutCaching extends AbstractLowerBoundEstimationWithoutCaching
 		implements RegressionBasisFunctionsProvider {
 
 	public enum BasisFunctionType {
@@ -32,7 +32,7 @@ public class SimpleLowerBoundEstimation extends AbstractLowerBoundEstimationInpu
 	/**
 	 * @param basisFunctionType choice of special basis functions to be used
 	 */
-	public SimpleLowerBoundEstimation(BasisFunctionType basisFunctionType) {
+	public SimpleLowerBoundEstimationWithoutCaching(BasisFunctionType basisFunctionType) {
 
 		if (basisFunctionType == BasisFunctionType.ForwardRates)
 			setRegressionBasisFunctionsProvider(getBasisFunctionsProviderWithSwapRates());
@@ -44,7 +44,7 @@ public class SimpleLowerBoundEstimation extends AbstractLowerBoundEstimationInpu
 	/**
 	 * Generates value estimator with default basis functions
 	 */
-	public SimpleLowerBoundEstimation() {
+	public SimpleLowerBoundEstimationWithoutCaching() {
 
 	}
 	/* (non-Javadoc)
@@ -66,15 +66,13 @@ public class SimpleLowerBoundEstimation extends AbstractLowerBoundEstimationInpu
 
 		// Calculate conditional expectation. Note that no discounting (numeraire division) is required!
 		triggerValues = triggerValuesDiscounted.getConditionalExpectation(conditionalExpectationOperator);
-
-		// cache values of underlying (including perfect foresight) and E[U_i|F_T_i-1]
 		
-		cacheValuesOfUnderlying[period] = exerciseValue;
 		return triggerValues;
 
 	}
 
 	
+
 	// some getters and setters
 	
 	public RandomVariable getTriggerValues() {
@@ -85,10 +83,5 @@ public class SimpleLowerBoundEstimation extends AbstractLowerBoundEstimationInpu
 		this.triggerValues = triggerValues;
 	}
 	
-	
-	public RandomVariable[] getCacheValuesOfUnderlying() {
-		return cacheValuesOfUnderlying;
-	}
 
-	
 }

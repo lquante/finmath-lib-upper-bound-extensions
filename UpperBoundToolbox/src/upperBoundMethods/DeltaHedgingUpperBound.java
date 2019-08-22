@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
-import lowerBoundMethods.AbstractLowerBoundEstimation;
+import lowerBoundMethods.AbstractLowerBoundEstimationInputForUpperBound;
+import lowerBoundMethods.AbstractLowerBoundEstimationWithoutCaching;
 import lowerBoundMethods.SimpleLowerBoundEstimation;
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;
@@ -23,7 +24,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 
 	LIBORModelMonteCarloSimulationModel model;
 
-	public DeltaHedgingUpperBound(AbstractLowerBoundEstimation lowerBoundMethod) {
+	public DeltaHedgingUpperBound(AbstractLowerBoundEstimationInputForUpperBound lowerBoundMethod) {
 		super(lowerBoundMethod);
 
 	}

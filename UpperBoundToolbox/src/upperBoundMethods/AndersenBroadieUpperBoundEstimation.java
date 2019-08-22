@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import bermudanSwaptionFramework.BermudanSwaption;
+import bermudanSwaptionFramework.BermudanSwaptionValueEstimatorInterface;
 import bermudanSwaptionFramework.SimplestExerciseStrategy;
-import lowerBoundMethods.AbstractLowerBoundEstimation;
+import lowerBoundMethods.AbstractLowerBoundEstimationInputForUpperBound;
+import lowerBoundMethods.AbstractLowerBoundEstimationWithoutCaching;
+import lowerBoundMethods.SimpleLowerBoundEstimationWithoutCaching;
 import net.finmath.exception.CalculationException;
 import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurve;
@@ -33,7 +36,7 @@ import net.finmath.time.TimeDiscretizationFromArray;
  * 
  */
 public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstimation {
-	AbstractLowerBoundEstimation lowerBoundMethod;
+	AbstractLowerBoundEstimationWithoutCaching lowerBoundMethod;
 	SimplestExerciseStrategy exerciseStrategy;
 	private int pathsSubsimulationsStepA;
 	private int pathsSubsimulationsStepB;
@@ -46,7 +49,8 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	 * @param pathsSubsimulationsStepA number of subsimulation Paths in case 2a of A-B algorithm, i.e. if exercise at current simulation time.
 	 * @param pathsSubsimulationsStepB number of subsimulation Paths in case 2b of A-B algorithm, i.e. if no exercise at current simulation time.                                     
 	 */
-	public AndersenBroadieUpperBoundEstimation(AbstractLowerBoundEstimation lowerBoundMethod,
+	
+	public AndersenBroadieUpperBoundEstimation(AbstractLowerBoundEstimationInputForUpperBound lowerBoundMethod,
 			int pathsSubsimulationsStepA, int pathsSubsimulationsStepB) {
 		super(lowerBoundMethod);
 		this.pathsSubsimulationsStepA = pathsSubsimulationsStepA;
@@ -97,8 +101,10 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 					LIBORModelMonteCarloSimulationModel modelStepA = createSubsimulationModel(model,
 							modelPeriod, path, pathsSubsimulationsStepA);
 
-					// create option
+					// create option with lower bound method without caching
+					BermudanSwaptionValueEstimatorInterface cachefreeLowerBound = new SimpleLowerBoundEstimationWithoutCaching();
 					BermudanSwaption bermudanA = this.bermudanOption.getCloneWithModifiedStartingPeriod(modelPeriod);
+					bermudanA.setValuationMethod(cachefreeLowerBound);
 					// calculate discount factor
 					RandomVariable discountFactor = modelStepA.getNumeraire(currentFixingDate)
 							.div(modelStepA.getMonteCarloWeights(currentFixingDate));
@@ -130,8 +136,12 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 
 						// create option
 						double futureExerciseTime = modelStepB.getTime(1);
+						
+						BermudanSwaptionValueEstimatorInterface cachefreeLowerBound = new SimpleLowerBoundEstimationWithoutCaching();
+					
 						BermudanSwaption bermudanB = this.bermudanOption
 							.getCloneWithModifiedStartingAndFinalPeriod(optionPeriod, terminationPeriod-1);
+						bermudanB.setValuationMethod(cachefreeLowerBound);	
 						// calculate discount factor
 						RandomVariable discountFactor = modelStepB.getNumeraire(futureExerciseTime)
 								.div(modelStepB.getMonteCarloWeights(futureExerciseTime));
