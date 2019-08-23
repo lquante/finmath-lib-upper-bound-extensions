@@ -15,6 +15,7 @@ import net.finmath.marketdata.model.curves.ForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
 import net.finmath.montecarlo.BrownianMotion;
 import net.finmath.montecarlo.RandomVariableFactory;
+import net.finmath.montecarlo.RandomVariableFromDoubleArray;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
@@ -64,24 +65,17 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 					throws CalculationException {
 		int numberOfSimulations = cacheOptionValues[0].getRealizations().length;
 
-		double sumOfDeltas = 0;
-		double delta0 = 0;
-
-		// pathwise calculation, as for every path depending on the exercise indicator step A or step B requires a different model (with the starting values of the path) and product
 		// determine number of martingale components to be estimated
 		int numberOfOptionPeriods = this.bermudanOption.getFixingDates().length;
 		double startingTimeBermudan = this.bermudanOption.getFixingDates()[0];
 		
 		
-		
-		for (int path = 0; path < numberOfSimulations; path++) {
-
 			// initialize martingale as lower bound value for period 0 and 1.
-			ArrayList<Double> martingaleCache = new ArrayList<Double>();
-			double martingale = cacheOptionValues[evaluationPeriod].get(path);
+			ArrayList<RandomVariable> martingaleCache = new ArrayList<RandomVariable>();
+			RandomVariable martingale = cacheOptionValues[evaluationPeriod];
 			martingaleCache.add(martingale);
 			if (evaluationPeriod + 1 < cacheOptionValues.length) {
-				martingale = cacheOptionValues[evaluationPeriod + 1].get(path);
+				martingale = cacheOptionValues[evaluationPeriod + 1];
 				martingaleCache.add(martingale);
 			}
 
@@ -92,9 +86,19 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 				 // shifting if swaption starts in later period
 				double currentFixingDate = this.bermudanOption.getFixingDates()[optionPeriod];
 				int modelPeriod = model.getTimeIndex(currentFixingDate);
-				double discountedExerciseValue = 0;
-				double discountedFutureExerciseValue = 0;
+				
 				int martingaleIndex = 2;
+				
+				//Arrays to store pathwise results to be transformed to RandomVariable
+				double [] discountedExerciseValueArray = new double[numberOfSimulations];
+				double [] discountedFutureExerciseValueArray = new double[numberOfSimulations]; 
+				double [] previousExerciseIndicatorArray = new double[numberOfSimulations];
+				// pathwise calculation, as for every path depending on the exercise indicator step A or step B requires a different model (with the starting values of the path) and product
+			
+		
+				for (int path = 0; path < numberOfSimulations; path++) {	
+				
+					
 				// check trigger values for each path of the main simulation:
 				if (triggerValues[optionPeriod].get(path) >= 0) // case 2a
 				{
@@ -110,7 +114,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 					RandomVariable discountFactor = modelStepA.getNumeraire(currentFixingDate)
 							.div(modelStepA.getMonteCarloWeights(currentFixingDate));
 					// calculate discounted option value
-					discountedExerciseValue = bermudanA.getValue(currentFixingDate, modelStepA).div(discountFactor)
+					discountedExerciseValueArray[path] = bermudanA.getValue(currentFixingDate, modelStepA).div(discountFactor)
 							.getAverage();
 
 				} else // case 2b
@@ -125,15 +129,16 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 						else
 							break;
 					}
-					double terminationTime = this.bermudanOption.getFixingDates()[terminationPeriod]+startingTimeBermudan;
+					double terminationTime = this.bermudanOption.getFixingDates()[terminationPeriod];
+					int terminationTimeIndex = model.getTimeIndex(terminationTime);
 					// calculate discounted option value:
-
-					discountedExerciseValue = cacheUnderlying[optionPeriod].get(path);
+					
+					discountedExerciseValueArray[path] = cacheUnderlying[optionPeriod].get(path);
 
 					// create model for subsimulations (only if not only degenerated swaptions, thus at least 2 additional periods necessary)
 					if (optionPeriod+2< terminationPeriod && terminationPeriod < numberOfOptionPeriods) {
 						LIBORModelMonteCarloSimulationModel modelStepB = createSubsimulationModelTerminating(model,
-								modelPeriod, model.getTimeIndex(terminationTime), path, pathsSubsimulationsStepB);
+								modelPeriod,terminationTimeIndex, path, pathsSubsimulationsStepB);
 
 						// create option
 						double futureExerciseTime = modelStepB.getTime(1);
@@ -147,36 +152,41 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 						RandomVariable discountFactor = modelStepB.getNumeraire(futureExerciseTime)
 								.div(modelStepB.getMonteCarloWeights(futureExerciseTime));
 						// calculate discounted option value
-						discountedFutureExerciseValue = bermudanB.getValue(futureExerciseTime, modelStepB).div(discountFactor).getAverage();						}
+						discountedFutureExerciseValueArray[path] = bermudanB.getValue(futureExerciseTime, modelStepB).div(discountFactor).getAverage();						}
 				}
-
-
-				// determine previous exercise value for martingale calculation
-				int previousExerciseIndicator;
+				// determine previous exercise indicator for martingale calculation
+				
 				if (triggerValues[martingaleIndex - 1].get(path) >= 0)
-					previousExerciseIndicator = 1;
+					previousExerciseIndicatorArray[path] = 1;
 				else
-					previousExerciseIndicator = 0;
-				double previousExerciseValue = cacheUnderlying[optionPeriod - 1].get(path);
+					previousExerciseIndicatorArray[path] = 0;
+				}
+				
+				
+				RandomVariable discountedExerciseValue = new RandomVariableFromDoubleArray(currentFixingDate,discountedExerciseValueArray);
+				RandomVariable discountedFutureExerciseValue = new RandomVariableFromDoubleArray(currentFixingDate,discountedFutureExerciseValueArray);
+				RandomVariable previousExerciseIndicator = new RandomVariableFromDoubleArray(currentFixingDate,previousExerciseIndicatorArray);
+				
+				RandomVariable previousExerciseValue = cacheUnderlying[optionPeriod - 1];
 				
 				// calculate value of martingale extimation
 				martingale = martingaleCache.get(martingaleIndex - 1)
-						- (cacheOptionValues[martingaleIndex - 1].get(path)) + discountedExerciseValue
-						-  previousExerciseIndicator * (discountedFutureExerciseValue+previousExerciseValue);
+						.sub(cacheOptionValues[martingaleIndex - 1]).add(discountedExerciseValue)
+						.sub((discountedFutureExerciseValue.add(previousExerciseValue)).mult(previousExerciseIndicator));
 				martingaleCache.add(martingale);
 				martingaleIndex += 1;
 
 			}
-
+			RandomVariable delta0 = model.getRandomVariableForConstant(0);
 			// calculate the maximum using the estimated martingale for each remaining period
 			for (int optionPeriod = 0+evaluationPeriod; optionPeriod < numberOfOptionPeriods; optionPeriod++)
-				delta0 = Math.max(delta0,
-						cacheUnderlying[optionPeriod].get(path) - martingaleCache.get(optionPeriod));
-			sumOfDeltas += delta0;
+				delta0 = delta0.floor(
+						cacheUnderlying[optionPeriod].sub(martingaleCache.get(optionPeriod)));
+			
 
-		}
+		
 		// return average of the approximation of martingale:
-		return sumOfDeltas / numberOfSimulations;
+		return delta0.getAverage();
 
 		
 
