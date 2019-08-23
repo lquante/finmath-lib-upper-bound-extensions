@@ -29,16 +29,7 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 		this.valuationMethod = valuationMethod;
 	}
 
-	/**
-	 * @param valuationMethod The valuation method to be used.
-	 * @return A Bermudan Swaption with the input valuation method
-	 */
-	public BermudanSwaption getBermudanSwaptionWithChangedValuationMethod(
-			BermudanSwaptionValueEstimatorInterface valuationMethod) {
-		return new BermudanSwaption(this.getCurrency(), this.getIsPeriodStartDateExerciseDate(), this.getFixingDates(),
-				this.getPeriodLengths(), this.getPaymentDates(), this.getPeriodNotionals(), this.isCallable(),
-				this.swaprates, valuationMethod);
-	}
+	
 
 	/**
 	 * Method using the valuation method specified in the option.
@@ -49,7 +40,17 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 		return valuationMethod.getValueEstimation(this, evaluationTime, model, null);
 	}
 
-	// method to produce clone with same properties, but later starting date:
+	/**
+	 * Method to get a clone with another valuation method
+	 * @param valuationMethod The valuation method to be used.
+	 * @return A Bermudan Swaption with the input valuation method
+	 */
+	public BermudanSwaption getBermudanSwaptionWithChangedValuationMethod(
+			BermudanSwaptionValueEstimatorInterface valuationMethod) {
+		return new BermudanSwaption(this.getCurrency(), this.getIsPeriodStartDateExerciseDate(), this.getFixingDates(),
+				this.getPeriodLengths(), this.getPaymentDates(), this.getPeriodNotionals(), this.isCallable(),
+				this.swaprates, valuationMethod);
+	}
 
 	/**
 	 * Shifts the first exercise date of an Bermudan swaption needed e.g. in method of Andersen-Broadie.
@@ -83,19 +84,40 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 		
 		// shorten all arrays for a new BermudanSwaption
 
-		double[] adjustedFixingDates = Arrays.copyOfRange(this.getFixingDates(), startingIndex, finalIndex);
-		boolean[] adjustedIsPeriodStartDateExerciseDate = Arrays.copyOfRange(this.getIsPeriodStartDateExerciseDate(), startingIndex,
+		double[] adjustedFixingDates = copyDoubleArray(this.getFixingDates(), startingIndex, finalIndex);
+		boolean[] adjustedIsPeriodStartDateExerciseDate = copyBooleanArray(this.getIsPeriodStartDateExerciseDate(), startingIndex,
 				finalIndex);
-		double[] adjustedPeriodLengths = Arrays.copyOfRange(this.getPeriodLengths(), startingIndex, finalIndex);
-		double[] adjustedPaymentDates = Arrays.copyOfRange(this.getPaymentDates(), startingIndex, finalIndex);
-		double[] adjustedPeriodNotionals = Arrays.copyOfRange(this.getPeriodNotionals(), startingIndex, finalIndex);
-		double[] adjustedSwapRates = Arrays.copyOfRange(this.getSwaprates(), startingIndex, finalIndex);
+		
+		double[] adjustedPaymentDates = copyDoubleArray(this.getPaymentDates(), startingIndex, finalIndex);
+		double[] adjustedPeriodLengths = copyDoubleArray(this.getPeriodLengths(), startingIndex, finalIndex);
+		double[] adjustedPeriodNotionals = copyDoubleArray(this.getPeriodNotionals(), startingIndex, finalIndex);
+		double[] adjustedSwapRates = copyDoubleArray(this.getSwaprates(), startingIndex, finalIndex);
 		
 		return new BermudanSwaption(this.getCurrency(), adjustedIsPeriodStartDateExerciseDate, adjustedFixingDates,
 				adjustedPeriodLengths, adjustedPaymentDates, adjustedPeriodNotionals, this.isCallable(),
 				adjustedSwapRates, this.getValuationMethod());
 
 	}
+	
+	// methods to copy a part of an array using System.arraycopy
+	
+	double[] copyDoubleArray(double[] arrayToBeCopied,int startingIndex,int finalIndex)
+	{
+		double [] copiedArray = new double[finalIndex-startingIndex];
+		System.arraycopy(arrayToBeCopied, startingIndex, copiedArray,0, finalIndex-startingIndex);
+		return copiedArray;
+		
+	}
+	boolean[] copyBooleanArray(boolean[] arrayToBeCopied,int startingIndex,int finalIndex)
+	{
+		boolean [] copiedArray = new boolean[finalIndex-startingIndex];
+		System.arraycopy(arrayToBeCopied, startingIndex, copiedArray,0, finalIndex-startingIndex);
+		return copiedArray;
+		
+		
+	}
+	
+	
 
 	// some getters
 

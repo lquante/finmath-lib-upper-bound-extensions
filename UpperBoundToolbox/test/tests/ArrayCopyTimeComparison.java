@@ -18,7 +18,7 @@ public class ArrayCopyTimeComparison {
 		double[] testArray = {1.2,2.3,3.4,4.5,5.6,6.7,7.8,8.9,9.10,10.11};
 		
 		
-		for(int magnitudeIndex =1; magnitudeIndex<10;magnitudeIndex++)
+		for(int magnitudeIndex =5; magnitudeIndex<15;magnitudeIndex++)
 		{
 		numberOfRepetitions = (int) Math.pow(10,magnitudeIndex);	
 	
