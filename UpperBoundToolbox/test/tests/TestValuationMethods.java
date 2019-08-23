@@ -27,12 +27,12 @@ public class TestValuationMethods {
 			new DecimalFormatSymbols(Locale.ENGLISH));
 
 	// set tolerance for difference between upper and lower bound methods
-	static double tolerance = 0.1; // should be tightened pending further improvement
+	static double tolerance = 1; // should be tightened pending further improvement
 	
-	private static int numberOfPaths = 1000;
+	private static int numberOfPaths = 100;
 	static int numberOfExercisePeriods = 10;
-	private static int numberOfSubsimulationsStepA=100;
-	private static int numberOfSubsimulationsStepB=100;
+	private static int numberOfSubsimulationsStepA=1;
+	private static int numberOfSubsimulationsStepB=1;
 	
 
 	@Test
@@ -56,7 +56,7 @@ public class TestValuationMethods {
 		// print head of comparison table
 		System.out.println("Bermudan Swaption prices:\n");
 		System.out.println(
-				"FirstFixingDate\tLower Bound\tUpper Bound(AB)\tUpperBound(Deltas)\tDeviation(AB)\tDeviation(Delta subsimfree)");
+				"FirstFixingDate\tLower Bound\tUpper Bound(AB)\t\tUpperBound(Deltas)\tDeviation(AB)\tDeviation(Delta subsimfree)");
 		// "EvaluationDate Lower Bound Upper Bound(AB) Deviation(AB) ");
 
 

@@ -70,8 +70,8 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 		// pathwise calculation, as for every path depending on the exercise indicator step A or step B requires a different model (with the starting values of the path) and product
 		// determine number of martingale components to be estimated
 		int numberOfOptionPeriods = this.bermudanOption.getFixingDates().length;
-		double startingPeriodBermudan = this.bermudanOption.getFixingDates()[0];
-		int startingShift = model.getTimeIndex(startingPeriodBermudan);
+		double startingTimeBermudan = this.bermudanOption.getFixingDates()[0];
+		
 		
 		
 		for (int path = 0; path < numberOfSimulations; path++) {
@@ -89,8 +89,9 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 
 			for (int optionPeriod = 2 + evaluationPeriod; optionPeriod < numberOfOptionPeriods; optionPeriod++) {
 				// initialize values for subsimulation
-				int modelPeriod = optionPeriod + startingShift; // shifting if swaption starts in later period
+				 // shifting if swaption starts in later period
 				double currentFixingDate = this.bermudanOption.getFixingDates()[optionPeriod];
+				int modelPeriod = model.getTimeIndex(currentFixingDate);
 				double discountedExerciseValue = 0;
 				double discountedFutureExerciseValue = 0;
 				int martingaleIndex = 2;
@@ -116,7 +117,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 				{
 					// create model terminating as soon as triggerValues[path+i] >=0 for i>=optionPeriod+1
 					// determine termination period:
-					int terminationPeriod= optionPeriod+1;
+					int terminationPeriod= optionPeriod;
 					while(terminationPeriod < numberOfOptionPeriods-1)
 					{
 						if(triggerValues[terminationPeriod].get(path) < 0)
@@ -124,7 +125,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 						else
 							break;
 					}
-					
+					double terminationTime = this.bermudanOption.getFixingDates()[terminationPeriod]+startingTimeBermudan;
 					// calculate discounted option value:
 
 					discountedExerciseValue = cacheUnderlying[optionPeriod].get(path);
@@ -132,7 +133,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 					// create model for subsimulations (only if not only degenerated swaptions, thus at least 2 additional periods necessary)
 					if (optionPeriod+2< terminationPeriod && terminationPeriod < numberOfOptionPeriods) {
 						LIBORModelMonteCarloSimulationModel modelStepB = createSubsimulationModelTerminating(model,
-								modelPeriod, terminationPeriod+startingShift, path, pathsSubsimulationsStepB);
+								modelPeriod, model.getTimeIndex(terminationTime), path, pathsSubsimulationsStepB);
 
 						// create option
 						double futureExerciseTime = modelStepB.getTime(1);

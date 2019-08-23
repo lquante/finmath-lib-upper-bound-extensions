@@ -93,26 +93,28 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 		// components
 		// initialize martingale cache
 		ArrayList<RandomVariable> martingaleCache = new ArrayList<RandomVariable>();
-		int startingShift = model.getTimeIndex(this.bermudanOption.getFixingDates()[0]);
-		for (int modelTimeIndex = 2+startingShift; modelTimeIndex < numberOfFixingDates+startingShift; modelTimeIndex++) {
+		for (int optionTimeIndex = 2; optionTimeIndex < numberOfFixingDates; optionTimeIndex++) {
+			
+			// get current model time index and time
+			int modelTimeIndex = model.getTimeIndex(this.bermudanOption .getFixingDates()[optionTimeIndex]);
+			double modelTime= model.getTime(modelTimeIndex);
 			// calculate deltas for every fixing date
-			RandomVariable[] deltas = getDeltas(gradient, modelTimeIndex);
+			RandomVariable[] deltas = getDeltas(gradient, modelTime);
 			/*
 			 * calculate the martingale according to the deltas
 			 */
 			RandomVariable martingale = model.getRandomVariableForConstant(0);
 
-			for (int i = 0; i < numberOfFixingDates-1; i++) {
+			for (int fixingDateIndex = 0; fixingDateIndex < numberOfFixingDates-1; fixingDateIndex++) {
 				// get times for current rate calculation
-				double fixingDate = this.bermudanOption.getFixingDates()[i];
-				double paymenDate = this.bermudanOption.getPaymentDates()[i];
-				double currentPeriodLength = this.bermudanOption.getPeriodLengths()[i];
+				double fixingDate = this.bermudanOption.getFixingDates()[fixingDateIndex];
+				double paymenDate = this.bermudanOption.getPaymentDates()[fixingDateIndex];
+				double currentPeriodLength = this.bermudanOption.getPeriodLengths()[fixingDateIndex];
 				// get times for forward calculation
-				double forwardFixingDate = this.bermudanOption.getFixingDates()[i+1];
-				double forwardPaymenDate = this.bermudanOption.getPaymentDates()[i+1];
-				double forwardPeriodLength = this.bermudanOption.getPeriodLengths()[i+1]; 
-				// get current model time
-				double modelTime= model.getTime(modelTimeIndex);
+				double forwardFixingDate = this.bermudanOption.getFixingDates()[fixingDateIndex+1];
+				double forwardPaymenDate = this.bermudanOption.getPaymentDates()[fixingDateIndex+1];
+				double forwardPeriodLength = this.bermudanOption.getPeriodLengths()[fixingDateIndex+1]; 
+			
 				RandomVariable currentRate = model.getLIBOR(modelTime, fixingDate,
 						paymenDate);
 				RandomVariable bondValue = currentRate.mult(currentPeriodLength);
@@ -121,8 +123,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 				RandomVariable forwardValue = forwardAtTimeIndex.mult(forwardPeriodLength);
 
 				// calculate martingale according to 5.1 of Joshi / Tang (2014)
-				martingale = martingale.add(deltas[i].mult(forwardValue.sub(bondValue)));
-
+				martingale = martingale.add(deltas[fixingDateIndex].mult(forwardValue.sub(bondValue)));
 			}
 			martingaleCache.add(martingale);
 		}
@@ -137,7 +138,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 	 * @return The delta approximation as a RandomVariable.
 	 * @throws CalculationException
 	 */
-	private RandomVariable[] getDeltas(Map<Long, RandomVariable> gradient, int modelTimeIndex) throws CalculationException {
+	private RandomVariable[] getDeltas(Map<Long, RandomVariable> gradient, double modelTime) throws CalculationException {
 
 		int numberOfFixingDates = this.bermudanOption.getFixingDates().length;
 		RandomVariable[] deltas = new RandomVariable[numberOfFixingDates];
@@ -153,12 +154,11 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 			// get times for current rate calculation
 			double fixingDate = this.bermudanOption.getFixingDates()[i];
 			double paymenDate = this.bermudanOption.getPaymentDates()[i];
-			double modelTime= model.getTime(modelTimeIndex);
 			
 			RandomVariable currentRate = ((RandomVariableDifferentiable) model.getLIBOR(modelTime, fixingDate,
 					paymenDate));
 			
-			RandomVariable numeraireAtTimeIndex = model.getNumeraire(model.getTime(modelTimeIndex));
+			RandomVariable currentNumeraire = model.getNumeraire(modelTime);
 			// get gradient with respect to the forward rate (liborID's are calculated in
 			// backward algorithm thus inversion of index)
 			RandomVariable delta = gradient.get(liborIDs.get(fixingDate));
@@ -168,11 +168,11 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 			}
 
 			// adjust by numeraire
-			delta = delta.mult(numeraireAtTimeIndex);
+			delta = delta.mult(currentNumeraire);
 			// get exerciseIndicator
 			RandomVariable indicator = new RandomVariableFromDoubleArray(1.0);
 			if (exerciseTime != null) {
-				indicator = exerciseTime.sub(model.getTime(modelTimeIndex) + 0.001)
+				indicator = exerciseTime.sub(modelTime + 0.001)
 						.choose(new RandomVariableFromDoubleArray(1.0), new RandomVariableFromDoubleArray(0.0));
 			}
 
