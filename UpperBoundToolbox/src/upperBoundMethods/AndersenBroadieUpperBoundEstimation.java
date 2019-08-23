@@ -169,9 +169,9 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 			}
 
 			// calculate the maximum using the estimated martingale for each remaining period
-			for (int forwardPeriod = 0; forwardPeriod < numberOfOptionPeriods - evaluationPeriod; forwardPeriod++)
+			for (int optionPeriod = 0+evaluationPeriod; optionPeriod < numberOfOptionPeriods; optionPeriod++)
 				delta0 = Math.max(delta0,
-						cacheUnderlying[forwardPeriod].get(path) - martingaleCache.get(forwardPeriod));
+						cacheUnderlying[optionPeriod].get(path) - martingaleCache.get(optionPeriod));
 			sumOfDeltas += delta0;
 
 		}

@@ -30,20 +30,20 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 	}
 
 	@Override
-	protected double calculateMartingaleApproximation(int period, LIBORModelMonteCarloSimulationModel model,
+	protected double calculateMartingaleApproximation(int evaluationPeriod, LIBORModelMonteCarloSimulationModel model,
 			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
 			throws CalculationException {
 		this.model = model;
-		double evaluationTime =model.getTime(period);
+		double evaluationTime =model.getTime(evaluationPeriod);
 		int numberOfOptionPeriods = this.bermudanOption.getFixingDates().length;
 
 		// initialize martingale as lower bound value for period 0 and 1.
 
 		ArrayList<RandomVariable> martingaleCache = new ArrayList<RandomVariable>();
-		RandomVariable martingale = cacheOptionValues[period];
+		RandomVariable martingale = cacheOptionValues[0];
 		martingaleCache.add(martingale);
-		if (this.bermudanOption.getFixingDates().length > 1 && period + 1 < cacheOptionValues.length) {
-			martingale = cacheOptionValues[period + 1];
+		if (this.bermudanOption.getFixingDates().length > 1 && evaluationPeriod + 1 < cacheOptionValues.length) {
+			martingale = cacheOptionValues[evaluationPeriod + 1];
 			martingaleCache.add(martingale);
 		}
 		// approximate remaining martingale components using delta approximation

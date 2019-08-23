@@ -50,24 +50,32 @@ public abstract class AbstractUpperBoundEstimation implements BermudanSwaptionVa
 		this.bermudanOption = bermudanOption;
 		RandomVariable optionValue = model.getRandomVariableForConstant(0);
 		// calculate value of lower bound
-		int evaluationTimeIndex = model.getTimeIndex(evaluationTime);
-
+		
 		this.bermudanOption.setValuationMethod(lowerBoundMethod);
 		this.bermudanOption.getValue(evaluationTime, model);
 		RandomVariable[] cacheUnderlying = lowerBoundMethod.getCacheValuesOfUnderlying();
 		RandomVariable[] cacheOptionValues = lowerBoundMethod.getCacheOptionValues();
 		// Check exercise condition of lower bound method
 		RandomVariable[] cacheTriggers = lowerBoundMethod.getCacheTriggerValues();
+		// calculate option time index for evaluation
+		
+		
+		double firstFixingDate = this.bermudanOption.getFixingDates()[0];
+		int optionTimeIndex;
+		if(evaluationTime<=firstFixingDate)
+			  optionTimeIndex = 0;
+		else
+			for (optionTimeIndex=1;evaluationTime>this.bermudanOption.getFixingDates()[optionTimeIndex];optionTimeIndex++);
 		// calculate upper bound
 
-		double martingaleApproximation = calculateMartingaleApproximation(evaluationTimeIndex, model, cacheUnderlying, cacheOptionValues,
+		double martingaleApproximation = calculateMartingaleApproximation(optionTimeIndex, model, cacheUnderlying, cacheOptionValues,
 				cacheTriggers);
 		// Note that values is a relative price - no numeraire division is required
 		RandomVariable numeraireAtEvaluationTime = model.getNumeraire(evaluationTime);
 		RandomVariable monteCarloProbabilitiesAtEvaluationTime = model.getMonteCarloWeights(evaluationTime);
 		RandomVariable discountFactor = numeraireAtEvaluationTime.div(monteCarloProbabilitiesAtEvaluationTime);
 
-		optionValue = cacheOptionValues[evaluationTimeIndex].mult(discountFactor).add(martingaleApproximation);
+		optionValue = cacheOptionValues[optionTimeIndex].mult(discountFactor).add(martingaleApproximation);
 
 		return optionValue;
 
