@@ -245,7 +245,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 		if (underlying.isDeterministic()) {
 			basisFunctions.add(underlying);
 		} else {
-			int numberOfBins = 20;
+			int numberOfBins = 100;
 			double[] values = underlying.getRealizations();
 			Arrays.sort(values);
 			IntStream.range( 0,  numberOfBins).parallel().forEach(i-> {
