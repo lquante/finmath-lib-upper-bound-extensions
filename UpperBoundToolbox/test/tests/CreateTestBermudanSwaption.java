@@ -37,7 +37,7 @@ public class CreateTestBermudanSwaption {
 
 	public CreateTestBermudanSwaption() throws CalculationException {
 		model = CreateTestModel.createLIBORMarketModel();
-		this.bermudanSwaption = createBermudanSwaption();
+		CreateTestBermudanSwaption.bermudanSwaption = createBermudanSwaption();
 	}
 
 	@Test

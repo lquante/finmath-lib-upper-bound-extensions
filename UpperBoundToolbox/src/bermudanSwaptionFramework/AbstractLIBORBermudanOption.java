@@ -10,6 +10,7 @@ import net.finmath.stochastic.RandomVariable;
 
 /**
  * Provides a basic object for Bermudan interest rate options.
+ * 
  * @author Lennart Quante
  * @version 1.0
  */
@@ -32,7 +33,8 @@ public abstract class AbstractLIBORBermudanOption extends AbstractLIBORMonteCarl
 	 * @param periodNotionals               Array of notionals
 	 * @param isCallable                    True if the option is callable,
 	 *                                      otherwise cancelable
-	 * @param currency The optional currency name of the option as a string.                                     
+	 * @param currency                      The optional currency name of the option
+	 *                                      as a string.
 	 */
 
 	public AbstractLIBORBermudanOption(String currency, boolean[] isPeriodStartDateExerciseDate, double[] fixingDates,
@@ -49,12 +51,10 @@ public abstract class AbstractLIBORBermudanOption extends AbstractLIBORMonteCarl
 	@Override
 	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationModel model)
 			throws CalculationException {
-		
-		throw(new CalculationException("The general valuation of Bermudan options is not yet implemented."));
-		
-		
+
+		throw (new CalculationException("The general valuation of Bermudan options is not yet implemented."));
+
 	}
-	
 
 	@Override
 	public Map<String, Object> getValues(double evaluationTime, LIBORModelMonteCarloSimulationModel model)

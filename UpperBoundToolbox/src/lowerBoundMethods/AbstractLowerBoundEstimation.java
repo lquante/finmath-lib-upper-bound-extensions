@@ -1,40 +1,37 @@
 package lowerBoundMethods;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import bermudanSwaptionFramework.BermudanSwaption;
 import bermudanSwaptionFramework.BermudanSwaptionValueEstimatorInterface;
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.MonteCarloSimulationModel;
 import net.finmath.montecarlo.RandomVariableFromDoubleArray;
-import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiable;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAAD;
 import net.finmath.montecarlo.conditionalexpectation.MonteCarloConditionalExpectationRegression;
 import net.finmath.montecarlo.conditionalexpectation.RegressionBasisFunctionsProvider;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
-import net.finmath.montecarlo.interestrate.TermStructureMonteCarloSimulationModel;
 import net.finmath.stochastic.ConditionalExpectationEstimator;
 import net.finmath.stochastic.RandomVariable;
-import net.finmath.stochastic.Scalar;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
- * Provides a framework for a lower bound estimation via the backward algorithm, based on a specific method to calculate the exercise trigger values.
+ * Provides a framework for a lower bound estimation via the backward algorithm,
+ * based on a specific method to calculate the exercise trigger values.
+ * 
  * @author Lennart Quante
  * @version 1.0
  */
 public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionValueEstimatorInterface {
 
 	RegressionBasisFunctionsProvider regressionBasisFunctionsProvider;
-	BermudanSwaption bermudanOption;
-	
+	BermudanSwaption bermudanSwaption;
+
 	RandomVariable continuationValue;
 	RandomVariable exerciseValue;
 	RandomVariable optionValue;
 	RandomVariable triggerValues;
-	
+
 	double[] exerciseProbablities;
 	RandomVariable exerciseTime;
 	protected LIBORModelMonteCarloSimulationModel model;
@@ -47,11 +44,10 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 	 * BermudanSwaption, double,
 	 * net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel)
 	 */
-	
+
 	// general methods to avoid code duplication in classes inheriting this.
-		protected void initializeValuation(RandomVariable triggerValuesInput)
-		{
-		
+	protected void initializeValuation(RandomVariable triggerValuesInput) {
+
 		// After the last period the product has value zero: Initialize values to zero.
 		RandomVariable zero = model.getRandomVariableForConstant(0.0);
 		exerciseValue = zero;
@@ -61,32 +57,30 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 		// use input trigger values if given
 		triggerValues = triggerValuesInput;
 
-		
-		}
-		
+	}
+
 	/**
 	 * Valuation of the Bermudan Swaption via the backward valuation algorithm.
-	 * @return The value random variable 
-	 * @throws CalculationException 
+	 * 
+	 * @return The value random variable
+	 * @throws CalculationException
 	 */
-	protected RandomVariable backwardAlgorithmValuation(double evaluationTime) throws CalculationException
-	{
-		int numberOfFixingDates = bermudanOption.getFixingDates().length - 1;
+	protected RandomVariable backwardAlgorithmValuation(double evaluationTime) throws CalculationException {
+		int numberOfFixingDates = bermudanSwaption.getFixingDates().length - 1;
 		exerciseProbablities = new double[numberOfFixingDates + 1];
 		// Loop backward over the swap periods
 		for (int period = numberOfFixingDates; period >= 0; period--) {
-			double fixingDate = bermudanOption.getFixingDates()[period];
+			double fixingDate = bermudanSwaption.getFixingDates()[period];
 			double exerciseDate = fixingDate;
-			double periodLength = bermudanOption.getPeriodLengths()[period];
-			double paymentDate = bermudanOption.getPaymentDates()[period];
-			double notional = bermudanOption.getPeriodNotionals()[period];
-			double swaprate = bermudanOption.getSwaprates()[period];
+			double periodLength = bermudanSwaption.getPeriodLengths()[period];
+			double paymentDate = bermudanSwaption.getPaymentDates()[period];
+			double notional = bermudanSwaption.getPeriodNotionals()[period];
+			double swaprate = bermudanSwaption.getSwaprates()[period];
 
 			// Get random variables - note that this is the rate at simulation time =
 			// exerciseDate
-			RandomVariable libor = calculateLiborRate(fixingDate,paymentDate);
-					
-			
+			RandomVariable libor = calculateLiborRate(fixingDate, paymentDate);
+
 			// calculate payoff
 			RandomVariable payoff = libor.sub(swaprate).mult(periodLength).mult(notional);
 
@@ -95,19 +89,18 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 			RandomVariable monteCarloProbabilities = model.getMonteCarloWeights(paymentDate);
 			payoff = payoff.div(numeraire).mult(monteCarloProbabilities);
 
-			if (bermudanOption.isCallable()) {
+			if (bermudanSwaption.isCallable()) {
 				exerciseValue = exerciseValue.add(payoff);
 			} else {
 				continuationValue = continuationValue.add(payoff); // cancelable
 			}
 			// Calculate the exercise criteria (exercise if the following trigger is
 			// negative)- trigger values calculated by specified method
-			if (this.bermudanOption.getIsPeriodStartDateExerciseDate()[period]) {
+			if (this.bermudanSwaption.getIsPeriodStartDateExerciseDate()[period]) {
 				triggerValues = calculateTriggerValues(period, fixingDate, model);
 			}
-			applyExerciseCriteria(exerciseDate,period);
+			applyExerciseCriteria(exerciseDate, period);
 
-			
 		}
 
 		// exerciseProbablities =
@@ -116,21 +109,25 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 		// Note that values is a relative price - no numeraire division is required
 		RandomVariable numeraireAtZero = model.getNumeraire(evaluationTime);
 		RandomVariable monteCarloProbabilitiesAtZero = model.getMonteCarloWeights(evaluationTime);
-		
+
 		return optionValue.mult(numeraireAtZero).div(monteCarloProbabilitiesAtZero);
 	}
 
-	
 	// abstract methods to be specified by the various implementations
+	@Override
 	public abstract RandomVariable getValueEstimation(BermudanSwaption bermudanOption, double evaluationTime,
 			LIBORModelMonteCarloSimulationModel model, RandomVariable triggerValuesInput) throws CalculationException;
-	protected abstract RandomVariable calculateLiborRate(double fixingDate, double paymentDate) throws CalculationException;
+
+	protected abstract RandomVariable calculateLiborRate(double fixingDate, double paymentDate)
+			throws CalculationException;
+
 	protected abstract RandomVariable calculateTriggerValues(int period, double fixingDate,
 			LIBORModelMonteCarloSimulationModel model) throws CalculationException;
+
 	abstract void applyExerciseCriteria(double exerciseDate, int period);
-		
+
 	// basis functions used in the algorithms
-	
+
 	/**
 	 * Return the conditional expectation estimator suitable for this product.
 	 *
@@ -138,8 +135,10 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 	 * @param model      The model
 	 * @return The conditional expectation estimator suitable for this product
 	 * @throws net.finmath.exception.CalculationException Thrown if the valuation
-	 *         fails, specific cause may be available via the <code>cause()</code>
-	 *         method.
+	 *                                                    fails, specific cause may
+	 *                                                    be available via the
+	 *                                                    <code>cause()</code>
+	 *                                                    method.
 	 */
 	public ConditionalExpectationEstimator getConditionalExpectationEstimator(double fixingDate,
 			LIBORModelMonteCarloSimulationModel model) throws CalculationException {
@@ -153,10 +152,13 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 		return condExpEstimator;
 	}
 
-	/* (non-Javadoc)
-	 * @see drafts.AbstractSimpleBoundEstimation#getBasisFunctions(double, net.finmath.montecarlo.MonteCarloSimulationModel)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see drafts.AbstractSimpleBoundEstimation#getBasisFunctions(double,
+	 * net.finmath.montecarlo.MonteCarloSimulationModel)
 	 */
-	
+
 	public RandomVariable[] getBasisFunctions(double evaluationTime, MonteCarloSimulationModel model)
 			throws CalculationException {
 		LIBORModelMonteCarloSimulationModel liborModel = (LIBORModelMonteCarloSimulationModel) model;
@@ -179,8 +181,8 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 			throws CalculationException {
 
 		ArrayList<RandomVariable> basisFunctions = new ArrayList<>();
-		double[] fixingDates = bermudanOption.getFixingDates();
-		double[] paymentDates = bermudanOption.getPaymentDates();
+		double[] fixingDates = bermudanSwaption.getFixingDates();
+		double[] paymentDates = bermudanSwaption.getPaymentDates();
 		// Constant
 		RandomVariable one = new RandomVariableFromDoubleArray(1.0);
 		basisFunctions.add(one);
@@ -224,7 +226,8 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 
 	/**
 	 *
-	 * @return An \( \mathcal{F}_{t} \)-measurable random variable, basis functions using swap rate estimation
+	 * @return An \( \mathcal{F}_{t} \)-measurable random variable, basis functions
+	 *         using swap rate estimation
 	 * 
 	 */
 	public RegressionBasisFunctionsProvider getBasisFunctionsProviderWithSwapRates() {
@@ -234,8 +237,8 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 					MonteCarloSimulationModel monteCarloModel) throws CalculationException {
 				LIBORModelMonteCarloSimulationModel model = (LIBORModelMonteCarloSimulationModel) monteCarloModel;
 
-				double[] exerciseDates = bermudanOption.getFixingDates();
-				double[] regressionBasisfunctionTimes = bermudanOption.getPaymentDates();
+				double[] exerciseDates = bermudanSwaption.getFixingDates();
+				double[] regressionBasisfunctionTimes = bermudanSwaption.getPaymentDates();
 
 				ArrayList<RandomVariable> basisFunctions = new ArrayList<>();
 
@@ -281,10 +284,12 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 			}
 		};
 	}
-	/**
 
-	 * @return An \( \mathcal{F}_{t} \)-measurable random variable, basis functions using forward rates and a cross.
-	
+	/**
+	 * 
+	 * @return An \( \mathcal{F}_{t} \)-measurable random variable, basis functions
+	 *         using forward rates and a cross.
+	 * 
 	 */
 	public RegressionBasisFunctionsProvider getBasisFunctionsProviderWithForwardRates() {
 		return new RegressionBasisFunctionsProvider() {
@@ -293,8 +298,8 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 					throws CalculationException {
 				LIBORModelMonteCarloSimulationModel model = (LIBORModelMonteCarloSimulationModel) monteCarloModel;
 
-				double[] exerciseDates = bermudanOption.getFixingDates();
-				double swapEndDate = bermudanOption.getPaymentDates()[exerciseDates.length - 1];
+				double[] exerciseDates = bermudanSwaption.getFixingDates();
+				double swapEndDate = bermudanSwaption.getPaymentDates()[exerciseDates.length - 1];
 				double[] regressionBasisfunctionTimes = new double[exerciseDates.length + 1];
 				int numberOfPeriods = exerciseDates.length;
 				for (int i = 0; i < exerciseDates.length; i++)
@@ -352,8 +357,8 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 		for (int periodIndex = exerciseDates.length - 1; periodIndex >= 0; periodIndex--) {
 			double paymentTime = paymentDates[periodIndex];
 			double fixingTime = exerciseDates[periodIndex];
-			double periodLength = bermudanOption.getPeriodLengths()[periodIndex];
-			double notional = bermudanOption.getPeriodNotionals()[periodIndex];
+			double periodLength = bermudanSwaption.getPeriodLengths()[periodIndex];
+			double notional = bermudanSwaption.getPeriodNotionals()[periodIndex];
 			/*
 			 * Note that it is important that getForwardDiscountBond and getLIBOR are called
 			 * with evaluationTime = exerciseTime.
@@ -375,13 +380,9 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 		return discountedCashflowFloatingLeg;
 
 	}
-	
-	
-	
-	
+
 	// some getters
 
-	
 	public double[] getExerciseProbablities() {
 		return exerciseProbablities;
 	}
@@ -397,8 +398,5 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 	public void setRegressionBasisFunctionsProvider(RegressionBasisFunctionsProvider regressionBasisFunctionProvider) {
 		this.regressionBasisFunctionsProvider = regressionBasisFunctionProvider;
 	}
-
-
-
 
 }

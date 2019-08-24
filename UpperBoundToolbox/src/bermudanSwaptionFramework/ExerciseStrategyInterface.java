@@ -4,6 +4,7 @@ import net.finmath.stochastic.RandomVariable;
 
 /**
  * Interface to enable the use of several exercise strategies.
+ * 
  * @author Lennart Quante
  * @version 1.0
  */

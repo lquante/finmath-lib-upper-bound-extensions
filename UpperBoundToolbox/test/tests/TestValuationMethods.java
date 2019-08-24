@@ -28,28 +28,23 @@ public class TestValuationMethods {
 
 	// set tolerance for difference between upper and lower bound methods
 	static double tolerance = 1; // should be tightened pending further improvement
-	
+
 	private static int numberOfPaths = 100;
 	static int numberOfExercisePeriods = 10;
-	private static int numberOfSubsimulationsStepA=100;
-	private static int numberOfSubsimulationsStepB=100;
-	
+	private static int numberOfSubsimulationsStepA = 100;
+	private static int numberOfSubsimulationsStepB = 100;
 
 	@Test
-	public void testSwaptionValuationMethods() throws CalculationException
-	{
+	public void testSwaptionValuationMethods() throws CalculationException {
 		// set parameters
 		CreateTestModel.setNumberOfPaths(numberOfPaths);
 		CreateTestBermudanSwaption.setNumberOfExercisePeriods(numberOfExercisePeriods);
 		TestValuationMethods.setNumberOfSubsimulationsStepA(numberOfSubsimulationsStepA);
 		TestValuationMethods.setNumberOfSubsimulationsStepB(numberOfSubsimulationsStepB);
-		
-		
-		
+
 		executePrintSwaptionValuationMethods();
 	}
-	
-	
+
 	public static void executePrintSwaptionValuationMethods() throws CalculationException {
 
 		LIBORModelMonteCarloSimulationModel liborModel = CreateTestModel.createLIBORMarketModel();
@@ -58,7 +53,6 @@ public class TestValuationMethods {
 		System.out.println(
 				"FirstFixingDate\tLower Bound\tUpper Bound(AB)\t\tUpperBound(Deltas)\tDeviation(AB)\tDeviation(Delta subsimfree)");
 		// "EvaluationDate Lower Bound Upper Bound(AB) Deviation(AB) ");
-
 
 		for (int maturityIndex = 1; maturityIndex < liborModel.getNumberOfLibors()
 				- numberOfExercisePeriods; maturityIndex++) {
@@ -72,7 +66,6 @@ public class TestValuationMethods {
 			 */
 
 			System.out.print(formatterTime.format(firstFixingDate) + "\t");
-			
 
 			SimpleLowerBoundEstimation lowerBound = new SimpleLowerBoundEstimation();
 
@@ -87,8 +80,8 @@ public class TestValuationMethods {
 			double DeltaUpperBoundValue = timingValuationTest(DeltaUpperBound, testSwaption, liborModel);
 
 			// Absolute error AB method
-			 double deviationAB = Math.abs(lowerBoundValue - ABupperBoundValue);
-			 System.out.print(formatterDeviation.format(deviationAB) + "\t");
+			double deviationAB = Math.abs(lowerBoundValue - ABupperBoundValue);
+			System.out.print(formatterDeviation.format(deviationAB) + "\t");
 
 			// Absolute error delta Hedge method
 			double deviationDeltaHedge = Math.abs(lowerBoundValue - DeltaUpperBoundValue);
@@ -99,17 +92,17 @@ public class TestValuationMethods {
 			Assert.assertEquals(lowerBoundValue, DeltaUpperBoundValue, tolerance);
 		}
 	}
-	
-	//help method for calculation and printing of values and calculation time
-	private static double timingValuationTest (BermudanSwaptionValueEstimatorInterface valuationMethod, BermudanSwaption swaption, LIBORModelMonteCarloSimulationModel liborModel) throws CalculationException
-	{
+
+	// help method for calculation and printing of values and calculation time
+	private static double timingValuationTest(BermudanSwaptionValueEstimatorInterface valuationMethod,
+			BermudanSwaption swaption, LIBORModelMonteCarloSimulationModel liborModel) throws CalculationException {
 		swaption.setValuationMethod(valuationMethod);
 		long timingValuationStart = System.currentTimeMillis();
 		double simulatedValue = swaption.getValue(liborModel);
 		long timingValuationEnd = System.currentTimeMillis();
 		double lastOperationTimingValuation = (timingValuationEnd - timingValuationStart) / 1000.0;
-		System.out.print(formatterValue.format(simulatedValue)+"\t");
-		System.out.print(formattterTime.format(lastOperationTimingValuation)+ "\t");
+		System.out.print(formatterValue.format(simulatedValue) + "\t");
+		System.out.print(formattterTime.format(lastOperationTimingValuation) + "\t");
 		return simulatedValue;
 	}
 
@@ -141,5 +134,4 @@ public class TestValuationMethods {
 		TestValuationMethods.numberOfSubsimulationsStepB = numberOfSubsimulationsStepB;
 	}
 
-	
 }

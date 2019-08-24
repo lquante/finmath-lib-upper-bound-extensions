@@ -65,7 +65,6 @@ public class ValuationOfBermudanSwaptionRudimentalTest {
 
 	}
 
-	
 	public void testSwaption() throws CalculationException {
 		// set tolerance for difference upper and lower bound
 		double tolerance = 0.01; // should be tightened pending further improvement
