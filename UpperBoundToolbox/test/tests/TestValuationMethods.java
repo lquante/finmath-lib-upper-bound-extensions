@@ -73,10 +73,10 @@ public class TestValuationMethods {
 
 			// AB upper bound approximation
 			AndersenBroadieUpperBoundEstimation ABupperBound = new AndersenBroadieUpperBoundEstimation(lowerBound,
-					numberOfSubsimulationsStepA, numberOfSubsimulationsStepB);
+					1,numberOfSubsimulationsStepA, numberOfSubsimulationsStepB);
 			double ABupperBoundValue = timingValuationTest(ABupperBound, testSwaption, liborModel);
 			// Upper bound using martingale construction via Delta hedging
-			DeltaHedgingUpperBound DeltaUpperBound = new DeltaHedgingUpperBound(lowerBound);
+			DeltaHedgingUpperBound DeltaUpperBound = new DeltaHedgingUpperBound(lowerBound,1);
 			double DeltaUpperBoundValue = timingValuationTest(DeltaUpperBound, testSwaption, liborModel);
 
 			// Absolute error AB method

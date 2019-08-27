@@ -145,7 +145,7 @@ public class ValuationOfBermudanSwaptionRudimentalTest {
 
 			// Value of the AB upper bound approximation
 
-			AndersenBroadieUpperBoundEstimation ABupperBound = new AndersenBroadieUpperBoundEstimation(lowerBound,
+			AndersenBroadieUpperBoundEstimation ABupperBound = new AndersenBroadieUpperBoundEstimation(lowerBound,1,
 					numberOfSubsimulationsStepA, numberOfSubsimulationsStepB);
 			swaptionMonteCarlo.setValuationMethod(ABupperBound);
 			double ABupperBoundValue = swaptionMonteCarlo.getValue(liborModel);
@@ -153,7 +153,7 @@ public class ValuationOfBermudanSwaptionRudimentalTest {
 
 			// test hedging portfolio
 
-			DeltaHedgingUpperBound DeltaUpperBound = new DeltaHedgingUpperBound(lowerBound);
+			DeltaHedgingUpperBound DeltaUpperBound = new DeltaHedgingUpperBound(lowerBound,1);
 
 			swaptionMonteCarlo.setValuationMethod(DeltaUpperBound);
 			double DeltaUpperBoundValue = swaptionMonteCarlo.getValue(liborModel);
@@ -264,7 +264,7 @@ public class ValuationOfBermudanSwaptionRudimentalTest {
 				randomVariableFactory2, covarianceModel, calibrationItems, properties);
 
 		BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(timeDiscretizationFromArray,
-				numberOfFactors, numberOfPaths, 3141 /* seed */);
+				numberOfFactors, numberOfPaths, 1111 /* seed */);
 
 		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion,
 				EulerSchemeFromProcessModel.Scheme.PREDICTOR_CORRECTOR);
