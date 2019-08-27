@@ -56,9 +56,9 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	 *                                 simulation time.
 	 */
 
-	public AndersenBroadieUpperBoundEstimation(AbstractLowerBoundEstimationInputForUpperBound lowerBoundMethod,
+	public AndersenBroadieUpperBoundEstimation(AbstractLowerBoundEstimationInputForUpperBound lowerBoundMethod, double weightOfMartingale,
 			int pathsSubsimulationsStepA, int pathsSubsimulationsStepB) {
-		super(lowerBoundMethod);
+		super(lowerBoundMethod,weightOfMartingale);
 		this.pathsSubsimulationsStepA = pathsSubsimulationsStepA;
 		this.pathsSubsimulationsStepB = pathsSubsimulationsStepB;
 

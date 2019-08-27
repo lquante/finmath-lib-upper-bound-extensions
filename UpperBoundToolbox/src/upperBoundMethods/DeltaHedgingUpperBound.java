@@ -26,8 +26,8 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 
 	LIBORModelMonteCarloSimulationModel model;
 
-	public DeltaHedgingUpperBound(AbstractLowerBoundEstimationInputForUpperBound lowerBoundMethod) {
-		super(lowerBoundMethod);
+	public DeltaHedgingUpperBound(AbstractLowerBoundEstimationInputForUpperBound lowerBoundMethod, double weightOfMartingale) {
+		super(lowerBoundMethod, weightOfMartingale);
 
 	}
 

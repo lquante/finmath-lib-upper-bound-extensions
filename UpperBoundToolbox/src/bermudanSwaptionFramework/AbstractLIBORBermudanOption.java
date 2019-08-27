@@ -66,6 +66,7 @@ public abstract class AbstractLIBORBermudanOption extends AbstractLIBORMonteCarl
 		return result;
 	}
 
+	// some getters 
 	public boolean[] getIsPeriodStartDateExerciseDate() {
 		return isPeriodStartDateExerciseDate;
 	}

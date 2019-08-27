@@ -29,7 +29,7 @@ public class TestValuationMethods {
 	// set tolerance for difference between upper and lower bound methods
 	static double tolerance = 1; // should be tightened pending further improvement
 
-	private static int numberOfPaths = 100;
+	private static int numberOfPaths = 1000;
 	static int numberOfExercisePeriods = 10;
 	private static int numberOfSubsimulationsStepA = 100;
 	private static int numberOfSubsimulationsStepB = 100;

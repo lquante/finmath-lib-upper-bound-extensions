@@ -5,7 +5,7 @@ import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 import net.finmath.stochastic.RandomVariable;
 
 /**
- * Implements a Bermudan swaption product..
+ * Implements a Bermudan swaption product.
  * 
  * @author Lennart Quante
  * @version 1.0
@@ -29,7 +29,7 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 	}
 
 	/**
-	 * Method using the valuation method specified in the option.
+	 * Valution performed using the valuation method specified in the option.
 	 */
 	@Override
 	public RandomVariable getValue(double evaluationTime, LIBORModelMonteCarloSimulationModel model)
@@ -102,15 +102,28 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 
 	}
 
-	// methods to copy a part of an array using System.arraycopy
+	
 
+	/**
+	 * Method to clone a part of a double array using System.arraycopy
+	 * @param arrayToBeCopied original array
+	 * @param startingIndex starting index for cloning (inclusive)
+	 * @param finalIndex final index for cloning (exclusive)
+	 * @return The shortened, cloned array.
+	 */
 	double[] copyDoubleArray(double[] arrayToBeCopied, int startingIndex, int finalIndex) {
 		double[] copiedArray = new double[finalIndex - startingIndex];
 		System.arraycopy(arrayToBeCopied, startingIndex, copiedArray, 0, finalIndex - startingIndex);
 		return copiedArray;
 
 	}
-
+	/**
+	 * Method to clone a part of a boolean array using System.arraycopy
+	 * @param arrayToBeCopied original array
+	 * @param startingIndex starting index for cloning (inclusive)
+	 * @param finalIndex final index for cloning (exclusive)
+	 * @return The shortened, cloned array.
+	 */
 	boolean[] copyBooleanArray(boolean[] arrayToBeCopied, int startingIndex, int finalIndex) {
 		boolean[] copiedArray = new boolean[finalIndex - startingIndex];
 		System.arraycopy(arrayToBeCopied, startingIndex, copiedArray, 0, finalIndex - startingIndex);
