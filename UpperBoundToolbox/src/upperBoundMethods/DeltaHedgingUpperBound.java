@@ -120,9 +120,12 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 			 * calculate the martingale according to the deltas
 			 */
 			RandomVariable martingale = model.getRandomVariableForConstant(0);
-
+			RandomVariable[] deltaInput = deltas;
+			//IntStream.range(0, numberOfFixingDates-1).parallel().forEach(fixingDateIndex -> no performance improvement via IntStream, thus for-loop
 			for (int fixingDateIndex = 0; fixingDateIndex < numberOfFixingDates - 1; fixingDateIndex++) {
 				// get times for current rate calculation
+				
+					
 				double fixingDate = this.bermudanSwaption.getFixingDates()[fixingDateIndex];
 				double paymenDate = this.bermudanSwaption.getPaymentDates()[fixingDateIndex];
 				double currentPeriodLength = this.bermudanSwaption.getPeriodLengths()[fixingDateIndex];
@@ -149,9 +152,10 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 				RandomVariable forwardValue = forwardAtTimeIndex.mult(forwardPeriodLength);
 
 				// calculate martingale according to 5.1 of Joshi / Tang (2014)
-				martingale = martingale.add(deltas[fixingDateIndex].mult(forwardValue.sub(bondValue)));
+				martingaleCache.add(martingale.add(deltaInput[fixingDateIndex].mult(forwardValue.sub(bondValue))));
 			}
-			martingaleCache.add(martingale);
+	
+			
 		});
 		return martingaleCache;
 

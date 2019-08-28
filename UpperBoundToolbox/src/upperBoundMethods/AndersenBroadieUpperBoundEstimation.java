@@ -123,7 +123,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 
 			RandomVariable previousExerciseValue = cacheUnderlying[optionPeriod - 1];
 
-			// calculate value of martingale extimation
+			// calculate value of martingale estimation
 			martingale = martingaleCache.get(martingaleIndex - 1).sub(cacheOptionValues[martingaleIndex - 1])
 					.add(discountedExerciseValue)
 					.sub((discountedFutureExerciseValue.add(previousExerciseValue)).mult(previousExerciseIndicator));
