@@ -31,8 +31,8 @@ public class TestValuationMethods {
 
 	private static int numberOfPaths = 1000;
 	static int numberOfExercisePeriods = 10;
-	private static int numberOfSubsimulationsStepA = 100;
-	private static int numberOfSubsimulationsStepB = 100;
+	private static int numberOfSubsimulationsStepA = 10000;
+	private static int numberOfSubsimulationsStepB = 10000;
 
 	@Test
 	public void testSwaptionValuationMethods() throws CalculationException {

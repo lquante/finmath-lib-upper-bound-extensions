@@ -1,5 +1,7 @@
 package upperBoundMethods;
 
+import java.util.ArrayList;
+
 import bermudanSwaptionFramework.BermudanSwaption;
 import bermudanSwaptionFramework.BermudanSwaptionValueEstimatorInterface;
 import lowerBoundMethods.AbstractLowerBoundEstimationInputForUpperBound;
@@ -34,7 +36,7 @@ public abstract class AbstractUpperBoundEstimation implements BermudanSwaptionVa
 	 * Constructor setting basic properties of the upper bound estimation.
 	 *@param lowerBoundMethod The lower bound method to be used as input for the
 	 *                         upper bound approximation.
-	 *@param weightOfMartingale The weight with which the martingale approximation should be added. 1=upper bound, 0=lower bound, 0.5= point wise estimate of A-B.                  
+	 *@param weightOfMartingale The weight with which the martingale approximation should be added. 1=upper bound, 0 results in lower bound, 0.5= point wise estimate of A-B.                  
 	 */
 	public AbstractUpperBoundEstimation(AbstractLowerBoundEstimationInputForUpperBound lowerBoundMethod, double weightOfMartingale) {
 
@@ -65,7 +67,7 @@ public abstract class AbstractUpperBoundEstimation implements BermudanSwaptionVa
 		// Check exercise condition of lower bound method
 		RandomVariable[] cacheTriggers = lowerBoundMethod.getCacheTriggerValues();
 		// calculate option time index for evaluation
-
+		int numberOfOptionPeriods = this.bermudanSwaption.getFixingDates().length-1;
 		double firstFixingDate = this.bermudanSwaption.getFixingDates()[0];
 		int optionTimeIndex;
 		if (evaluationTime <= firstFixingDate)
@@ -74,21 +76,26 @@ public abstract class AbstractUpperBoundEstimation implements BermudanSwaptionVa
 			for (optionTimeIndex = 1; evaluationTime > this.bermudanSwaption
 					.getFixingDates()[optionTimeIndex]; optionTimeIndex++)
 				;
-		// calculate upper bound
+		// calculate martingale approximation
 
-		double martingaleApproximation = calculateMartingaleApproximation(optionTimeIndex, model, cacheUnderlying,
+		ArrayList <RandomVariable> martingaleArrays = calculateMartingaleApproximation(optionTimeIndex, model, cacheUnderlying,
 				cacheOptionValues, cacheTriggers);
+
+		RandomVariable martingaleApproximation = model.getRandomVariableForConstant(0);
+
+		
+		// calculate the maximum of the estimated martingale for each remaining period
+		for (int optionPeriod = optionTimeIndex; optionPeriod < numberOfOptionPeriods; optionPeriod++)
+			martingaleApproximation = martingaleApproximation.floor(cacheUnderlying[optionPeriod].sub(martingaleArrays.get(optionPeriod)));
 		// Note that values is a relative price - no numeraire division is required
 		RandomVariable numeraireAtEvaluationTime = model.getNumeraire(evaluationTime);
 		RandomVariable monteCarloProbabilitiesAtEvaluationTime = model.getMonteCarloWeights(evaluationTime);
 		RandomVariable discountFactor = numeraireAtEvaluationTime.div(monteCarloProbabilitiesAtEvaluationTime);
-
 		optionValue = cacheOptionValues[optionTimeIndex].mult(discountFactor).add(martingaleApproximation).mult(weightOfMartingale);
-
 		return optionValue;
 
 	}
-
+	
 	/**
 	 * This method needs to be specified to estimate the martingale component of the
 	 * upper bound estimation using the following parameters:
@@ -105,27 +112,27 @@ public abstract class AbstractUpperBoundEstimation implements BermudanSwaptionVa
 	 * @return The Monte Carlo estimate of the martingale component, as a double.
 	 * @throws CalculationException
 	 */
-	protected abstract double calculateMartingaleApproximation(int period, LIBORModelMonteCarloSimulationModel model,
+	protected abstract ArrayList<RandomVariable> calculateMartingaleApproximation(int period, LIBORModelMonteCarloSimulationModel model,
 			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
-			throws CalculationException;
+					throws CalculationException;
 
 
 
 
-// some getters and setters
+	// some getters and setters
 
-/**
- * @return the weightOfMartingale
- */
-public double getWeightOfMartingale() {
-	return weightOfMartingale;
-}
+	/**
+	 * @return the weightOfMartingale
+	 */
+	public double getWeightOfMartingale() {
+		return weightOfMartingale;
+	}
 
-/**
- * @param weightOfMartingale the weightOfMartingale to set
- */
-public void setWeightOfMartingale(double weightOfMartingale) {
-	this.weightOfMartingale = weightOfMartingale;
-}
+	/**
+	 * @param weightOfMartingale the weightOfMartingale to set
+	 */
+	public void setWeightOfMartingale(double weightOfMartingale) {
+		this.weightOfMartingale = weightOfMartingale;
+	}
 
 }

@@ -16,6 +16,7 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 	private BermudanSwaptionValueEstimatorInterface valuationMethod;
 
 	/**
+	 * Constructs a Bermudan swaption with the input parameters. 
 	 * @param swaprates       Array of swaprates
 	 * @param valuationMethod The valuation method to be used.
 	 */
@@ -51,7 +52,7 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 	}
 
 	/**
-	 * Shifts the first exercise date of an Bermudan swaption needed e.g. in method
+	 * Clones the option shifting the first exercise date of an Bermudan swaption needed e.g. in method
 	 * of Andersen-Broadie.
 	 * 
 	 * @param startingIndex first fixing date to be kept
@@ -69,7 +70,7 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 	}
 
 	/**
-	 * Shifts the first and final exercise date of an Bermudan swaption needed e.g.
+	 * Clones the option shifting the first and the final exercise date of an Bermudan swaption needed e.g.
 	 * in method of Andersen-Broadie.
 	 * 
 	 * @param startingIndex first fixing date to be kept
@@ -79,6 +80,7 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 	 */
 	public BermudanSwaption getCloneWithModifiedStartingAndFinalPeriod(int startingIndex, int finalIndex) {
 
+		// make sure that indizes are well defined
 		if (startingIndex >= this.getFixingDates().length)
 			startingIndex = this.getFixingDates().length - 1;
 		finalIndex += 1;
@@ -103,9 +105,11 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 	}
 
 	
-
+	
 	/**
 	 * Method to clone a part of a double array using System.arraycopy
+	 * using System.arraycop outperforms Arrays.copyOfRange slightly -  
+	 * @see tests.ArrayCopyTimeComparison
 	 * @param arrayToBeCopied original array
 	 * @param startingIndex starting index for cloning (inclusive)
 	 * @param finalIndex final index for cloning (exclusive)

@@ -44,12 +44,7 @@ public class SimpleLowerBoundEstimationWithoutCaching extends AbstractLowerBound
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see drafts.AbstractSimpleBoundEstimation#calculateTriggerValues(int, double,
-	 * net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel)
-	 */
+	
 	@Override
 	protected RandomVariable calculateTriggerValues(int period, double fixingDate,
 			LIBORModelMonteCarloSimulationModel model) throws CalculationException {

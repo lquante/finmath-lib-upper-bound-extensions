@@ -44,10 +44,8 @@ public class SimpleLowerBoundEstimation extends AbstractLowerBoundEstimationInpu
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see drafts.AbstractSimpleBoundEstimation#calculateTriggerValues(int, double,
+	/**
+	 * @see lowerBoundMethods.AbstractLowerBoundEstimation#calculateTriggerValues(int, double,
 	 * net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel)
 	 */
 	@Override
