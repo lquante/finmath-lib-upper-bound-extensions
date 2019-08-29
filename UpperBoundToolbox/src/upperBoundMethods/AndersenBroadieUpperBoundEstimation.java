@@ -88,7 +88,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 			// initialize values for subsimulation
 			// shifting if swaption starts in later period
 			double currentFixingDate = this.bermudanSwaption.getFixingDates()[optionPeriod];
-			int modelPeriod = model.getTimeIndex(currentFixingDate);
+			int liborPeriod = model.getLiborPeriodIndex(currentFixingDate);
 
 			int martingaleIndex = 2;
 
@@ -104,7 +104,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 				double[] results = null;
 
 				try {
-					results = executeSubsimulation(model, path, optionPeriodForInput, modelPeriod, currentFixingDate,
+					results = executeSubsimulation(model, path, optionPeriodForInput, liborPeriod, currentFixingDate,
 							triggerValues, numberOfOptionPeriods, cacheUnderlying, martingaleIndexForInput);
 				} catch (CalculationException e) {
 					e.printStackTrace();
@@ -188,7 +188,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 			}
 			// transfrom to termination time and get modelTime index
 			double terminationTime = this.bermudanSwaption.getFixingDates()[terminationPeriod];
-			int terminationTimeIndex = model.getTimeIndex(terminationTime);
+			int terminationTimeIndex = model.getLiborPeriodIndex(terminationTime);
 			// retrieve discounted option value from cache:
 			discountedExerciseValue = cacheUnderlying[optionPeriod].get(path);
 			// create model for subsimulations (only if not only degenerated swaptions, thus
@@ -197,7 +197,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 				LIBORModelMonteCarloSimulationModel modelStepB = createSubsimulationModelTerminating(model, modelPeriod,
 						terminationTimeIndex, path, pathsSubsimulationsStepB);
 				// create option: with exercise time t+1, cache free lower bound method and shifted starting and final period
-				double futureExerciseTime = modelStepB.getTime(1);
+				double futureExerciseTime = modelStepB.getLiborPeriod(1);
 				
 				BermudanSwaptionValueEstimatorInterface cachefreeLowerBound = new SimpleLowerBoundEstimationWithoutCaching();
 

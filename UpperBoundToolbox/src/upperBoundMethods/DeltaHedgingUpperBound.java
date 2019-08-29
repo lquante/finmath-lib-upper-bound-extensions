@@ -36,7 +36,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
 					throws CalculationException {
 		this.model = model;
-		double evaluationTime = model.getTime(evaluationPeriod);
+		double evaluationTime = model.getLiborPeriod(evaluationPeriod);
 		int numberOfOptionPeriods = this.bermudanSwaption.getFixingDates().length;
 
 		// initialize martingale as lower bound value for period 0 and 1.
@@ -94,12 +94,12 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 		{
 
 			// get current model time index and time
-			int modelTimeIndex = model.getTimeIndex(this.bermudanSwaption.getFixingDates()[optionTimeIndex]);
-			double modelTime = model.getTime(modelTimeIndex);
+			int liborTimeIndex = model.getLiborPeriodIndex(this.bermudanSwaption.getFixingDates()[optionTimeIndex]);
+			double liborTime = model.getLiborPeriod(liborTimeIndex);
 			// calculate deltas for every fixing date
 			RandomVariable[] deltas = null;
 			try {
-				deltas = getDeltas(gradient, modelTime);
+				deltas = getDeltas(gradient, liborTime);
 			} catch (CalculationException e1) {
 
 				e1.printStackTrace();
@@ -124,7 +124,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 
 				RandomVariable currentRate = null;
 				try {
-					currentRate = model.getLIBOR(modelTime, fixingDate, paymenDate);
+					currentRate = model.getLIBOR(liborTime, fixingDate, paymenDate);
 				} catch (CalculationException e) {
 
 					e.printStackTrace();
@@ -132,7 +132,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 				RandomVariable bondValue = currentRate.mult(currentPeriodLength);
 				RandomVariable forwardAtTimeIndex = null;
 				try {
-					forwardAtTimeIndex = model.getLIBOR(modelTime, forwardFixingDate, forwardPaymenDate);
+					forwardAtTimeIndex = model.getLIBOR(liborTime, forwardFixingDate, forwardPaymenDate);
 				} catch (CalculationException e) {
 
 					e.printStackTrace();
@@ -158,7 +158,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 	 * @return The delta approximation as a RandomVariable.
 	 * @throws CalculationException
 	 */
-	private RandomVariable[] getDeltas(Map<Long, RandomVariable> gradient, double modelTime)
+	private RandomVariable[] getDeltas(Map<Long, RandomVariable> gradient, double liborTime)
 			throws CalculationException {
 
 		int numberOfFixingDates = this.bermudanSwaption.getFixingDates().length;
@@ -179,7 +179,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 
 			RandomVariable currentRate = null;
 			try {
-				currentRate = (model.getLIBOR(modelTime, fixingDate, paymenDate));
+				currentRate = (model.getLIBOR(liborTime, fixingDate, paymenDate));
 			} catch (CalculationException e) {
 
 				e.printStackTrace();
@@ -187,7 +187,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 
 			RandomVariable currentNumeraire = null;
 			try {
-				currentNumeraire = model.getNumeraire(modelTime);
+				currentNumeraire = model.getNumeraire(liborTime);
 			} catch (CalculationException e) {
 
 				e.printStackTrace();
@@ -205,7 +205,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 			// get exerciseIndicator
 			RandomVariable indicator = new RandomVariableFromDoubleArray(1.0);
 			if (exerciseTime != null) {
-				indicator = exerciseTime.sub(modelTime + 0.001).choose(new RandomVariableFromDoubleArray(1.0),
+				indicator = exerciseTime.sub(liborTime + 0.001).choose(new RandomVariableFromDoubleArray(1.0),
 						new RandomVariableFromDoubleArray(0.0));
 			}
 

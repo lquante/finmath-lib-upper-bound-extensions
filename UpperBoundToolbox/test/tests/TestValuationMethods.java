@@ -28,22 +28,25 @@ public class TestValuationMethods {
 			new DecimalFormatSymbols(Locale.ENGLISH));
 
 	// set tolerance for difference between upper and lower bound methods
-	static double tolerance = 0.01; // should be tightened pending further improvement
+	static double tolerance = 1; // should be tightened pending further improvement
 
 	private static int numberOfPaths = 1000;
-	private static double modelPeriodLength=0.5;
+	private static double timeDiscretizationLength=0.25;
+	private static double liborPeriodLength = 0.5;
 	
-	static int numberOfExercisePeriods = 10;
+	static int numberOfExercisePeriods = 4;
 	private static int numberOfSubsimulationsStepA = 100;
 	private static int numberOfSubsimulationsStepB = 100;
 	private static double optionPeriodLength=1;
+
 	
 
 	@Test
 	public void testSwaptionValuationMethods() throws CalculationException {
 		// set parameters
 		CreateTestModel.setNumberOfPaths(numberOfPaths);
-		CreateTestModel.setPeriodLength(modelPeriodLength);
+		CreateTestModel.setTimeDiscretizationPeriodLength(timeDiscretizationLength);
+		CreateTestModel.setLiborPeriodLength(liborPeriodLength);
 		CreateTestBermudanSwaption.setNumberOfExercisePeriods(numberOfExercisePeriods);
 		CreateTestBermudanSwaption.setPeriodLength(optionPeriodLength);
 		TestValuationMethods.setNumberOfSubsimulationsStepA(numberOfSubsimulationsStepA);
@@ -64,7 +67,7 @@ public class TestValuationMethods {
 		// "EvaluationDate Lower Bound Upper Bound(AB) Deviation(AB) ");
 
 		for (int modelTimeIndexToStartOption = 1; modelTimeIndexToStartOption < liborModel.getNumberOfLibors()
-				-numberOfExercisePeriods*optionPeriodLength/modelPeriodLength ; modelTimeIndexToStartOption++) {
+				-numberOfExercisePeriods*optionPeriodLength/liborPeriodLength ; modelTimeIndexToStartOption++) {
 			double firstFixingDate = liborModel.getLiborPeriod(modelTimeIndexToStartOption);
 			CreateTestBermudanSwaption.setFirstFixingDate(firstFixingDate);
 			CreateTestBermudanSwaption.setNumberOfExercisePeriods(numberOfExercisePeriods);

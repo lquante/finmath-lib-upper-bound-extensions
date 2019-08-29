@@ -48,10 +48,12 @@ public class CreateTestModel {
 	// time tiscretization properties
 
 	static double lastTime = 20.0;
-	static double dt = 0.5;
+	static double timeDiscretizationPeriodLength = 0.5;
 
 	static // properties of the libor model
 	double liborRateTimeHorzion = 20.0;
+	
+
 	static double liborPeriodLength = 0.5;
 	final static double correlationDecayParam = 0.3;
 	// points for interpolaton forward curve
@@ -108,7 +110,7 @@ public class CreateTestModel {
 		 */
 
 		TimeDiscretizationFromArray timeDiscretizationFromArray = new TimeDiscretizationFromArray(0.0,
-				(int) (lastTime / dt), dt);
+				(int) (lastTime / timeDiscretizationPeriodLength), timeDiscretizationPeriodLength);
 
 		/*
 		 * Create a volatility structure v[i][j] = sigma_j(t_i)
@@ -175,6 +177,63 @@ public class CreateTestModel {
 
 		return new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModel, process);
 	}
+	
+	
+	/**
+	 * @return the lastTime
+	 */
+	public static double getLastTime() {
+		return lastTime;
+	}
+
+	/**
+	 * @param lastTime the lastTime to set
+	 */
+	public static void setLastTime(double lastTime) {
+		CreateTestModel.lastTime = lastTime;
+	}
+
+	/**
+	 * @return the timeDiscretizationPeriodLength
+	 */
+	public static double getTimeDiscretizationPeriodLength() {
+		return timeDiscretizationPeriodLength;
+	}
+
+	/**
+	 * @param dt the timeDiscretizationPeriodLength to set
+	 */
+	public static void setTimeDiscretizationPeriodLength(double timeDiscretizationPeriodLength) {
+		CreateTestModel.timeDiscretizationPeriodLength = timeDiscretizationPeriodLength;
+	}
+
+	/**
+	 * @return the liborRateTimeHorzion
+	 */
+	public static double getLiborRateTimeHorzion() {
+		return liborRateTimeHorzion;
+	}
+
+	/**
+	 * @param liborRateTimeHorzion the liborRateTimeHorzion to set
+	 */
+	public static void setLiborRateTimeHorzion(double liborRateTimeHorzion) {
+		CreateTestModel.liborRateTimeHorzion = liborRateTimeHorzion;
+	}
+
+	/**
+	 * @return the liborPeriodLength
+	 */
+	public static double getLiborPeriodLength() {
+		return liborPeriodLength;
+	}
+
+	/**
+	 * @param liborPeriodLength the liborPeriodLength to set
+	 */
+	public static void setLiborPeriodLength(double liborPeriodLength) {
+		CreateTestModel.liborPeriodLength = liborPeriodLength;
+	}
 
 	/**
 	 * @return the numberOfPaths
@@ -218,8 +277,5 @@ public class CreateTestModel {
 		CreateTestModel.seed = seed;
 	}
 
-	public static void setPeriodLength(double periodLength) {
-		CreateTestModel.dt = periodLength;
-		
-	}
+
 }
