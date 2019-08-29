@@ -23,9 +23,9 @@ import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
 public class CreateTestBermudanSwaption {
 	// option parameters
 	static int numberOfExercisePeriods = 10; // number of (possible) exercise dates
-	static double swapPeriodLength = 0.5;
+	static double swapPeriodLength = 1;
 	static String currency = "EURO";
-	static double swaprate = 0.02; // getParSwaprate(liborModel, swapTenor);
+	static double swaprate = 0.021; // getParSwaprate(liborModel, swapTenor);
 	static BermudanSwaption bermudanSwaption;
 	static BermudanSwaptionValueEstimatorInterface valuationInterface = new SimpleLowerBoundEstimation(); // valuation
 	// interface
@@ -99,6 +99,11 @@ public class CreateTestBermudanSwaption {
 	 */
 	public static void setFirstFixingDate(double firstFixingDate) {
 		CreateTestBermudanSwaption.firstFixingDate = firstFixingDate;
+	}
+
+	public static void setPeriodLength(double periodLength) {
+		
+		CreateTestBermudanSwaption.swapPeriodLength = periodLength;
 	}
 
 }

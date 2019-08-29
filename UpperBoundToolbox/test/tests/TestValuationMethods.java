@@ -2,6 +2,7 @@ package tests;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Arrays;
 import java.util.Locale;
 
 import org.junit.Assert;
@@ -27,36 +28,44 @@ public class TestValuationMethods {
 			new DecimalFormatSymbols(Locale.ENGLISH));
 
 	// set tolerance for difference between upper and lower bound methods
-	static double tolerance = 1; // should be tightened pending further improvement
+	static double tolerance = 0.01; // should be tightened pending further improvement
 
 	private static int numberOfPaths = 1000;
+	private static double modelPeriodLength=0.5;
+	
 	static int numberOfExercisePeriods = 10;
-	private static int numberOfSubsimulationsStepA = 10000;
-	private static int numberOfSubsimulationsStepB = 10000;
+	private static int numberOfSubsimulationsStepA = 100;
+	private static int numberOfSubsimulationsStepB = 100;
+	private static double optionPeriodLength=1;
+	
 
 	@Test
 	public void testSwaptionValuationMethods() throws CalculationException {
 		// set parameters
 		CreateTestModel.setNumberOfPaths(numberOfPaths);
+		CreateTestModel.setPeriodLength(modelPeriodLength);
 		CreateTestBermudanSwaption.setNumberOfExercisePeriods(numberOfExercisePeriods);
+		CreateTestBermudanSwaption.setPeriodLength(optionPeriodLength);
 		TestValuationMethods.setNumberOfSubsimulationsStepA(numberOfSubsimulationsStepA);
 		TestValuationMethods.setNumberOfSubsimulationsStepB(numberOfSubsimulationsStepB);
-
+		
+		
 		executePrintSwaptionValuationMethods();
 	}
 
 	public static void executePrintSwaptionValuationMethods() throws CalculationException {
 
 		LIBORModelMonteCarloSimulationModel liborModel = CreateTestModel.createLIBORMarketModel();
+		
 		// print head of comparison table
 		System.out.println("Bermudan Swaption prices:\n");
 		System.out.println(
 				"FirstFixingDate\tLower Bound\tUpper Bound(AB)\t\tUpperBound(Deltas)\tDeviation(AB)\tDeviation(Delta subsimfree)");
 		// "EvaluationDate Lower Bound Upper Bound(AB) Deviation(AB) ");
 
-		for (int maturityIndex = 1; maturityIndex < liborModel.getNumberOfLibors()
-				- numberOfExercisePeriods; maturityIndex++) {
-			double firstFixingDate = liborModel.getLiborPeriod(maturityIndex);
+		for (int modelTimeIndexToStartOption = 1; modelTimeIndexToStartOption < liborModel.getNumberOfLibors()
+				-numberOfExercisePeriods*optionPeriodLength/modelPeriodLength ; modelTimeIndexToStartOption++) {
+			double firstFixingDate = liborModel.getLiborPeriod(modelTimeIndexToStartOption);
 			CreateTestBermudanSwaption.setFirstFixingDate(firstFixingDate);
 			CreateTestBermudanSwaption.setNumberOfExercisePeriods(numberOfExercisePeriods);
 			BermudanSwaption testSwaption = CreateTestBermudanSwaption.createBermudanSwaption();
@@ -70,7 +79,7 @@ public class TestValuationMethods {
 			SimpleLowerBoundEstimation lowerBound = new SimpleLowerBoundEstimation();
 
 			double lowerBoundValue = timingValuationTest(lowerBound, testSwaption, liborModel);
-
+			System.out.print(Arrays.toString(testSwaption.getExerciseProbabilities()));
 			// AB upper bound approximation
 			AndersenBroadieUpperBoundEstimation ABupperBound = new AndersenBroadieUpperBoundEstimation(lowerBound,
 					1,numberOfSubsimulationsStepA, numberOfSubsimulationsStepB);
@@ -103,6 +112,7 @@ public class TestValuationMethods {
 		double lastOperationTimingValuation = (timingValuationEnd - timingValuationStart) / 1000.0;
 		System.out.print(formatterValue.format(simulatedValue) + "\t");
 		System.out.print(formattterTime.format(lastOperationTimingValuation) + "\t");
+		
 		return simulatedValue;
 	}
 

@@ -217,4 +217,9 @@ public class CreateTestModel {
 	public static void setSeed(int seed) {
 		CreateTestModel.seed = seed;
 	}
+
+	public static void setPeriodLength(double periodLength) {
+		CreateTestModel.dt = periodLength;
+		
+	}
 }
