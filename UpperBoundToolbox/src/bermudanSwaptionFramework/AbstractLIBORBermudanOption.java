@@ -23,6 +23,8 @@ public abstract class AbstractLIBORBermudanOption extends AbstractLIBORMonteCarl
 	private final double[] periodNotionals; // Vector of notionals for each period
 	private final boolean isCallable; // If true: the right to enter into the underlying product, else the right to
 										// terminate the product.
+	
+	private double[] exerciseProbabilities; //array to store the exercise probabilities for each exerciseDate
 
 	/**
 	 * @param isPeriodStartDateExerciseDate Boolean vector, true if this period is
@@ -46,6 +48,9 @@ public abstract class AbstractLIBORBermudanOption extends AbstractLIBORMonteCarl
 		this.paymentDates = paymentDates;
 		this.periodNotionals = periodNotionals;
 		this.isCallable = isCallable;
+		
+		// initialize exercise probabilities - each fixing Date is considered, even if not an exercise date (than p==0=
+		this.exerciseProbabilities = new double[this.fixingDates.length];
 	}
 
 	@Override
@@ -85,6 +90,20 @@ public abstract class AbstractLIBORBermudanOption extends AbstractLIBORMonteCarl
 
 	public double[] getPeriodNotionals() {
 		return periodNotionals;
+	}
+
+	/**
+	 * @return the exerciseProbabilities
+	 */
+	public double[] getExerciseProbabilities() {
+		return exerciseProbabilities;
+	}
+	
+	/**
+	 * @exerciseProbabilites the exerciseProbabilities to set
+	 */
+	public void setExerciseProbabilities(double [] exerciseProbabilities) {
+		this.exerciseProbabilities = exerciseProbabilities;
 	}
 
 	public boolean isCallable() {

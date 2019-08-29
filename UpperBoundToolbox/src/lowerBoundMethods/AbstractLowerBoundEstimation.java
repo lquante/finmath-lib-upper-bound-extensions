@@ -32,7 +32,7 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 	RandomVariable optionValue;
 	RandomVariable triggerValues;
 
-	double[] exerciseProbablities;
+	
 	RandomVariable exerciseTime;
 	protected LIBORModelMonteCarloSimulationModel model;
 
@@ -67,7 +67,7 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 	 */
 	protected RandomVariable backwardAlgorithmValuation(double evaluationTime) throws CalculationException {
 		int numberOfFixingDates = bermudanSwaption.getFixingDates().length - 1;
-		exerciseProbablities = new double[numberOfFixingDates + 1];
+	
 		// Loop backward over the swap periods
 		for (int period = numberOfFixingDates; period >= 0; period--) {
 			double fixingDate = bermudanSwaption.getFixingDates()[period];
@@ -103,8 +103,7 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 
 		}
 
-		// exerciseProbablities =
-		// exerciseTime.getHistogram(bermudanOption.getFixingDates());
+	
 
 		// Note that values is a relative price - no numeraire division is required
 		RandomVariable numeraireAtZero = model.getNumeraire(evaluationTime);
@@ -383,10 +382,7 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 
 	// some getters
 
-	public double[] getExerciseProbablities() {
-		return exerciseProbablities;
-	}
-
+	
 	public RandomVariable getExerciseTime() {
 		return exerciseTime;
 	}

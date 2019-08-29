@@ -55,11 +55,6 @@ public abstract class AbstractLowerBoundEstimationWithoutCaching extends Abstrac
 	// some getters
 
 	@Override
-	public double[] getExerciseProbablities() {
-		return exerciseProbablities;
-	}
-
-	@Override
 	public RandomVariable getExerciseTime() {
 		return exerciseTime;
 	}
