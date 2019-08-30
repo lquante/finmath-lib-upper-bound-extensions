@@ -90,7 +90,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 		Map<Double, RandomVariable> martingaleCache = new HashMap<>();
 		// loop over all discretization dates of the libor discretization to calculate all martingale
 		// components
-		IntStream.range(firstLIBORIndex, lastLIBORIndex).forEach(liborTimeIndex ->
+		IntStream.range(firstLIBORIndex, lastLIBORIndex).parallel().forEach(liborTimeIndex ->
 
 		{
 
@@ -167,7 +167,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 		// loop parallelized over all fixing dates of the option to calculate each
 		// individual delta
 		
-		IntStream.range(firstLIBORIndex, lastLIBORIndex).forEach(liborPeriodIndex -> {
+		IntStream.range(firstLIBORIndex, lastLIBORIndex).parallel().forEach(liborPeriodIndex -> {
 			
 			SimpleLowerBoundEstimation valuationMethod = (SimpleLowerBoundEstimation) this.bermudanSwaption
 					.getValuationMethod();
