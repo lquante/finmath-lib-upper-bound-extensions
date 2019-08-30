@@ -26,15 +26,16 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 
 	LIBORModelMonteCarloSimulationModel model;
 
-	public DeltaHedgingUpperBound(AbstractLowerBoundEstimationInputForUpperBound lowerBoundMethod, double weightOfMartingale) {
+	public DeltaHedgingUpperBound(AbstractLowerBoundEstimationInputForUpperBound lowerBoundMethod,
+			double weightOfMartingale) {
 		super(lowerBoundMethod, weightOfMartingale);
 
 	}
 
 	@Override
-	protected ArrayList<RandomVariable> calculateMartingaleApproximation(int evaluationPeriod, LIBORModelMonteCarloSimulationModel model,
-			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
-					throws CalculationException {
+	protected ArrayList<RandomVariable> calculateMartingaleApproximation(int evaluationPeriod,
+			LIBORModelMonteCarloSimulationModel model, RandomVariable[] cacheUnderlying,
+			RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues) throws CalculationException {
 		this.model = model;
 		double evaluationTime = model.getLiborPeriod(evaluationPeriod);
 		int numberOfOptionPeriods = this.bermudanSwaption.getFixingDates().length;
@@ -49,7 +50,8 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 			martingaleCache.add(martingale);
 		}
 		// approximate remaining martingale components using delta approximation
-		martingaleCache.addAll(deltaMartingaleApproximation(evaluationTime, numberOfOptionPeriods));
+		martingaleCache
+				.addAll(deltaMartingaleApproximation(evaluationTime, cacheOptionValues[0], numberOfOptionPeriods));
 		// return array of martingale approximations:
 		return martingaleCache;
 	}
@@ -65,24 +67,18 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 	 * @return An array list with all estimated martingale RandomVariables
 	 * @throws CalculationException
 	 */
-	private ArrayList<RandomVariable> deltaMartingaleApproximation(double evaluationTime, int numberOfFixingDates)
-			throws CalculationException {
+	private ArrayList<RandomVariable> deltaMartingaleApproximation(double evaluationTime,
+			RandomVariable cacheOptionValue, int numberOfFixingDates) throws CalculationException {
 
 		/*
 		 * Going forward in time we monitor the hedge deltas on each path.
 		 */
 
-		long timingValuationStart = System.currentTimeMillis();
-
-		RandomVariableDifferentiable value = (RandomVariableDifferentiable) this.bermudanSwaption
-				.getValue(evaluationTime, model);
-
-		long timingValuationEnd = System.currentTimeMillis();
+		RandomVariableDifferentiable value = (RandomVariableDifferentiable) cacheOptionValue;
 
 		// Gradient of option value to replicate
-		long timingDerivativeStart = System.currentTimeMillis();
+
 		Map<Long, RandomVariable> gradient = value.getGradient();
-		long timingDerivativeEnd = System.currentTimeMillis();
 
 		// loop over all discretization dates of the option to calculate all martingale
 		// components
@@ -109,10 +105,10 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 			 */
 			RandomVariable martingale = model.getRandomVariableForConstant(0);
 			RandomVariable[] deltaInput = deltas;
-			//IntStream.range(0, numberOfFixingDates-1).parallel().forEach(fixingDateIndex -> no performance improvement via IntStream, thus for-loop
+			// IntStream.range(0, numberOfFixingDates-1).parallel().forEach(fixingDateIndex
+			// -> no performance improvement via IntStream, thus for-loop
 			for (int fixingDateIndex = 0; fixingDateIndex < numberOfFixingDates - 1; fixingDateIndex++) {
 				// get times for current rate calculation
-
 
 				double fixingDate = this.bermudanSwaption.getFixingDates()[fixingDateIndex];
 				double paymenDate = this.bermudanSwaption.getPaymentDates()[fixingDateIndex];
@@ -142,7 +138,6 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 				// calculate martingale according to 5.1 of Joshi / Tang (2014)
 				martingaleCache.add(martingale.add(deltaInput[fixingDateIndex].mult(forwardValue.sub(bondValue))));
 			}
-
 
 		});
 		return martingaleCache;
