@@ -30,7 +30,7 @@ public class TestValuationMethods {
 	// set tolerance for difference between upper and lower bound methods
 	static double tolerance = 1; // should be tightened pending further improvement
 
-	private static int numberOfPaths = 100;
+	private static int numberOfPaths = 1000;
 	private static double timeDiscretizationLength=0.25;
 	private static double liborPeriodLength = 0.25;
 	
