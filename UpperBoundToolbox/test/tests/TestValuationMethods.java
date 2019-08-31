@@ -28,16 +28,16 @@ public class TestValuationMethods {
 			new DecimalFormatSymbols(Locale.ENGLISH));
 
 	// set tolerance for difference between upper and lower bound methods
-	static double tolerance = 1; // should be tightened pending further improvement
+	static double tolerance = 0.01; // should be tightened pending further improvement
 
 	private static int numberOfPaths = 1000;
-	private static double timeDiscretizationLength=0.25;
-	private static double liborPeriodLength = 0.25;
+	private static double timeDiscretizationLength=0.5;
+	private static double liborPeriodLength = 0.5;
 	
-	static int numberOfExercisePeriods = 4;
-	private static int numberOfSubsimulationsStepA = 1;
-	private static int numberOfSubsimulationsStepB = 1;
-	private static double optionPeriodLength=2;
+	static int numberOfExercisePeriods = 10;
+	private static int numberOfSubsimulationsStepA = 100;
+	private static int numberOfSubsimulationsStepB = 100;
+	private static double optionPeriodLength=1;
 
 	
 
@@ -82,7 +82,7 @@ public class TestValuationMethods {
 			SimpleLowerBoundEstimation lowerBound = new SimpleLowerBoundEstimation();
 
 			double lowerBoundValue = timingValuationTest(lowerBound, testSwaption, liborModel);
-			System.out.print(Arrays.toString(testSwaption.getExerciseProbabilities()));
+			// System.out.print(Arrays.toString(testSwaption.getExerciseProbabilities()));
 			// AB upper bound approximation
 			AndersenBroadieUpperBoundEstimation ABupperBound = new AndersenBroadieUpperBoundEstimation(lowerBound,
 					1,numberOfSubsimulationsStepA, numberOfSubsimulationsStepB);

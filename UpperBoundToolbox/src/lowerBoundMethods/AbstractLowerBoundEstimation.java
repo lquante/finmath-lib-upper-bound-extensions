@@ -101,8 +101,8 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 				if(bermudanSwaption.isCallable()==false)
 					triggerValues = calculateTriggerValues(period, fixingDate, model);
 				else
-					// extension to account for points where exercise won't occur (compare Josh2014)
-					if (exerciseValue.getMax()<0)
+					// extension to account for points where exercise won't occur (compare Joshi2014)
+					if (exerciseValue.getMax()<=0)
 						triggerValues= model.getRandomVariableForConstant(-1);
 					else
 						triggerValues = calculateTriggerValues(period, fixingDate, model);

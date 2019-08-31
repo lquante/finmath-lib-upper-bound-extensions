@@ -104,14 +104,14 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 
 				e1.printStackTrace();
 			}
-			/*
-			 * calculate the martingale according to the deltas
-			 */
+			// approximate martingale according to the deltas
+			
 			RandomVariable martingale = model.getRandomVariableForConstant(0);
+			RandomVariable [] martingaleComponents = new RandomVariable[lastLIBORIndex-firstLIBORIndex];
 			RandomVariable[] deltaInput = deltas;
-			// IntStream.range(0, numberOfFixingDates-1).parallel().forEach(fixingDateIndex
-			// -> no performance improvement via IntStream, thus for-loop
-			for (int liborPeriodIndex = firstLIBORIndex; liborPeriodIndex < lastLIBORIndex; liborPeriodIndex++) {
+			IntStream.range(firstLIBORIndex, lastLIBORIndex).parallel().forEach(liborPeriodIndex->
+			//for (int liborPeriodIndex = firstLIBORIndex; liborPeriodIndex < lastLIBORIndex; liborPeriodIndex++) 
+					{
 				// get times for current rate calculation
 
 				double fixingDate = model.getLiborPeriod(liborPeriodIndex);
@@ -140,10 +140,12 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 				RandomVariable forwardValue = forwardAtTimeIndex.mult(forwardPeriodLength);
 
 				// calculate martingale according to 5.1 of Joshi / Tang (2014)
-				martingale = martingale.add(deltaInput[liborPeriodIndex-firstLIBORIndex].mult(forwardValue.sub(bondValue)));
-				martingaleCache.put(fixingDate,martingale);
-			}
-
+				martingaleComponents[liborPeriodIndex-firstLIBORIndex] = (deltaInput[liborPeriodIndex-firstLIBORIndex].mult(forwardValue.sub(bondValue)));
+				
+			});
+			for (int i=0; i<(lastLIBORIndex-firstLIBORIndex);i++)
+				martingale.add(martingaleComponents[i]);
+			martingaleCache.put(liborTime,martingale);
 		});
 		return martingaleCache;
 
@@ -238,16 +240,16 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 		if (underlying.isDeterministic()) {
 			basisFunctions.add(underlying);
 		} else {
-			int numberOfBins = this.bermudanSwaption.getFixingDates().length * 10;
+			int numberOfBins =  20; //this.bermudanSwaption.getFixingDates().length * 10; optimal number of bins?
 			double[] values = underlying.getRealizations();
 			Arrays.sort(values);
-			for(int i=0;i< numberOfBins;i++) {
+			IntStream.range(0, numberOfBins).parallel().forEach(i->{	
 				double binLeft = values[(int) (((double) i / (double) numberOfBins) * values.length)];
 				RandomVariable basisFunction = underlying.sub(binLeft)
 						.choose(new RandomVariableFromDoubleArray(1.0), new RandomVariableFromDoubleArray(0.0))
 						.mult(exerciseIndicator);
 				basisFunctions.add(basisFunction);
-			}
+			});
 		}
 
 		return basisFunctions;
