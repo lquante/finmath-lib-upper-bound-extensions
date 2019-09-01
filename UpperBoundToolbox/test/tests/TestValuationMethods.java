@@ -164,4 +164,18 @@ public class TestValuationMethods {
 		TestValuationMethods.numberOfSubsimulationsStepB = numberOfSubsimulationsStepB;
 	}
 
+	/**
+	 * @return the tolerance
+	 */
+	public static double getTolerance() {
+		return tolerance;
+	}
+
+	/**
+	 * @param tolerance the tolerance to set
+	 */
+	public static void setTolerance(double tolerance) {
+		TestValuationMethods.tolerance = tolerance;
+	}
+
 }

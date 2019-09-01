@@ -49,7 +49,7 @@ public abstract class AbstractLowerBoundEstimationInputForUpperBound extends Abs
 		cacheTriggerValues = new RandomVariable[numberOfFixingDates + 1];
 		initializeValuation(triggerValuesInput);
 		optionValue= backwardAlgorithmValuation(evaluationTime);
-		this.bermudanSwaption.setExerciseProbabilities(exerciseTime.getHistogram(this.bermudanSwaption.getFixingDates()));
+	//	this.bermudanSwaption.setExerciseProbabilities(exerciseTime.getHistogram(this.bermudanSwaption.getFixingDates()));
 		return optionValue;
 
 	}

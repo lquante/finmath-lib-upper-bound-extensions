@@ -106,4 +106,18 @@ public class CreateTestBermudanSwaption {
 		CreateTestBermudanSwaption.swapPeriodLength = periodLength;
 	}
 
+	/**
+	 * @return the swaprate
+	 */
+	public static double getSwaprate() {
+		return swaprate;
+	}
+
+	/**
+	 * @param swaprate the swaprate to set
+	 */
+	public static void setSwaprate(double swaprate) {
+		CreateTestBermudanSwaption.swaprate = swaprate;
+	}
+
 }

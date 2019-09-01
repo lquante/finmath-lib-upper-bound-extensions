@@ -55,15 +55,17 @@ public class CreateTestModel {
 	
 
 	static double liborPeriodLength = 0.5;
-	final static double correlationDecayParam = 0.3;
+
 	// points for interpolaton forward curve
 	static double[] forwardInterpolationTimePoints = new double[] { 0.5, 1.0, 2.0, 5.0, 40.0 };
 	static double[] forwardInterpolationRates = new double[] { 0.02, 0.02, 0.02, 0.02, 0.02 };
 	// parameters of volatility model (instVolatility = (a + b * Math.exp(-c *
 	// timeToMaturity)
-	static double a = 0.3;
-	static double b = 0.2;
-	static double c = 0.25;
+	static double volatilityA = 0.3;
+	static double volatilityB = 0.2;
+	static double volatilityC = 0.25;
+	// exponential correlation decay parameter
+	static double correlationDecayParam = 0.3;
 	// measure
 	static String measure = LIBORMarketModelFromCovarianceModel.Measure.SPOT.name();
 
@@ -128,7 +130,7 @@ public class CreateTestModel {
 				if (timeToMaturity <= 0) {
 					instVolatility = 0; // This forward rate is already fixed, no volatility
 				} else {
-					instVolatility = (a + b * Math.exp(-c * timeToMaturity))
+					instVolatility = (volatilityA + volatilityB * Math.exp(-volatilityC * timeToMaturity))
 							* forwardCurveInterpolation.getForward(null, liborPeriodDiscretization.getTime(liborIndex)); // rescale
 					// values
 				}
@@ -275,6 +277,90 @@ public class CreateTestModel {
 	 */
 	public static void setSeed(int seed) {
 		CreateTestModel.seed = seed;
+	}
+
+	/**
+	 * @return the forwardInterpolationTimePoints
+	 */
+	public static double[] getForwardInterpolationTimePoints() {
+		return forwardInterpolationTimePoints;
+	}
+
+	/**
+	 * @param forwardInterpolationTimePoints the forwardInterpolationTimePoints to set
+	 */
+	public static void setForwardInterpolationTimePoints(double[] forwardInterpolationTimePoints) {
+		CreateTestModel.forwardInterpolationTimePoints = forwardInterpolationTimePoints;
+	}
+
+	/**
+	 * @return the forwardInterpolationRates
+	 */
+	public static double[] getForwardInterpolationRates() {
+		return forwardInterpolationRates;
+	}
+
+	/**
+	 * @param forwardInterpolationRates the forwardInterpolationRates to set
+	 */
+	public static void setForwardInterpolationRates(double[] forwardInterpolationRates) {
+		CreateTestModel.forwardInterpolationRates = forwardInterpolationRates;
+	}
+
+	/**
+	 * @return the volatilityA
+	 */
+	public static double getVolatilityA() {
+		return volatilityA;
+	}
+
+	/**
+	 * @param volatilityA the volatilityA to set
+	 */
+	public static void setVolatilityA(double volatilityA) {
+		CreateTestModel.volatilityA = volatilityA;
+	}
+
+	/**
+	 * @return the volatilityB
+	 */
+	public static double getVolatilityB() {
+		return volatilityB;
+	}
+
+	/**
+	 * @param volatilityB the volatilityB to set
+	 */
+	public static void setVolatilityB(double volatilityB) {
+		CreateTestModel.volatilityB = volatilityB;
+	}
+
+	/**
+	 * @return the volatilityC
+	 */
+	public static double getVolatilityC() {
+		return volatilityC;
+	}
+
+	/**
+	 * @param volatilityC the volatilityC to set
+	 */
+	public static void setVolatilityC(double volatilityC) {
+		CreateTestModel.volatilityC = volatilityC;
+	}
+
+	/**
+	 * @return the correlationDecayParam
+	 */
+	public static double getCorrelationDecayParam() {
+		return correlationDecayParam;
+	}
+
+	/**
+	 * @param correlationDecayParam the correlationDecayParam to set
+	 */
+	public static void setCorrelationDecayParam(double correlationDecayParam) {
+		CreateTestModel.correlationDecayParam = correlationDecayParam;
 	}
 
 
