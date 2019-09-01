@@ -107,7 +107,7 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 					else
 						triggerValues = calculateTriggerValues(period, fixingDate, model);
 
-
+				
 			}
 			applyExerciseCriteria(exerciseDate, period);
 

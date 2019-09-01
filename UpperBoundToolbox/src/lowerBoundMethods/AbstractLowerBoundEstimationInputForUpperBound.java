@@ -71,6 +71,7 @@ public abstract class AbstractLowerBoundEstimationInputForUpperBound extends Abs
 		exerciseTime = triggerValues.choose(new Scalar(exerciseDate), exerciseTime);
 
 		// caching for upper bound methods
+		cacheValuesOfUnderlying[period] = exerciseValue;
 		cacheTriggerValues[period] = triggerValues;
 		cacheOptionValues[period] = optionValue;
 	}

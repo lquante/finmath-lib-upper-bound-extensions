@@ -70,7 +70,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	protected ArrayList<RandomVariable> calculateMartingaleApproximation(int evaluationPeriod, LIBORModelMonteCarloSimulationModel model,
 			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
 			throws CalculationException {
-		int numberOfSimulations = cacheOptionValues[0].getRealizations().length;
+		int numberOfPaths = model.getNumberOfPaths();
 
 		// determine number of martingale components to be estimated
 		int numberOfOptionPeriods = this.bermudanSwaption.getFixingDates().length;
@@ -93,14 +93,14 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 			int martingaleIndex = 2;
 
 			// Arrays to store pathwise results to be transformed to RandomVariable
-			double[] discountedExerciseValueArray = new double[numberOfSimulations];
-			double[] discountedFutureExerciseValueArray = new double[numberOfSimulations];
-			double[] previousExerciseIndicatorArray = new double[numberOfSimulations];
+			double[] discountedExerciseValueArray = new double[numberOfPaths];
+			double[] discountedFutureExerciseValueArray = new double[numberOfPaths];
+			double[] previousExerciseIndicatorArray = new double[numberOfPaths];
 
 			// Parallelized implementation of pathwise part of A-B algorithm:
 			int optionPeriodForInput = optionPeriod;
 			int martingaleIndexForInput = martingaleIndex;
-			IntStream.range(0, numberOfSimulations).parallel().forEach(path -> {
+			IntStream.range(0, numberOfPaths).parallel().forEach(path -> {
 				double[] results = null;
 
 				try {

@@ -65,9 +65,6 @@ public class SimpleLowerBoundEstimation extends AbstractLowerBoundEstimationInpu
 		// division) is required!
 		triggerValues = triggerValuesDiscounted.getConditionalExpectation(conditionalExpectationOperator);
 
-		// cache values of underlying (including perfect foresight) and E[U_i|F_T_i-1]
-
-		cacheValuesOfUnderlying[period] = exerciseValue;
 		return triggerValues;
 
 	}
