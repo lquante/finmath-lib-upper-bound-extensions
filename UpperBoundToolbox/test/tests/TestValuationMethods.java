@@ -30,13 +30,17 @@ public class TestValuationMethods {
 	// set tolerance for difference between upper and lower bound methods
 	static double tolerance = 0.01; // should be tightened pending further improvement
 
-	private static int numberOfPaths = 1000;
-	private static double timeDiscretizationLength=0.5;
-	private static double liborPeriodLength = 0.5;
 	
-	static int numberOfExercisePeriods = 10;
+	// libor model parameters
+	double lastTimePoint = 30;
+	private static double timeDiscretizationLength=0.25;
+	private static double liborPeriodLength = 0.5;
+	// monte carlo parameters
+	private static int numberOfPaths = 1;
 	private static int numberOfSubsimulationsStepA = 100;
 	private static int numberOfSubsimulationsStepB = 100;
+	// option parameters
+	static int numberOfExercisePeriods = 10;
 	private static double optionPeriodLength=1;
 
 	
@@ -44,14 +48,27 @@ public class TestValuationMethods {
 	@Test
 	public void testSwaptionValuationMethods() throws CalculationException {
 		// set parameters
-		CreateTestModel.setNumberOfPaths(numberOfPaths);
+		CreateTestModel.setLastTime(lastTimePoint);
+		CreateTestModel.setLiborRateTimeHorzion(lastTimePoint);
 		CreateTestModel.setTimeDiscretizationPeriodLength(timeDiscretizationLength);
 		CreateTestModel.setLiborPeriodLength(liborPeriodLength);
-		CreateTestBermudanSwaption.setNumberOfExercisePeriods(numberOfExercisePeriods);
-		CreateTestBermudanSwaption.setPeriodLength(optionPeriodLength);
+		
+		CreateTestModel.setNumberOfPaths(numberOfPaths);
+		
 		TestValuationMethods.setNumberOfSubsimulationsStepA(numberOfSubsimulationsStepA);
 		TestValuationMethods.setNumberOfSubsimulationsStepB(numberOfSubsimulationsStepB);
 		
+		CreateTestBermudanSwaption.setNumberOfExercisePeriods(numberOfExercisePeriods);
+		CreateTestBermudanSwaption.setPeriodLength(optionPeriodLength);
+		
+		System.out.println("Number of paths: "+numberOfPaths);
+		System.out.println("Number of subsimulation paths step A: "+numberOfSubsimulationsStepA);
+		System.out.println("Number of subsimulation paths step B: "+numberOfSubsimulationsStepB);
+		System.out.println("Number of exercise periods: "+numberOfExercisePeriods);
+		
+		System.out.println("Time discretization period length: "+timeDiscretizationLength);
+		System.out.println("LIBOR period length: "+liborPeriodLength);
+		System.out.println("Option period length: "+optionPeriodLength);
 		
 		executePrintSwaptionValuationMethods();
 	}

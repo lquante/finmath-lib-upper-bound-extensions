@@ -47,11 +47,11 @@ public class CreateTestModel {
 
 	// time tiscretization properties
 
-	static double lastTime = 20.0;
+	static double lastTime = 30;
 	static double timeDiscretizationPeriodLength = 0.5;
 
 	static // properties of the libor model
-	double liborRateTimeHorzion = 20.0;
+	double liborRateTimeHorzion = 30;
 	
 
 	static double liborPeriodLength = 0.5;
