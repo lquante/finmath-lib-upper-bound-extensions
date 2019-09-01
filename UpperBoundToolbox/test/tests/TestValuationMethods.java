@@ -36,7 +36,7 @@ public class TestValuationMethods {
 	private static double timeDiscretizationLength=0.25;
 	private static double liborPeriodLength = 0.5;
 	// monte carlo parameters
-	private static int numberOfPaths = 1;
+	private static int numberOfPaths = 1000;
 	private static int numberOfSubsimulationsStepA = 100;
 	private static int numberOfSubsimulationsStepB = 100;
 	// option parameters
