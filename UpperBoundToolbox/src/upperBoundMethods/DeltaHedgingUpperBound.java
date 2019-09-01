@@ -144,10 +144,13 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 				e1.printStackTrace();
 			}
 			// get gradient with respect to the forward rate and adjust by numeraire
-			RandomVariable delta = gradient.get(valuationMethod.getLiborIDs().get(fixingDate)).mult(currentNumeraire);
+			RandomVariable delta = gradient.get(valuationMethod.getLiborIDs().get(fixingDate));
+			
 			if (delta == null) {
 				delta = currentRate.mult(0.0);
 			}
+			// adjust by numeraire
+			delta= delta.mult(currentNumeraire);
 			// get exerciseIndicator
 			RandomVariable indicator = calculateExerciseIndicator  (liborTime,valuationMethod.getExerciseTime());
 			// Create a conditional expectation estimator with some basis functions
