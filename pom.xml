@@ -7,7 +7,8 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>finmath-lib-upper-bound-extensions-alpha</name>
 	<properties>
-	
+		<src.main.java.dir>src/main/java</src.main.java.dir>
+		<src.test.java.dir>src/test/java</src.test.java.dir>
 		<junit.version>4.12</junit.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -41,9 +42,7 @@
 	</dependencies>
 	
 	<build>
-		<defaultGoal>clean install </defaultGoal>
-		<sourceDirectory>UpperBoundToolbox/src</sourceDirectory>
-		<testSourceDirectory>UpperBoundToolbox/test</testSourceDirectory> 
+		<defaultGoal>clean install </defaultGoal> 
 		<plugins>
 			
 			<plugin>
