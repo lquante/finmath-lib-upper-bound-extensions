@@ -52,7 +52,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 		}
 		// calculate number of LIBOR periods covered by the fixing dates:
 
-		double firstFixingDate= fixingDates[0];
+		double firstFixingDate= fixingDates[2];
 		double lastFixingDate= fixingDates[numberOfOptionPeriods-1];
 		int firstLIBORIndex = model.getLiborPeriodIndex(firstFixingDate);
 		int lastLIBORIndex = model.getLiborPeriodIndex(lastFixingDate);
@@ -60,7 +60,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 		// approximate remaining martingale components using delta approximation
 		Map<Double, RandomVariable> liborMartingale = (deltaMartingaleApproximation(evaluationTime, cacheOptionValues[0], firstLIBORIndex,lastLIBORIndex));
 		// filter values for all fixing dates
-		for (int fixingDateIndex=0;fixingDateIndex<numberOfOptionPeriods;fixingDateIndex++)
+		for (int fixingDateIndex=2;fixingDateIndex<numberOfOptionPeriods;fixingDateIndex++)
 			martingaleCache.add(liborMartingale.get(fixingDates[fixingDateIndex]));
 		// return array of martingale approximations:
 		return martingaleCache;
@@ -87,7 +87,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 		Map<Double, RandomVariable> martingaleCache = new HashMap<>();
 		// loop over all discretization dates of the libor discretization to calculate all martingale
 		// components
-		IntStream.range(firstLIBORIndex, lastLIBORIndex).parallel().forEach(liborTimeIndex ->
+		IntStream.range(firstLIBORIndex, lastLIBORIndex+1).parallel().forEach(liborTimeIndex ->
 		{
 			// get current model time index and time
 			double liborTime = model.getLiborPeriod(liborTimeIndex);
