@@ -85,7 +85,7 @@ public abstract class AbstractUpperBoundEstimation implements BermudanSwaptionVa
 
 		
 		// calculate the maximum of the estimated martingale for each remaining period
-		for (int optionPeriod = optionTimeIndex; optionPeriod < numberOfOptionPeriods; optionPeriod++)
+		for (int optionPeriod = 0; optionPeriod < numberOfOptionPeriods; optionPeriod++)
 			martingaleApproximation = martingaleApproximation.floor(cacheUnderlying[optionPeriod].sub(martingaleArrays.get(optionPeriod)));
 		// Note that values is a relative price - no numeraire division is required
 		RandomVariable numeraireAtEvaluationTime = model.getNumeraire(evaluationTime);
