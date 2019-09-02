@@ -27,13 +27,11 @@ public class TestValuationMethods {
 	private static DecimalFormat formatterDeviation = new DecimalFormat(" 0.00000E00;-0.00000E00",
 			new DecimalFormatSymbols(Locale.ENGLISH));
 
-	// set tolerance for difference between upper and lower bound methods
-	static double tolerance = 0.01; // should be tightened pending further improvement
-
+	
 	
 	// libor model parameters
 	double lastTimePoint = 30;
-	private static double timeDiscretizationLength=0.25;
+	private static double timeDiscretizationLength=0.5;
 	private static double liborPeriodLength = 0.5;
 	// monte carlo parameters
 	private static int numberOfPaths = 1000;
@@ -43,7 +41,8 @@ public class TestValuationMethods {
 	static int numberOfExercisePeriods = 10;
 	private static double optionPeriodLength=1;
 
-	
+	// tolerance depending on numberOfPaths
+	static double tolerance = (double)1/(double)numberOfPaths;
 
 	@Test
 	public void testSwaptionValuationMethods() throws CalculationException {
@@ -57,6 +56,7 @@ public class TestValuationMethods {
 		
 		TestValuationMethods.setNumberOfSubsimulationsStepA(numberOfSubsimulationsStepA);
 		TestValuationMethods.setNumberOfSubsimulationsStepB(numberOfSubsimulationsStepB);
+		TestValuationMethods.setTolerance(tolerance);
 		
 		CreateTestBermudanSwaption.setNumberOfExercisePeriods(numberOfExercisePeriods);
 		CreateTestBermudanSwaption.setPeriodLength(optionPeriodLength);

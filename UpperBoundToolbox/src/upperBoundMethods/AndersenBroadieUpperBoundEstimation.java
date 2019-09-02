@@ -72,69 +72,47 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
 					throws CalculationException {
 		int numberOfPaths = model.getNumberOfPaths();
-
 		// determine number of martingale components to be estimated
 		int numberOfOptionPeriods = this.bermudanSwaption.getFixingDates().length;
-
 		// initialize martingale as lower bound value for period 0 and 1.
 		ArrayList<RandomVariable> martingaleCache = new ArrayList<RandomVariable>();
-		RandomVariable martingale = cacheOptionValues[evaluationPeriod];
-		martingaleCache.add(martingale);
-		if (evaluationPeriod + 1 < cacheOptionValues.length) {
-			martingale = cacheOptionValues[evaluationPeriod + 1];
-			martingaleCache.add(martingale);
-		}
-
+		martingaleCache.add(cacheOptionValues[evaluationPeriod]);
+		if (evaluationPeriod + 1 < cacheOptionValues.length)
+			martingaleCache.add(cacheOptionValues[evaluationPeriod + 1]);
+		// estimate martingale for all remaining fixing dates
+		int martingaleIndex = 2; // index of current martingale component to be calculated
 		for (int optionPeriod = 2 + evaluationPeriod; optionPeriod < numberOfOptionPeriods; optionPeriod++) {
 			// initialize values for subsimulation
-			// shifting if swaption starts in later period
 			double currentFixingDate = this.bermudanSwaption.getFixingDates()[optionPeriod];
 			int liborPeriod = model.getLiborPeriodIndex(currentFixingDate);
-
-			int martingaleIndex = 2;
-
 			// Arrays to store pathwise results to be transformed to RandomVariable
-			double[] discountedExerciseValueArray = new double[numberOfPaths];
+			double[] discountedExerciseValueArray  = new double[numberOfPaths];
 			double[] discountedFutureExerciseValueArray = new double[numberOfPaths];
 			double[] previousExerciseIndicatorArray = new double[numberOfPaths];
-
 			// Parallelized implementation of pathwise part of A-B algorithm:
-			int optionPeriodForInput = optionPeriod;
+			int optionPeriodForInput = optionPeriod; // to avoid non-final problems in nested environment
 			int martingaleIndexForInput = martingaleIndex;
 			IntStream.range(0, numberOfPaths).parallel().forEach(path -> {
 				double[] results = null;
-
 				try {
 					results = executeSubsimulation(model, path, optionPeriodForInput, liborPeriod, currentFixingDate,
 							triggerValues, numberOfOptionPeriods, cacheUnderlying, martingaleIndexForInput);
-				} catch (CalculationException e) {
-					e.printStackTrace();
-				}
+				} catch (CalculationException e)
+				{e.printStackTrace();}
 				discountedExerciseValueArray[path] = results[0];
 				discountedFutureExerciseValueArray[path] = results[1];
 				previousExerciseIndicatorArray[path] = results[2];
 			});
-
-			RandomVariable discountedExerciseValue = new RandomVariableFromDoubleArray(currentFixingDate,
-					discountedExerciseValueArray);
-			RandomVariable discountedFutureExerciseValue = new RandomVariableFromDoubleArray(currentFixingDate,
-					discountedFutureExerciseValueArray);
-			RandomVariable previousExerciseIndicator = new RandomVariableFromDoubleArray(currentFixingDate,
-					previousExerciseIndicatorArray);
-
-			RandomVariable previousExerciseValue = cacheUnderlying[optionPeriod - 1];
-
+			RandomVariable discountedExerciseValue = new RandomVariableFromDoubleArray(currentFixingDate,discountedExerciseValueArray);
+			RandomVariable discountedFutureExerciseValue = new RandomVariableFromDoubleArray(currentFixingDate,discountedFutureExerciseValueArray);
+			RandomVariable previousExerciseIndicator = new RandomVariableFromDoubleArray(currentFixingDate,previousExerciseIndicatorArray);
 			// calculate value of martingale estimation
-			martingale = martingaleCache.get(martingaleIndex - 1).sub(cacheOptionValues[martingaleIndex - 1])
+			martingaleCache.add(martingaleCache.get(martingaleIndex - 1).sub(cacheOptionValues[martingaleIndex - 1])
 					.add(discountedExerciseValue)
-					.sub((discountedFutureExerciseValue.add(previousExerciseValue)).mult(previousExerciseIndicator));
-			martingaleCache.add(martingale);
+					.sub((discountedFutureExerciseValue.add(cacheUnderlying[martingaleIndex - 1])).mult(previousExerciseIndicator)));
 			martingaleIndex += 1;
-
 		}
-		// return array of martingale approximations:
 		return martingaleCache;
-
 	}
 
 	/**
@@ -157,43 +135,37 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 			int modelPeriod, double currentFixingDate, RandomVariable[] triggerValues, int numberOfOptionPeriods,
 			RandomVariable[] cacheUnderlying, int martingaleIndex) throws CalculationException {
 		// initialize variables
-		double discountedExerciseValue = 0;
-		double discountedFutureExerciseValue = 0;
+		double discountedExerciseValue = 0; double discountedFutureExerciseValue = 0;
 		// check trigger values for each path of the main simulation:
 		if (triggerValues[optionPeriod].get(path) >= 0) // case 2a
-		{
 			discountedExerciseValue = calculateSubsimulationValue(model,optionPeriod,1000,modelPeriod,1000,path,currentFixingDate, pathsSubsimulationsStepA);
-		} else // case 2b
+		else // case 2b
 		{
-			// create model terminating as soon as triggerValues[path+i] >=0 for i>=optionPeriod+1
-			// determine termination period:
 			int terminationPeriod = optionPeriod;
+			// determine termination period: as soon as triggerValues[path+i] >=0 for i>=optionPeriod+1
 			while (terminationPeriod < numberOfOptionPeriods - 1) {
 				if (triggerValues[terminationPeriod].get(path) < 0)
 					terminationPeriod += 1;
 				else
 					break;
 			}
-			// transfrom to termination time and get modelTime index
+			// transform to termination time and get LIBORindex
 			double terminationTime = this.bermudanSwaption.getFixingDates()[terminationPeriod];
 			int terminationTimeIndex = model.getLiborPeriodIndex(terminationTime);
 			// retrieve discounted option value from cache:
 			discountedExerciseValue = cacheUnderlying[optionPeriod].get(path);
-			// create model for subsimulations 
 			if (modelPeriod+1 < terminationTimeIndex) {
+				// create model for subsimulations 
 				double futureExerciseTime = model.getLiborPeriod(modelPeriod+1);
 				discountedFutureExerciseValue = calculateSubsimulationValue(model,optionPeriod,terminationPeriod-1,modelPeriod,terminationTimeIndex,path,futureExerciseTime, pathsSubsimulationsStepB);
 			}
 		}
 		// determine previous exercise indicator for martingale calculation
-		double previousExerciseIndicator;
+		double previousExerciseIndicator = 0;
 		if (triggerValues[martingaleIndex - 1].get(path) >= 0)
 			previousExerciseIndicator = 1;
-		else
-			previousExerciseIndicator = 0;
 		// return results as a triple
-		double[] results = { discountedExerciseValue, discountedFutureExerciseValue, previousExerciseIndicator };
-		return results;
+		return new double[] { discountedExerciseValue, discountedFutureExerciseValue, previousExerciseIndicator };
 	}
 
 	private double calculateSubsimulationValue(LIBORModelMonteCarloSimulationModel model, int startingOptionPeriod,int terminationOptionPeriod, int startingTimeIndex, int terminationTimeIndex,
@@ -254,27 +226,18 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 		return new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModel, process);
 	}
 
-
-
-
 	private LIBORMarketModel liborModelCreator(TimeDiscretization shortenedLiborDiscretization,
 			ForwardCurve forwardCurve, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		DiscountCurveFromForwardCurve discountCurve = new DiscountCurveFromForwardCurve(forwardCurve);
 		// create new model
-		/*
-		 * Create a volatility structure v[i][j] = sigma_j(t_i)
-		 */
+		// Create a volatility structure v[i][j] = sigma_j(t_i)
 		double[][] volatility = createVolatilityMatrix(0.3, 0.2, 0.25, forwardCurve, shortenedLiborDiscretization);
 		LIBORVolatilityModelFromGivenMatrix volatilityModel = new LIBORVolatilityModelFromGivenMatrix(
 				shortenedLiborDiscretization, shortenedLiborDiscretization, volatility);
-		/*
-		 * Create a correlation model rho_{i,j} = exp(-a * abs(T_i-T_j))
-		 */
+		// Create a correlation model rho_{i,j} = exp(-a * abs(T_i-T_j))
 		LIBORCorrelationModelExponentialDecay correlationModel = new LIBORCorrelationModelExponentialDecay(
 				shortenedLiborDiscretization, shortenedLiborDiscretization, model.getNumberOfFactors(), 0.3);
-		/*
-		 * Combine volatility model and correlation model to a covariance model
-		 */
+		//  Combine volatility model and correlation model to a covariance model
 		LIBORCovarianceModelFromVolatilityAndCorrelation covarianceModel = new LIBORCovarianceModelFromVolatilityAndCorrelation(
 				shortenedLiborDiscretization, shortenedLiborDiscretization, volatilityModel, correlationModel);
 		// create AAD random variable factory
@@ -282,7 +245,6 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 				new RandomVariableFactory());
 		return new LIBORMarketModelFromCovarianceModel(shortenedLiborDiscretization, null,
 				forwardCurve, discountCurve, randomVariableFactory, covarianceModel, null, null);
-
 	}
 
 	private double[][] createVolatilityMatrix(double a, double b, double c, ForwardCurve forwardCurve, TimeDiscretization shortenedLiborDiscretization) {
@@ -295,23 +257,18 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 				double time = shortenedLiborDiscretization.getTime(timeIndex);
 				double maturity = shortenedLiborDiscretization.getTime(liborIndex);
 				double timeToMaturity = maturity - time;
-
 				double instVolatility;
 				if (timeToMaturity <= 0) {
 					instVolatility = 0; // This forward rate is already fixed, no volatility
 				} else {
 					instVolatility = (a + b * Math.exp(-c * timeToMaturity))
 							* forwardCurve.getForward(null, shortenedLiborDiscretization.getTime(liborIndex)); // rescale
-					// values
 				}
-
-				// Store
 				volatility[timeIndex][liborIndex] = instVolatility;
 			}
 		}
 		return volatility;
 	}
-
 	private ForwardCurve createForwardCurveFromRealization(RandomVariable[] forwardCurveRandomVariable,
 			TimeDiscretization shortenedLiborDiscretization, int path) {
 		int numberOfShortendTimes = shortenedLiborDiscretization.getNumberOfTimes();
@@ -319,7 +276,6 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 		double periodLength = shortenedLiborDiscretization.getTimeStep(0);
 		for (int i = 0; i < numberOfShortendTimes; i++)
 			forwardArray[i] = forwardCurveRandomVariable[i].get(path);
-
 		return ForwardCurveInterpolation.createForwardCurveFromForwards(
 				"forwardCurve" /* name of the curve */, shortenedLiborDiscretization.getAsDoubleArray()
 				/* fixings of the forward */, forwardArray, /* forwards */
