@@ -33,6 +33,7 @@ public class TestRunnerForSSH {
 		
 		TestValuationMethods.setNumberOfSubsimulationsStepA(numberOfSubsimulationsStepA);
 		TestValuationMethods.setNumberOfSubsimulationsStepB(numberOfSubsimulationsStepB);
+		TestValuationMethods.setTolerance((double)1/(double)numberOfPaths);
 		
 		CreateTestBermudanSwaption.setNumberOfExercisePeriods(numberOfExercisePeriods);
 		CreateTestBermudanSwaption.setPeriodLength(optionPeriodLength);

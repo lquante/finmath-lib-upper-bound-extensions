@@ -62,11 +62,9 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 		super(lowerBoundMethod,weightOfMartingale);
 		this.pathsSubsimulationsStepA = pathsSubsimulationsStepA;
 		this.pathsSubsimulationsStepB = pathsSubsimulationsStepB;
-
 		// fixed exercise strategy, maybe add other implementations
 		exerciseStrategy = new SimplestExerciseStrategy();
 	}
-
 	@Override
 	protected ArrayList<RandomVariable> calculateMartingaleApproximation(int evaluationPeriod, LIBORModelMonteCarloSimulationModel model,
 			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
@@ -91,17 +89,16 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 			double[] previousExerciseIndicatorArray = new double[numberOfPaths];
 			// Parallelized implementation of pathwise part of A-B algorithm:
 			int optionPeriodForInput = optionPeriod; // to avoid non-final problems in nested environment
-			int martingaleIndexForInput = martingaleIndex;
 			IntStream.range(0, numberOfPaths).parallel().forEach(path -> {
-				double[] results = null;
+				double[] subsimulationResults = null;
 				try {
-					results = executeSubsimulation(model, path, optionPeriodForInput, liborPeriod, currentFixingDate,
-							triggerValues, numberOfOptionPeriods, cacheUnderlying, martingaleIndexForInput);
+					subsimulationResults = executeSubsimulation(model, path, optionPeriodForInput, liborPeriod,
+							triggerValues, numberOfOptionPeriods, cacheUnderlying);
 				} catch (CalculationException e)
 				{e.printStackTrace();}
-				discountedExerciseValueArray[path] = results[0];
-				discountedFutureExerciseValueArray[path] = results[1];
-				previousExerciseIndicatorArray[path] = results[2];
+				discountedExerciseValueArray[path] = subsimulationResults[0];
+				discountedFutureExerciseValueArray[path] = subsimulationResults[1];
+				previousExerciseIndicatorArray[path] = subsimulationResults[2];
 			});
 			RandomVariable discountedExerciseValue = new RandomVariableFromDoubleArray(currentFixingDate,discountedExerciseValueArray);
 			RandomVariable discountedFutureExerciseValue = new RandomVariableFromDoubleArray(currentFixingDate,discountedFutureExerciseValueArray);
@@ -121,7 +118,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	 * @param model
 	 * @param path
 	 * @param optionPeriod
-	 * @param modelPeriod
+	 * @param liborPeriod
 	 * @param currentFixingDate
 	 * @param triggerValues
 	 * @param numberOfOptionPeriods
@@ -132,13 +129,16 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	 * @throws CalculationException
 	 */
 	double[] executeSubsimulation(LIBORModelMonteCarloSimulationModel model, int path, int optionPeriod,
-			int modelPeriod, double currentFixingDate, RandomVariable[] triggerValues, int numberOfOptionPeriods,
-			RandomVariable[] cacheUnderlying, int martingaleIndex) throws CalculationException {
+			int liborPeriod , RandomVariable[] triggerValues, int numberOfOptionPeriods,
+			RandomVariable[] cacheUnderlying) throws CalculationException {
 		// initialize variables
 		double discountedExerciseValue = 0; double discountedFutureExerciseValue = 0;
 		// check trigger values for each path of the main simulation:
 		if (triggerValues[optionPeriod].get(path) >= 0) // case 2a
-			discountedExerciseValue = calculateSubsimulationValue(model,optionPeriod,1000,modelPeriod,1000,path,currentFixingDate, pathsSubsimulationsStepA);
+		{
+			double currentFixingDate = model.getLiborPeriod(liborPeriod);
+			discountedExerciseValue = calculateSubsimulationValue(model,optionPeriod,1000,liborPeriod,1000,path,currentFixingDate, pathsSubsimulationsStepA);
+		}
 		else // case 2b
 		{
 			int terminationPeriod = optionPeriod;
@@ -154,15 +154,15 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 			int terminationTimeIndex = model.getLiborPeriodIndex(terminationTime);
 			// retrieve discounted option value from cache:
 			discountedExerciseValue = cacheUnderlying[optionPeriod].get(path);
-			if (modelPeriod+1 < terminationTimeIndex) {
+			if (liborPeriod+2 < terminationTimeIndex) {
 				// create model for subsimulations 
-				double futureExerciseTime = model.getLiborPeriod(modelPeriod+1);
-				discountedFutureExerciseValue = calculateSubsimulationValue(model,optionPeriod,terminationPeriod-1,modelPeriod,terminationTimeIndex,path,futureExerciseTime, pathsSubsimulationsStepB);
+				double futureExerciseTime = model.getLiborPeriod(liborPeriod+1);
+				discountedFutureExerciseValue = calculateSubsimulationValue(model,optionPeriod,terminationPeriod-1,liborPeriod,terminationTimeIndex,path,futureExerciseTime, pathsSubsimulationsStepB);
 			}
 		}
 		// determine previous exercise indicator for martingale calculation
 		double previousExerciseIndicator = 0;
-		if (triggerValues[martingaleIndex - 1].get(path) >= 0)
+		if (triggerValues[optionPeriod - 1].get(path) >= 0)
 			previousExerciseIndicator = 1;
 		// return results as a triple
 		return new double[] { discountedExerciseValue, discountedFutureExerciseValue, previousExerciseIndicator };

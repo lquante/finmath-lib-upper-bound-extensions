@@ -58,34 +58,27 @@ public abstract class AbstractUpperBoundEstimation implements BermudanSwaptionVa
 
 		this.bermudanSwaption = bermudanOption;
 		RandomVariable optionValue = model.getRandomVariableForConstant(0);
-		// calculate value of lower bound
-
+		// calculate value of lower bound and cache in-beween results
 		this.bermudanSwaption.setValuationMethod(lowerBoundMethod);
 		this.bermudanSwaption.getValue(evaluationTime, model);
 		RandomVariable[] cacheUnderlying = lowerBoundMethod.getCacheValuesOfUnderlying();
 		RandomVariable[] cacheOptionValues = lowerBoundMethod.getCacheOptionValues();
-		// Check exercise condition of lower bound method
 		RandomVariable[] cacheTriggers = lowerBoundMethod.getCacheTriggerValues();
 		// calculate option time index for evaluation
-		int numberOfOptionPeriods = this.bermudanSwaption.getFixingDates().length-1;
+		int numberOfOptionPeriods = this.bermudanSwaption.getFixingDates().length;
 		double firstFixingDate = this.bermudanSwaption.getFixingDates()[0];
 		int optionTimeIndex;
 		if (evaluationTime <= firstFixingDate)
 			optionTimeIndex = 0;
 		else
 			for (optionTimeIndex = 1; evaluationTime > this.bermudanSwaption
-					.getFixingDates()[optionTimeIndex]; optionTimeIndex++)
-				;
-		// calculate martingale approximation
-
+					.getFixingDates()[optionTimeIndex]; optionTimeIndex++);
+		// calculate martingale approximations for each fixing date
 		ArrayList <RandomVariable> martingaleArrays = calculateMartingaleApproximation(optionTimeIndex, model, cacheUnderlying,
 				cacheOptionValues, cacheTriggers);
-
 		RandomVariable martingaleApproximation = model.getRandomVariableForConstant(0);
-
-		
 		// calculate the maximum of the estimated martingale for each remaining period
-		for (int optionPeriod = 0; optionPeriod <= numberOfOptionPeriods; optionPeriod++)
+		for (int optionPeriod = 0; optionPeriod < numberOfOptionPeriods; optionPeriod++)
 			martingaleApproximation = martingaleApproximation.floor(cacheUnderlying[optionPeriod].sub(martingaleArrays.get(optionPeriod)));
 		// Note that values is a relative price - no numeraire division is required
 		RandomVariable numeraireAtEvaluationTime = model.getNumeraire(evaluationTime);

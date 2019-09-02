@@ -31,8 +31,8 @@ public class TestValuationMethods {
 	
 	// libor model parameters
 	double lastTimePoint = 30;
-	private static double timeDiscretizationLength=0.5;
-	private static double liborPeriodLength = 0.5;
+	private static double timeDiscretizationLength=1;
+	private static double liborPeriodLength = 1;
 	// monte carlo parameters
 	private static int numberOfPaths = 1000;
 	private static int numberOfSubsimulationsStepA = 100;
@@ -103,7 +103,7 @@ public class TestValuationMethods {
 			// AB upper bound approximation
 			AndersenBroadieUpperBoundEstimation ABupperBound = new AndersenBroadieUpperBoundEstimation(lowerBound,
 					1,numberOfSubsimulationsStepA, numberOfSubsimulationsStepB);
-			double ABupperBoundValue = timingValuationTest(ABupperBound, testSwaption, liborModel);
+			double ABupperBoundValue =  timingValuationTest(ABupperBound, testSwaption, liborModel);
 			// Upper bound using martingale construction via Delta hedging
 			DeltaHedgingUpperBound DeltaUpperBound = new DeltaHedgingUpperBound(lowerBound,1);
 			double DeltaUpperBoundValue = timingValuationTest(DeltaUpperBound, testSwaption, liborModel);
@@ -116,7 +116,7 @@ public class TestValuationMethods {
 			double deviationDeltaHedge = Math.abs(lowerBoundValue - DeltaUpperBoundValue);
 			System.out.println(formatterDeviation.format(deviationDeltaHedge) + "\t");
 
-			// Assert deviations
+			// Assert duality gaps
 			Assert.assertEquals(lowerBoundValue, ABupperBoundValue, tolerance);
 			Assert.assertEquals(lowerBoundValue, DeltaUpperBoundValue, tolerance);
 		}
