@@ -213,10 +213,10 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 		ForwardCurve forwardCurve = createForwardCurveFromRealization (forwardCurveRandomVariable,shortenedLiborDiscretization, path);
 		LIBORMarketModel liborMarketModel = liborModelCreator(shortenedLiborDiscretization,forwardCurve, model);		
 		// adjust process if less factors needed
-		int numberOfTimeSteps = endPeriod-startingPeriod;
+		int numberOfLibors = liborMarketModel.getNumberOfLibors();
 		int numberOfFactors;
-		if (numberOfTimeSteps<model.getBrownianMotion().getNumberOfFactors())
-			numberOfFactors = numberOfTimeSteps;
+		if (numberOfLibors<model.getBrownianMotion().getNumberOfFactors())
+			numberOfFactors = numberOfLibors;
 		else
 			numberOfFactors = model.getBrownianMotion().getNumberOfFactors();
 		BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(shortenedLiborDiscretization,

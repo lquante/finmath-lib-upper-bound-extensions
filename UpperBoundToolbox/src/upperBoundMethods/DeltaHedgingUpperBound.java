@@ -219,13 +219,13 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 			int numberOfBins =  20; //optimal number of bins?
 			double[] values = underlying.getRealizations();
 			Arrays.sort(values);
-			IntStream.range(0, numberOfBins).parallel().forEach(i->{	
+			for (int i =0; i<numberOfBins;i++){	
 				double binLeft = values[(int) (((double) i / (double) numberOfBins) * values.length)];
 				RandomVariable basisFunction = underlying.sub(binLeft)
 						.choose(new RandomVariableFromDoubleArray(1.0), new RandomVariableFromDoubleArray(0.0))
 						.mult(exerciseIndicator);
 				basisFunctions.add(basisFunction);
-			});
+			}
 		}
 		return basisFunctions;
 	}
