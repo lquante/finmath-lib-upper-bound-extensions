@@ -12,9 +12,9 @@ public class SimulationSuite {
 	static double timeDiscretizationLength=0.25;
 	static double liborPeriodLength = 0.5;
 	// monte carlo parameters
-	static int numberOfPaths = 10;
-	static int numberOfSubsimulationsStepA = 100;
-	static int numberOfSubsimulationsStepB = 100;
+	static int numberOfPaths = 10000;
+	static int numberOfSubsimulationsStepA = 10000;
+	static int numberOfSubsimulationsStepB = 10000;
 	// option parameters
 	static int numberOfExercisePeriods = 20;
 	static double optionPeriodLength=1;
@@ -26,21 +26,27 @@ public class SimulationSuite {
 
 	public static void main(String[] args) throws CalculationException {
 
-		// at the money option
-		double swaprate = 0.02;
-		double [] forwardInterpolationRates= {swaprate,swaprate};
-		double [] forwardInterpolationTimePoints= {0,lastTimePoint};
-
-		executeSimulationRunWithFlexibleRates(swaprate,forwardInterpolationRates,forwardInterpolationTimePoints);
-
+		double swapRate = 0.02;
 		// out of the money option
-		swaprate = 0.02;
-		forwardInterpolationRates= new double[]{swaprate-0.001,swaprate-0.001};
-		forwardInterpolationTimePoints= new double[] {0,lastTimePoint};
-
-		executeSimulationRunWithFlexibleRates(swaprate,forwardInterpolationRates,forwardInterpolationTimePoints);
+		double rateShift = -0.005;
+		testOptionFlatCurve(rateShift,swapRate);
+		// at the money option
+		rateShift=0;
+		testOptionFlatCurve(rateShift,swapRate);
+		// in  the money option
+		rateShift = +0.005;
+		testOptionFlatCurve(rateShift,swapRate);	
 	}
 
+	private static void testOptionFlatCurve(double rateShift, double swapRate) throws CalculationException
+	{
+	double[] forwardInterpolationRates = new double[]{swapRate-rateShift,swapRate-rateShift};
+	double[] forwardInterpolationTimePoints = new double[] {0,lastTimePoint};
+
+	executeSimulationRunWithFlexibleRates(swapRate,forwardInterpolationRates,forwardInterpolationTimePoints);
+	}
+	
+	
 	public static void executeSimulationRunWithFlexibleRates (double swaprate,double[] forwardInterpolationRates,double[] forwardInterpolationTimePoints) throws CalculationException
 	{
 		// set parameters
