@@ -179,10 +179,8 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 			int terminationTimeIndex = model.getLiborPeriodIndex(terminationTime);
 			// retrieve discounted option value from cache:
 			discountedExerciseValue = cacheUnderlying[optionPeriod].get(path);
-			// create model for subsimulations (only if not only degenerated swaptions, thus
-			// at least 2 additional periods necessary)
-			if (optionPeriod + 2 < terminationPeriod && terminationPeriod < numberOfOptionPeriods) {
-
+			// create model for subsimulations 
+			if (modelPeriod+1 < terminationTimeIndex) {
 				double futureExerciseTime = model.getLiborPeriod(modelPeriod+1);
 				discountedFutureExerciseValue = calculateSubsimulationValue(model,optionPeriod,terminationPeriod-1,modelPeriod,terminationTimeIndex,path,futureExerciseTime, pathsSubsimulationsStepB);
 			}
@@ -242,9 +240,15 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 		RandomVariable[] forwardCurveRandomVariable = model.getLIBORs(startingPeriod);
 		ForwardCurve forwardCurve = createForwardCurveFromRealization (forwardCurveRandomVariable,shortenedLiborDiscretization, path);
 		LIBORMarketModel liborMarketModel = liborModelCreator(shortenedLiborDiscretization,forwardCurve, model);		
-		// adjust process
+		// adjust process if less factors needed
+		int numberOfTimeSteps = endPeriod-startingPeriod;
+		int numberOfFactors;
+		if (numberOfTimeSteps<model.getBrownianMotion().getNumberOfFactors())
+			numberOfFactors = numberOfTimeSteps;
+		else
+			numberOfFactors = model.getBrownianMotion().getNumberOfFactors();
 		BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(shortenedLiborDiscretization,
-				model.getBrownianMotion().getNumberOfFactors(), pathsOfSubsimulation, 1234 + path);
+				numberOfFactors, pathsOfSubsimulation, 1234 + path);
 		MonteCarloProcess process = new EulerSchemeFromProcessModel(brownianMotion,
 				EulerSchemeFromProcessModel.Scheme.PREDICTOR_CORRECTOR);
 		return new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModel, process);
