@@ -34,7 +34,6 @@ public class TestRunnerForSSH {
 
 		TestValuationMethods.setNumberOfSubsimulationsStepA(numberOfSubsimulationsStepA);
 		TestValuationMethods.setNumberOfSubsimulationsStepB(numberOfSubsimulationsStepB);
-		TestValuationMethods.setTolerance((double) 1 / (double) numberOfPaths);
 
 		TestValuationMethods.setNumberOfExercisePeriods(numberOfExercisePeriods);
 		TestValuationMethods.setOptionPeriodLength(optionPeriodLength);
