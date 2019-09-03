@@ -30,6 +30,8 @@ public class TestValuationMethods {
 	double lastTimePoint = 30;
 	private static double timeDiscretizationLength = 1;
 	private static double liborPeriodLength = 1;
+	
+
 	// monte carlo parameters
 	private static int numberOfPaths = 1000;
 	private static int numberOfSubsimulationsStepA = 100;
@@ -39,7 +41,7 @@ public class TestValuationMethods {
 	static double optionPeriodLength = 1;
 	static double swaprate = 0.02;
 	// tolerance depending on numberOfPaths
-	static double tolerance = 0.1;
+	static double tolerance = 1000;
 
 	@Test
 	public void testSwaptionValuationMethods() throws CalculationException {
@@ -215,5 +217,21 @@ public class TestValuationMethods {
 	public static void setTolerance(double tolerance) {
 		TestValuationMethods.tolerance = tolerance;
 	}
+	
+	/**
+	 * @return the liborPeriodLength
+	 */
+	public static double getLiborPeriodLength() {
+		return liborPeriodLength;
+	}
+
+	/**
+	 * @param liborPeriodLength the liborPeriodLength to set
+	 */
+	public static void setLiborPeriodLength(double liborPeriodLength) {
+		TestValuationMethods.liborPeriodLength = liborPeriodLength;
+	}
+
+	
 
 }

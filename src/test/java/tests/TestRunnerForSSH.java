@@ -11,8 +11,8 @@ public class TestRunnerForSSH {
 	static double liborPeriodLength = 0.5;
 	// monte carlo parameters
 	static int numberOfPaths = 10000;
-	static int numberOfSubsimulationsStepA = 100;
-	static int numberOfSubsimulationsStepB = 100;
+	static int numberOfSubsimulationsStepA = 1000;
+	static int numberOfSubsimulationsStepB = 1000;
 	// option parameters
 	static int numberOfExercisePeriods = 20;
 	static double optionPeriodLength = 1;
@@ -37,6 +37,7 @@ public class TestRunnerForSSH {
 
 		TestValuationMethods.setNumberOfExercisePeriods(numberOfExercisePeriods);
 		TestValuationMethods.setOptionPeriodLength(optionPeriodLength);
+		TestValuationMethods.setLiborPeriodLength(liborPeriodLength);
 		TestValuationMethods.setSwaprate(swaprate );
 
 		System.out.println("Number of paths: " + numberOfPaths);
