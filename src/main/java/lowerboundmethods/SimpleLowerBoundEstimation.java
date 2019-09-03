@@ -80,9 +80,6 @@ public class SimpleLowerBoundEstimation extends AbstractLowerBoundEstimationInpu
 		this.triggerValues = triggerValues;
 	}
 
-	@Override
-	public RandomVariable[] getCacheValuesOfUnderlying() {
-		return cacheValuesOfUnderlying;
-	}
+	
 
 }

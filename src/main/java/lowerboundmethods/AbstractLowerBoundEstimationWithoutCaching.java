@@ -46,17 +46,6 @@ public abstract class AbstractLowerBoundEstimationWithoutCaching extends Abstrac
 
 	}
 
-	// abstract methods to be specified by the various implementations
 
-	@Override
-	protected abstract RandomVariable calculateTriggerValues(int period, double fixingDate,
-			LIBORModelMonteCarloSimulationModel model) throws CalculationException;
-
-	// some getters
-
-	@Override
-	public RandomVariable getExerciseTime() {
-		return exerciseTime;
-	}
 
 }

@@ -76,18 +76,6 @@ public abstract class AbstractLowerBoundEstimationInputForUpperBound extends Abs
 		cacheOptionValues[period] = optionValue;
 	}
 
-	@Override
-	protected abstract RandomVariable calculateTriggerValues(int period, double fixingDate,
-			LIBORModelMonteCarloSimulationModel model) throws CalculationException;
-
-	// some getters
-
-	
-	@Override
-	public RandomVariable getExerciseTime() {
-		return exerciseTime;
-	}
-
 	public Map<Double, Long> getLiborIDs() {
 		return liborIDs;
 	}
