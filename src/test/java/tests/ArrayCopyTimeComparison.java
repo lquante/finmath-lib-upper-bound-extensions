@@ -2,6 +2,7 @@ package tests;
 
 import java.util.Arrays;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 public class ArrayCopyTimeComparison {
@@ -35,10 +36,10 @@ public class ArrayCopyTimeComparison {
 			}
 			long timingSystemCopyEnd = System.currentTimeMillis();
 			long timeSystemCopy = timingSystemCopyEnd - timingSystemCopyStart;
-
 			System.out.println("Time comparison for a repeated array copying, repetitions:" + numberOfRepetitions);
 			System.out.println("Time needed using arrays.copyOfRange: " + timeArrayCopyOfRange);
 			System.out.println("Time needed using SystemCopy: " + timeSystemCopy);
+			Assert.assertTrue(timeArrayCopyOfRange>timeSystemCopy);
 		}
 	}
 }

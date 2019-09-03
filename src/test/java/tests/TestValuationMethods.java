@@ -2,7 +2,6 @@ package tests;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.Arrays;
 import java.util.Locale;
 
 import org.junit.Assert;
@@ -27,55 +26,50 @@ public class TestValuationMethods {
 	private static DecimalFormat formatterDeviation = new DecimalFormat(" 0.00000E00;-0.00000E00",
 			new DecimalFormatSymbols(Locale.ENGLISH));
 
-	
-	
 	// libor model parameters
 	double lastTimePoint = 30;
-	private static double timeDiscretizationLength=1;
+	private static double timeDiscretizationLength = 1;
 	private static double liborPeriodLength = 1;
 	// monte carlo parameters
-	private static int numberOfPaths = 100;
+	private static int numberOfPaths = 1000;
 	private static int numberOfSubsimulationsStepA = 100;
 	private static int numberOfSubsimulationsStepB = 100;
 	// option parameters
 	static int numberOfExercisePeriods = 10;
-	private static double optionPeriodLength=1;
-
+	static double optionPeriodLength = 1;
+	static double swaprate = 0.02;
 	// tolerance depending on numberOfPaths
-	static double tolerance = (double)1/(double)numberOfPaths;
+	static double tolerance = (double) 1 / Math.sqrt((double) numberOfPaths);
 
 	@Test
 	public void testSwaptionValuationMethods() throws CalculationException {
-		// set parameters
+		// set model parameters
 		CreateTestModel.setLastTime(lastTimePoint);
 		CreateTestModel.setLiborRateTimeHorzion(lastTimePoint);
 		CreateTestModel.setTimeDiscretizationPeriodLength(timeDiscretizationLength);
 		CreateTestModel.setLiborPeriodLength(liborPeriodLength);
-		
 		CreateTestModel.setNumberOfPaths(numberOfPaths);
 		
-		TestValuationMethods.setNumberOfSubsimulationsStepA(numberOfSubsimulationsStepA);
-		TestValuationMethods.setNumberOfSubsimulationsStepB(numberOfSubsimulationsStepB);
-		TestValuationMethods.setTolerance(tolerance);
-		
-		CreateTestBermudanSwaption.setNumberOfExercisePeriods(numberOfExercisePeriods);
-		CreateTestBermudanSwaption.setPeriodLength(optionPeriodLength);
-		
-		System.out.println("Number of paths: "+numberOfPaths);
-		System.out.println("Number of subsimulation paths step A: "+numberOfSubsimulationsStepA);
-		System.out.println("Number of subsimulation paths step B: "+numberOfSubsimulationsStepB);
-		System.out.println("Number of exercise periods: "+numberOfExercisePeriods);
-		
-		System.out.println("Time discretization period length: "+timeDiscretizationLength);
-		System.out.println("LIBOR period length: "+liborPeriodLength);
-		System.out.println("Option period length: "+optionPeriodLength);
-		
+				
+		System.out.println("Number of paths: " + numberOfPaths);
+		System.out.println("Number of subsimulation paths step A: " + numberOfSubsimulationsStepA);
+		System.out.println("Number of subsimulation paths step B: " + numberOfSubsimulationsStepB);
+		System.out.println("Number of exercise periods: " + numberOfExercisePeriods);
+
+		System.out.println("Time discretization period length: " + timeDiscretizationLength);
+		System.out.println("LIBOR period length: " + liborPeriodLength);
+		System.out.println("Option period length: " + optionPeriodLength);
+
 		executePrintSwaptionValuationMethods();
 	}
 
 	public static void executePrintSwaptionValuationMethods() throws CalculationException {
 
 		LIBORModelMonteCarloSimulationModel liborModel = CreateTestModel.createLIBORMarketModel();
+
+		// set swaption parameters
+				TestBermudanSwaption testSwaptionCreator = new TestBermudanSwaption(numberOfExercisePeriods, optionPeriodLength, swaprate);
+					
 		
 		// print head of comparison table
 		System.out.println("Bermudan Swaption prices:\n");
@@ -83,29 +77,28 @@ public class TestValuationMethods {
 				"FirstFixingDate\tLower Bound\tUpper Bound(AB)\t\tUpperBound(Deltas)\tDeviation(AB)\tDeviation(Delta subsimfree)");
 		// "EvaluationDate Lower Bound Upper Bound(AB) Deviation(AB) ");
 
-		for (int modelTimeIndexToStartOption = 1; modelTimeIndexToStartOption < liborModel.getNumberOfLibors()
-				-numberOfExercisePeriods*optionPeriodLength/liborPeriodLength ; modelTimeIndexToStartOption++) {
-			double firstFixingDate = liborModel.getLiborPeriod(modelTimeIndexToStartOption);
-			CreateTestBermudanSwaption.setFirstFixingDate(firstFixingDate);
-			CreateTestBermudanSwaption.setNumberOfExercisePeriods(numberOfExercisePeriods);
-			BermudanSwaption testSwaption = CreateTestBermudanSwaption.createBermudanSwaption();
-
+		for (int startIndexLIBOR = 1; startIndexLIBOR < liborModel.getNumberOfLibors()
+				- numberOfExercisePeriods * optionPeriodLength / liborPeriodLength; startIndexLIBOR++) {
+			double firstFixingDate = liborModel.getLiborPeriod(startIndexLIBOR);
+			
+			
 			/*
 			 * Value a bermudan swaption
 			 */
 
 			System.out.print(formatterTime.format(firstFixingDate) + "\t");
 
+			
 			SimpleLowerBoundEstimation lowerBound = new SimpleLowerBoundEstimation();
-
+			BermudanSwaption testSwaption = testSwaptionCreator.constructBermudanSwaption(firstFixingDate, lowerBound);
 			double lowerBoundValue = timingValuationTest(lowerBound, testSwaption, liborModel);
 			// System.out.print(Arrays.toString(testSwaption.getExerciseProbabilities()));
 			// AB upper bound approximation
-			AndersenBroadieUpperBoundEstimation ABupperBound = new AndersenBroadieUpperBoundEstimation(lowerBound,
-					1,numberOfSubsimulationsStepA, numberOfSubsimulationsStepB);
-			double ABupperBoundValue =  timingValuationTest(ABupperBound, testSwaption, liborModel);
+			AndersenBroadieUpperBoundEstimation ABupperBound = new AndersenBroadieUpperBoundEstimation(lowerBound, 1,
+					numberOfSubsimulationsStepA, numberOfSubsimulationsStepB);
+			double ABupperBoundValue = timingValuationTest(ABupperBound, testSwaption, liborModel);
 			// Upper bound using martingale construction via Delta hedging
-			DeltaHedgingUpperBound DeltaUpperBound = new DeltaHedgingUpperBound(lowerBound,1);
+			DeltaHedgingUpperBound DeltaUpperBound = new DeltaHedgingUpperBound(lowerBound, 1);
 			double DeltaUpperBoundValue = timingValuationTest(DeltaUpperBound, testSwaption, liborModel);
 
 			// Absolute error AB method
@@ -132,8 +125,50 @@ public class TestValuationMethods {
 		double lastOperationTimingValuation = (timingValuationEnd - timingValuationStart) / 1000.0;
 		System.out.print(formatterValue.format(simulatedValue) + "\t");
 		System.out.print(formattterTime.format(lastOperationTimingValuation) + "\t");
-		
+
 		return simulatedValue;
+	}
+
+	/**
+	 * @return the numberOfExercisePeriods
+	 */
+	public static int getNumberOfExercisePeriods() {
+		return numberOfExercisePeriods;
+	}
+
+	/**
+	 * @param numberOfExercisePeriods the numberOfExercisePeriods to set
+	 */
+	public static void setNumberOfExercisePeriods(int numberOfExercisePeriods) {
+		TestValuationMethods.numberOfExercisePeriods = numberOfExercisePeriods;
+	}
+
+	/**
+	 * @return the optionPeriodLength
+	 */
+	public static double getOptionPeriodLength() {
+		return optionPeriodLength;
+	}
+
+	/**
+	 * @param optionPeriodLength the optionPeriodLength to set
+	 */
+	public static void setOptionPeriodLength(double optionPeriodLength) {
+		TestValuationMethods.optionPeriodLength = optionPeriodLength;
+	}
+
+	/**
+	 * @return the swaprate
+	 */
+	public static double getSwaprate() {
+		return swaprate;
+	}
+
+	/**
+	 * @param swaprate the swaprate to set
+	 */
+	public static void setSwaprate(double swaprate) {
+		TestValuationMethods.swaprate = swaprate;
 	}
 
 	/**

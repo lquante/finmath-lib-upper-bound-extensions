@@ -9,6 +9,7 @@ import bermudanswaptionframework.BermudanSwaptionValueEstimatorInterface;
 import bermudanswaptionframework.SimplestExerciseStrategy;
 import lowerboundmethods.AbstractLowerBoundEstimationInputForUpperBound;
 import lowerboundmethods.AbstractLowerBoundEstimationWithoutCaching;
+import lowerboundmethods.SimpleLowerBoundEstimation;
 import lowerboundmethods.SimpleLowerBoundEstimationWithoutCaching;
 import net.finmath.exception.CalculationException;
 import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
@@ -49,6 +50,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	/**
 	 * @param lowerBoundMethod         The lower bound method to be used as a basis
 	 *                                 for the upper bound.
+	* @param weightOfMartingale        The weighting scheme for point value approximation - 0 = lower bound, 1= upper bound, 0.5 = A-B point wise estimate.	                        
 	 * @param pathsSubsimulationsStepA number of subsimulation Paths in case 2a of
 	 *                                 A-B algorithm, i.e. if exercise at current
 	 *                                 simulation time.
@@ -57,6 +59,12 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	 *                                 simulation time.
 	 */
 
+	/**
+	 * @param lowerBoundMethod
+	 
+	 * @param pathsSubsimulationsStepA
+	 * @param pathsSubsimulationsStepB
+	 */
 	public AndersenBroadieUpperBoundEstimation(AbstractLowerBoundEstimationInputForUpperBound lowerBoundMethod, double weightOfMartingale,
 			int pathsSubsimulationsStepA, int pathsSubsimulationsStepB) {
 		super(lowerBoundMethod,weightOfMartingale);
@@ -65,6 +73,18 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 		// fixed exercise strategy, maybe add other implementations
 		exerciseStrategy = new SimplestExerciseStrategy();
 	}
+	/**
+	 * Creates an AndersenBroadieUpperBound estimator with fixed SimpleLowerBoundEstimation as input, weight of martingale =1 and simplest exercise strategy.
+	 * @param subsimulationPaths The number of paths to be used in both subsimulation possibilites
+	 */
+	public AndersenBroadieUpperBoundEstimation(int subsimulationPaths) {
+		super(new SimpleLowerBoundEstimation(),1);
+		this.pathsSubsimulationsStepA = subsimulationPaths;
+		this.pathsSubsimulationsStepB = subsimulationPaths;
+		// fixed exercise strategy, maybe add other implementations
+		exerciseStrategy = new SimplestExerciseStrategy();
+	}
+	
 	@Override
 	protected ArrayList<RandomVariable> calculateMartingaleApproximation(int evaluationPeriod, LIBORModelMonteCarloSimulationModel model,
 			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
@@ -78,17 +98,16 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 		if (evaluationPeriod + 1 < cacheOptionValues.length)
 			martingaleCache.add(cacheOptionValues[evaluationPeriod + 1]);
 		// estimate martingale for all remaining fixing dates
-		int martingaleIndex = 2; // index of current martingale component to be calculated
-		for (int optionPeriod = 2 + evaluationPeriod; optionPeriod < numberOfOptionPeriods; optionPeriod++) {
+		for (int martingaleIndex = 2; martingaleIndex < numberOfOptionPeriods; martingaleIndex++) {
 			// initialize values for subsimulation
-			double currentFixingDate = this.bermudanSwaption.getFixingDates()[optionPeriod];
+			double currentFixingDate = this.bermudanSwaption.getFixingDates()[martingaleIndex];
 			int liborPeriod = model.getLiborPeriodIndex(currentFixingDate);
 			// Arrays to store pathwise results to be transformed to RandomVariable
 			double[] discountedExerciseValueArray  = new double[numberOfPaths];
 			double[] discountedFutureExerciseValueArray = new double[numberOfPaths];
 			double[] previousExerciseIndicatorArray = new double[numberOfPaths];
 			// Parallelized implementation of pathwise part of A-B algorithm:
-			int optionPeriodForInput = optionPeriod; // to avoid non-final problems in nested environment
+			int optionPeriodForInput = martingaleIndex; // to avoid non-final problems in nested environment
 			IntStream.range(0, numberOfPaths).parallel().forEach(path -> {
 				double[] subsimulationResults = null;
 				try {
@@ -107,7 +126,6 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 			martingaleCache.add(martingaleCache.get(martingaleIndex - 1).sub(cacheOptionValues[martingaleIndex - 1])
 					.add(discountedExerciseValue)
 					.sub((discountedFutureExerciseValue.add(cacheUnderlying[martingaleIndex - 1])).mult(previousExerciseIndicator)));
-			martingaleIndex += 1;
 		}
 		return martingaleCache;
 	}

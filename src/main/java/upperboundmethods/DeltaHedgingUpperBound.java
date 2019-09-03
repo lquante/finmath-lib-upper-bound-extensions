@@ -27,10 +27,21 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 
 	LIBORModelMonteCarloSimulationModel model;
 
+	/**
+	 * @param lowerBoundMethod         The lower bound method to be used as a basis
+	 *                                 for the upper bound.
+	* @param weightOfMartingale        The weighting scheme for point value approximation - 0 = lower bound, 1= upper bound, 0.5 = A-B point wise estimate.	    
+	 */
 	public DeltaHedgingUpperBound(AbstractLowerBoundEstimationInputForUpperBound lowerBoundMethod,
 			double weightOfMartingale) {
 		super(lowerBoundMethod, weightOfMartingale);
 
+	}
+	/**Constructs DeltaHedging upper bound estimator with fixed simple lower bound and martingale weight of 1.
+	 * 
+	 */
+	public DeltaHedgingUpperBound() {
+		super(new SimpleLowerBoundEstimation(),1);
 	}
 	@Override
 	protected ArrayList<RandomVariable> calculateMartingaleApproximation(int evaluationPeriod,

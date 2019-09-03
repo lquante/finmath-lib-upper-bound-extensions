@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import org.junit.Assert;
 import net.finmath.exception.CalculationException;
 import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
@@ -82,15 +83,21 @@ public class CreateTestModel {
 		System.out.println("TimeDiscretization:" + Arrays.toString(timeDiscretization.getAsDoubleArray()));
 		System.out.println("LiborDiscretization:" + Arrays.toString(liborDiscretization.getAsDoubleArray()));
 
+		boolean [] LiborCalculated = new boolean[liborDiscretization.getNumberOfTimeSteps()];
 		// try to calculate all LIBOR rates
 		for (int i = 0; i < liborDiscretization.getNumberOfTimeSteps(); i++)
 			try {
 				RandomVariable[] libors = liborModel.getLIBORs(i);
-				System.out.println(i + "thLIBOR spot rate " + libors[i].getAverage());
+				System.out.println((i+1) + "thLIBOR rate " + libors[i].getAverage());
+				LiborCalculated[i] = true;
 			} catch (CalculationException e) {
 				System.out.println("calculation of libors failed at timepoint" + liborDiscretization.getTime(i));
 				e.printStackTrace();
+				Assert.assertEquals((i+1)+" th LIBOR rates could not be calculated", LiborCalculated[i]=true);
 			}
+		
+		
+		
 	}
 
 	public static LIBORModelMonteCarloSimulationModel createLIBORMarketModel() throws CalculationException {
