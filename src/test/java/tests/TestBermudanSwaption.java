@@ -29,17 +29,8 @@ public class TestBermudanSwaption {
 	private int numberOfExercisePeriods;
 	private double periodLength;
 	private double swaprate;
-	private BermudanSwaptionValueEstimatorInterface valuationMethod;
 
 	
-	
-	public TestBermudanSwaption(int numberOfExercisePeriods, double periodLength,
-			double swaprate) {
-		super();
-		this.numberOfExercisePeriods = numberOfExercisePeriods;
-		this.periodLength = periodLength;
-		this.swaprate = swaprate;
-	}
 
 	@Test
 	public void testLowerBoundSwaptionValuation() throws CalculationException {
@@ -129,6 +120,47 @@ public class TestBermudanSwaption {
 		return new BermudanSwaption("EURO", isPeriodStartDateExerciseDate, fixingDates, periodLengths, paymentDates, notionals, true,swaprates,valuationMethod);
 	
 	}
-	
+
+	/**
+	 * @return the numberOfExercisePeriods
+	 */
+	public int getNumberOfExercisePeriods() {
+		return numberOfExercisePeriods;
+	}
+
+	/**
+	 * @param numberOfExercisePeriods the numberOfExercisePeriods to set
+	 */
+	public void setNumberOfExercisePeriods(int numberOfExercisePeriods) {
+		this.numberOfExercisePeriods = numberOfExercisePeriods;
+	}
+
+	/**
+	 * @return the periodLength
+	 */
+	public double getPeriodLength() {
+		return periodLength;
+	}
+
+	/**
+	 * @param periodLength the periodLength to set
+	 */
+	public void setPeriodLength(double periodLength) {
+		this.periodLength = periodLength;
+	}
+
+	/**
+	 * @return the swaprate
+	 */
+	public double getSwaprate() {
+		return swaprate;
+	}
+
+	/**
+	 * @param swaprate the swaprate to set
+	 */
+	public void setSwaprate(double swaprate) {
+		this.swaprate = swaprate;
+	}
 
 }

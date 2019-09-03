@@ -39,7 +39,7 @@ public class TestValuationMethods {
 	static double optionPeriodLength = 1;
 	static double swaprate = 0.02;
 	// tolerance depending on numberOfPaths
-	static double tolerance = (double) 1 / Math.sqrt((double) numberOfPaths);
+	static double tolerance = (double) 1 / (double) Math.sqrt(numberOfPaths);
 
 	@Test
 	public void testSwaptionValuationMethods() throws CalculationException {
@@ -68,8 +68,11 @@ public class TestValuationMethods {
 		LIBORModelMonteCarloSimulationModel liborModel = CreateTestModel.createLIBORMarketModel();
 
 		// set swaption parameters
-				TestBermudanSwaption testSwaptionCreator = new TestBermudanSwaption(numberOfExercisePeriods, optionPeriodLength, swaprate);
-					
+				
+				TestBermudanSwaption testSwaptionCreator = new TestBermudanSwaption();
+				testSwaptionCreator.setNumberOfExercisePeriods(numberOfExercisePeriods);
+				testSwaptionCreator.setPeriodLength(optionPeriodLength);
+				testSwaptionCreator.setSwaprate(swaprate);
 		
 		// print head of comparison table
 		System.out.println("Bermudan Swaption prices:\n");
