@@ -49,11 +49,14 @@ public abstract class AbstractLowerBoundEstimationInputForUpperBound extends Abs
 		cacheTriggerValues = new RandomVariable[numberOfFixingDates + 1];
 		initializeValuation(triggerValuesInput);
 		optionValue= backwardAlgorithmValuation(evaluationTime);
-	//	this.bermudanSwaption.setExerciseProbabilities(exerciseTime.getHistogram(this.bermudanSwaption.getFixingDates()));
 		return optionValue;
 
 	}
 
+	/**
+	 * Additionally, (fixingDate,liborIDs) is cached in a K,V map for use in AD dependent upper bound methods.
+	 */
+	
 	@Override
 	protected RandomVariable calculateLiborRate(double fixingDate, double paymentDate) throws CalculationException {
 		RandomVariable libor = ((RandomVariableDifferentiableAAD) model.getLIBOR(fixingDate, fixingDate, paymentDate))
@@ -64,6 +67,9 @@ public abstract class AbstractLowerBoundEstimationInputForUpperBound extends Abs
 		return libor;
 	}
 
+	/**
+	 * Caching of exerciseValue, triggerValues and optionValue.
+	 */
 	@Override
 	void applyExerciseCriteria(double exerciseDate, int period) {
 		optionValue = triggerValues.choose(exerciseValue, continuationValue).floor(0);

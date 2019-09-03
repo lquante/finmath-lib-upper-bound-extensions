@@ -83,6 +83,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 	 * 
 	 * @param evaluationTime      The time at which the martingale should be
 	 *                            evaluated (i.e. discounted to)
+	 * @param cacheOptionValue    The cached option value from a lower bound method.                    
 	 * @param firstLIBORIndex 		The first LIBOR period for which the martingale shall be approximated.
 	 * @param lastLIBORIndex 		The last LIBOR period for which the martingale shall be approximated.
 	 * @return An array list with all estimated martingale RandomVariables
@@ -131,8 +132,9 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 	 * Method to estimate the relevant deltas for the martingale approximation.
 	 * 
 	 * @param gradient       The already calculated gradient map.
-	 * @param modelTimeIndex The model time index for which the deltas should be
-	 *                       calculated
+	 * @param liborTime  The time for which the delta should be estimated.
+	 * @param firstLIBORIndex The index of the first LIBOR rate to be considered.
+	 * @param lastLIBORIndex The index of the last LIBOR rate to be considered.
 	 * @return The delta approximation as a RandomVariable.
 	 * @throws CalculationException
 	 */
@@ -223,12 +225,11 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 	private ArrayList<RandomVariable> getRegressionBasisFunctionsBinning(RandomVariable underlying,
 			RandomVariable exerciseIndicator) {
 		ArrayList<RandomVariable> basisFunctions = new ArrayList<RandomVariable>();
-
 		if (underlying.isDeterministic()) {
 			basisFunctions.add(underlying);
 		} else {
 			int numberOfBins =  20; //optimal number of bins?
-			double[] values = underlying.getRealizations();
+			double[] values =underlying.getRealizations();
 			Arrays.sort(values);
 			for (int i =0; i<numberOfBins;i++){	
 				double binLeft = values[(int) (((double) i / (double) numberOfBins) * values.length)];

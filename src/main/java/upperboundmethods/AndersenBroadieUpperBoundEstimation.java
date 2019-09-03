@@ -47,7 +47,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	private int pathsSubsimulationsStepA;
 	private int pathsSubsimulationsStepB;
 
-	/**
+	/** Creates an AndersenBroadieUpperBound estimator.
 	 * @param lowerBoundMethod         The lower bound method to be used as a basis
 	 *                                 for the upper bound.
 	* @param weightOfMartingale        The weighting scheme for point value approximation - 0 = lower bound, 1= upper bound, 0.5 = A-B point wise estimate.	                        
@@ -59,12 +59,6 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	 *                                 simulation time.
 	 */
 
-	/**
-	 * @param lowerBoundMethod
-	 
-	 * @param pathsSubsimulationsStepA
-	 * @param pathsSubsimulationsStepB
-	 */
 	public AndersenBroadieUpperBoundEstimation(AbstractLowerBoundEstimationInputForUpperBound lowerBoundMethod, double weightOfMartingale,
 			int pathsSubsimulationsStepA, int pathsSubsimulationsStepB) {
 		super(lowerBoundMethod,weightOfMartingale);
@@ -85,7 +79,11 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 		exerciseStrategy = new SimplestExerciseStrategy();
 	}
 	
+	/**
+	 * Calculates the martingale components based on parallelized subsimulation.
+	 */
 	@Override
+	
 	protected ArrayList<RandomVariable> calculateMartingaleApproximation(int evaluationPeriod, LIBORModelMonteCarloSimulationModel model,
 			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
 					throws CalculationException {
@@ -131,7 +129,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	}
 
 	/**
-	 * Method to be called by parallelized execution interface for subsimulations
+	 * Method for subsimulations to be called by parallelized execution interface 
 	 * 
 	 * @param model
 	 * @param path
@@ -141,7 +139,6 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	 * @param triggerValues
 	 * @param numberOfOptionPeriods
 	 * @param cacheUnderlying
-	 * @param martingaleIndex
 	 * @return The triple
 	 *         {discountedExerciseValue,discountedFutureExerciseValue,previousExerciseIndicator}
 	 * @throws CalculationException
@@ -244,6 +241,14 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 		return new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModel, process);
 	}
 
+	/**
+	 * Help method to create a LIBORMarket model from the input parameters
+	 * @param shortenedLiborDiscretization The models discretization (LIBOR and time)
+	 * @param forwardCurve The initial forward curve of the model
+	 * @param model The original model from which the model is derived
+	 * @return A LIBORMarketmodel with fixed volatility and correlation.
+	 * @throws CalculationException
+	 */
 	private LIBORMarketModel liborModelCreator(TimeDiscretization shortenedLiborDiscretization,
 			ForwardCurve forwardCurve, LIBORModelMonteCarloSimulationModel model) throws CalculationException {
 		DiscountCurveFromForwardCurve discountCurve = new DiscountCurveFromForwardCurve(forwardCurve);
@@ -265,6 +270,15 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 				forwardCurve, discountCurve, randomVariableFactory, covarianceModel, null, null);
 	}
 
+	/**
+	 * Creates a volatility matrix based on the rebonato instant volatility o_i = a+b*exp(-c*T_i)
+	 * @param a parameter a for rebonato inst. volatility
+	 * @param b parameter b for rebonato inst. volatility
+	 * @param c parameter c for rebonato inst. volatility
+	 * @param forwardCurve The forward curve to be used
+	 * @param shortenedLiborDiscretization The time discretization to be used
+	 * @return 2dimensional volatility matrix
+	 */
 	private double[][] createVolatilityMatrix(double a, double b, double c, ForwardCurve forwardCurve, TimeDiscretization shortenedLiborDiscretization) {
 		int numberOfTimes = shortenedLiborDiscretization.getNumberOfTimes();
 		int numberOfLIBORs = shortenedLiborDiscretization.getNumberOfTimes();
@@ -287,6 +301,13 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 		}
 		return volatility;
 	}
+	/**
+	 * Creates a forward curve from a RandomVariable, e.g. a LIBOR rate from a LMM.
+	 * @param forwardCurveRandomVariable The input LIBOR rate RV
+	 * @param shortenedLiborDiscretization The discretization to be used
+	 * @param path The path of the random variable to be used
+	 * @return The forward curve.
+	 */
 	private ForwardCurve createForwardCurveFromRealization(RandomVariable[] forwardCurveRandomVariable,
 			TimeDiscretization shortenedLiborDiscretization, int path) {
 		int numberOfShortendTimes = shortenedLiborDiscretization.getNumberOfTimes();
