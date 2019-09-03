@@ -39,7 +39,7 @@ public class TestValuationMethods {
 	static double optionPeriodLength = 1;
 	static double swaprate = 0.02;
 	// tolerance depending on numberOfPaths
-	static double tolerance = (double) 1 / (double) Math.sqrt(numberOfPaths);
+	static double tolerance = 0.1;
 
 	@Test
 	public void testSwaptionValuationMethods() throws CalculationException {
