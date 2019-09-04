@@ -87,8 +87,6 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 				exerciseValue = exerciseValue.add(payoff);
 			else
 				continuationValue = continuationValue.add(payoff); // cancelable
-			// Calculate the exercise criteria (exercise if the following trigger is
-			// non-negative)- trigger values calculated by specified method
 			determineTriggerValuesWithEarlyTermination(period,fixingDate);
 			applyExerciseCriteria(exerciseDate, period);
 		}
@@ -284,22 +282,16 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 		ArrayList<RandomVariable> basisFunctions = new ArrayList<>();
 		double exerciseTime = evaluationTime;
 		int exerciseIndex = Arrays.binarySearch(regressionBasisfunctionTimes, exerciseTime);
-		if (exerciseIndex < 0) {
+		if (exerciseIndex < 0) 
 			exerciseIndex = -exerciseIndex;
-		}
-		if (exerciseIndex >= fixingDates.length) {
+		if (exerciseIndex >= fixingDates.length) 
 			exerciseIndex = fixingDates.length - 1;
-		}
 		// Numeraire (adapted to multicurve framework)
 		RandomVariable discountFactor = model.getNumeraire(exerciseTime).invert();
-		/*
-		 * Add swap rates of underlyings.
-		 */
+		// Add swap rates of underlyings.
 		for (int exerciseIndexUnderlying = exerciseIndex; exerciseIndexUnderlying < fixingDates.length; exerciseIndexUnderlying++) {
-			RandomVariable floatLeg = getValueOfLegAnalytic(exerciseTime, fixingDates,
-					regressionBasisfunctionTimes, model, true, 0.0);
-			RandomVariable annuity = getValueOfLegAnalytic(exerciseTime, fixingDates,
-					regressionBasisfunctionTimes, model, false, 1.0);
+			RandomVariable floatLeg = getValueOfLegAnalytic(exerciseTime, fixingDates, regressionBasisfunctionTimes, model, true, 0.0);
+			RandomVariable annuity = getValueOfLegAnalytic(exerciseTime, fixingDates, regressionBasisfunctionTimes, model, false, 1.0);
 			RandomVariable swapRate = floatLeg.div(annuity);
 			RandomVariable basisFunction = swapRate.mult(discountFactor);
 			basisFunctions.add(basisFunction);
@@ -317,10 +309,8 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 	public RegressionBasisFunctionsProvider getBasisFunctionsProviderWithForwardRates() {
 		return new RegressionBasisFunctionsProvider() {
 			@Override
-			public RandomVariable[] getBasisFunctions(double evaluationTime, MonteCarloSimulationModel monteCarloModel)
-					throws CalculationException {
+			public RandomVariable[] getBasisFunctions(double evaluationTime, MonteCarloSimulationModel monteCarloModel) throws CalculationException {
 				LIBORModelMonteCarloSimulationModel model = (LIBORModelMonteCarloSimulationModel) monteCarloModel;
-
 				double[] fixingDates = bermudanSwaption.getFixingDates();
 				double swapEndDate = bermudanSwaption.getPaymentDates()[fixingDates.length - 1];
 				double[] regressionBasisfunctionTimes = new double[fixingDates.length + 1];
@@ -329,14 +319,10 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 					regressionBasisfunctionTimes[i] = fixingDates[i];
 				regressionBasisfunctionTimes[numberOfPeriods] = swapEndDate;
 				ArrayList<RandomVariable> basisFunctions = new ArrayList<>();
-
 				basisFunctions.addAll(standardBasisFunctions(evaluationTime, model, fixingDates, regressionBasisfunctionTimes));
 				basisFunctions.addAll(crossBasisFunctions(swapEndDate,evaluationTime,model,regressionBasisfunctionTimes,numberOfPeriods));
-				return basisFunctions.toArray(new RandomVariableDifferentiableAAD[basisFunctions.size()]);
-				
-			}
-
-			
+				return basisFunctions.toArray(new RandomVariableDifferentiableAAD[basisFunctions.size()]);			
+			}	
 		};
 	}
 
@@ -355,23 +341,18 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 		double exerciseTime = evaluationTime;
 		ArrayList<RandomVariable> basisFunctions = new ArrayList<>();
 		int exerciseIndex = Arrays.binarySearch(regressionBasisfunctionTimes, exerciseTime);
-		if (exerciseIndex < 0) {
+		if (exerciseIndex < 0) 
 			exerciseIndex = -exerciseIndex;
-		}
-		if (exerciseIndex >= numberOfPeriods) {
+		if (exerciseIndex >= numberOfPeriods) 
 			exerciseIndex = numberOfPeriods - 1;
-		}
-
 		// forward rate to the end of the product
-		RandomVariable rateLong = model.getLIBOR(exerciseTime, regressionBasisfunctionTimes[exerciseIndex],
-				swapMaturity);
+		RandomVariable rateLong = model.getLIBOR(exerciseTime, regressionBasisfunctionTimes[exerciseIndex],swapMaturity);
 		basisFunctions.add(rateLong);
 		basisFunctions.add(rateLong.pow(2.0));
 		// Numeraire (adapted to multicurve framework)
 		RandomVariable discountFactor = model.getNumeraire(exerciseTime).invert();
 		basisFunctions.add(discountFactor);
-		// Cross
-		basisFunctions.add(rateLong.mult(discountFactor));
+		basisFunctions.add(rateLong.mult(discountFactor)); // Cross
 		return basisFunctions;
 	}
 	

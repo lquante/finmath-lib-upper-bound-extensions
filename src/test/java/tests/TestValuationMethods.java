@@ -43,7 +43,7 @@ public class TestValuationMethods {
 	// tolerance depending on numberOfPaths
 	static double tolerance = 1000;
 
-	@Test
+	
 	public void testSwaptionValuationMethods() throws CalculationException {
 		// set model parameters
 		CreateTestModel.setLastTime(lastTimePoint);
