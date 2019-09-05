@@ -77,9 +77,7 @@ public class SimulationFactory {
 
 	private void executeSimulationRunWithFlexibleRates(double swaprate, double[] forwardInterpolationRates,
 			double[] forwardInterpolationTimePoints) throws CalculationException {
-		
-		
-		// set parameters
+		// set and print parameters
 		TestModelFactory.setLastTime(lastTimePoint);
 		TestModelFactory.setLiborRateTimeHorzion(lastTimePoint);
 		TestModelFactory.setTimeDiscretizationPeriodLength(timeDiscretizationLength);
@@ -87,23 +85,16 @@ public class SimulationFactory {
 		TestModelFactory.setForwardInterpolationRates(forwardInterpolationRates);
 		TestModelFactory.setForwardInterpolationTimePoints(forwardInterpolationTimePoints);
 		TestModelFactory.setNumberOfPaths(numberOfPaths);
-
-	
-
 		System.out.println("Number of paths: " + numberOfPaths);
 		System.out.println("Number of subsimulation paths step A: " + numberOfSubsimulationsStepA);
 		System.out.println("Number of subsimulation paths step B: " + numberOfSubsimulationsStepB);
 		System.out.println("Number of exercise periods: " + numberOfExercisePeriods);
-
 		System.out.println("Time discretization period length: " + timeDiscretizationLength);
 		System.out.println("LIBOR period length: " + liborPeriodLength);
 		System.out.println("Initial forward rates: " + Arrays.toString(forwardInterpolationRates));
-
 		System.out.println("Option period length: " + optionPeriodLength);
 		System.out.println("Option swap rate: " + swaprate);
-		// run test
-
-		executePrintSwaptionValuationMethods(swaprate);
+		executePrintSwaptionValuationMethods(swaprate); // run test
 	}
 	
 	public void executePrintSwaptionValuationMethods(double swaprate) throws CalculationException {
@@ -122,8 +113,6 @@ public class SimulationFactory {
 		System.out.println("Bermudan Swaption prices:\n");
 		System.out.println(
 				"FirstFixingDate\tLower Bound\tUpper Bound(AB)\t\tUpperBound(Deltas)\tDeviation(AB)\tDeviation(Delta subsimfree)");
-		// "EvaluationDate Lower Bound Upper Bound(AB) Deviation(AB) ");
-
 		for (int startIndexLIBOR = 1; startIndexLIBOR < liborModel.getNumberOfLibors()
 				- numberOfExercisePeriods * optionPeriodLength / liborPeriodLength; startIndexLIBOR++) {
 			double firstFixingDate = liborModel.getLiborPeriod(startIndexLIBOR);
