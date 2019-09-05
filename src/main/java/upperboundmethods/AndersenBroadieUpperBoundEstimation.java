@@ -85,31 +85,23 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	@Override
 	
 	protected ArrayList<RandomVariable> calculateMartingaleApproximation(int evaluationPeriod, LIBORModelMonteCarloSimulationModel model,
-			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
-					throws CalculationException {
+			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues) throws CalculationException {
 		int numberOfPaths = model.getNumberOfPaths();
-		// determine number of martingale components to be estimated
+		// determine number of martingale components to be estimated and initialize as lower bound value
 		int numberOfOptionPeriods = this.bermudanSwaption.getFixingDates().length;
-		// initialize martingale as lower bound value for period 0 and 1.
-		ArrayList<RandomVariable> martingaleCache = new ArrayList<RandomVariable>();
-		martingaleCache.add(cacheOptionValues[evaluationPeriod]);
-		if (evaluationPeriod + 1 < cacheOptionValues.length)
-			martingaleCache.add(cacheOptionValues[evaluationPeriod + 1]);
+		ArrayList<RandomVariable> martingaleCache = initializeMartingaleCache(evaluationPeriod,cacheOptionValues);
 		// estimate martingale for all remaining fixing dates
 		for (int martingaleIndex = 2; martingaleIndex < numberOfOptionPeriods; martingaleIndex++) {
-			// initialize values for subsimulation
 			double currentFixingDate = this.bermudanSwaption.getFixingDates()[martingaleIndex];
 			int liborPeriod = model.getLiborPeriodIndex(currentFixingDate);
 			// Arrays to store pathwise results to be transformed to RandomVariable
 			double[] discountedExerciseValueArray  = new double[numberOfPaths];
 			double[] discountedFutureExerciseValueArray = new double[numberOfPaths];
 			double[] previousExerciseIndicatorArray = new double[numberOfPaths];
-			// Parallelized implementation of pathwise part of A-B algorithm:
 			int optionPeriodForInput = martingaleIndex; // to avoid non-final problems in nested environment
-			IntStream.range(0, numberOfPaths).parallel().forEach(path -> {
+			IntStream.range(0, numberOfPaths).parallel().forEach(path -> { // Parallelized implementation
 				double[] subsimulationResults = null;
-				try {
-					subsimulationResults = executeSubsimulation(model, path, optionPeriodForInput, liborPeriod,
+				try {subsimulationResults = executeSubsimulation(model, path, optionPeriodForInput, liborPeriod,
 							triggerValues, numberOfOptionPeriods, cacheUnderlying);
 				} catch (CalculationException e)
 				{e.printStackTrace();}
@@ -128,6 +120,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 		return martingaleCache;
 	}
 
+	
 	/**
 	 * Method for subsimulations to be called by parallelized execution interface 
 	 * 
