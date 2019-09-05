@@ -1,12 +1,8 @@
-package tests;
+package simulationMethods;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
-
-import org.junit.Assert;
 import net.finmath.exception.CalculationException;
 import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
@@ -24,18 +20,21 @@ import net.finmath.montecarlo.interestrate.models.covariance.LIBORCovarianceMode
 import net.finmath.montecarlo.interestrate.models.covariance.LIBORVolatilityModelFromGivenMatrix;
 import net.finmath.montecarlo.process.EulerSchemeFromProcessModel;
 import net.finmath.montecarlo.process.EulerSchemeFromProcessModel.Scheme;
-import net.finmath.stochastic.RandomVariable;
-import net.finmath.time.TimeDiscretization;
 import net.finmath.time.TimeDiscretizationFromArray;
 
-public class CreateTestModel {
+/**
+ * Class to provide a factory to create test LMMs
+ * @author Lennart Quante
+ *
+ */
+public class TestModelFactory {
 
 	// all model parameters are set as fields and used in the creation method to
 	// facilitate adjustments
 
 	LIBORModelMonteCarloSimulationModel liborModel;
 	// monte carlo simulation parameters
-	static int numberOfPaths = 1000;
+	static int numberOfPaths = 100;
 	static int numberOfFactors = 3; // PCA number of factors
 	static int seed = 3141; // seed for stochastic driver
 
@@ -53,7 +52,6 @@ public class CreateTestModel {
 
 	static // properties of the libor model
 	double liborRateTimeHorzion = 30;
-	
 
 	static double liborPeriodLength = 0.5;
 
@@ -70,34 +68,8 @@ public class CreateTestModel {
 	// measure
 	static String measure = LIBORMarketModelFromCovarianceModel.Measure.SPOT.name();
 
-	public CreateTestModel() throws CalculationException {
+	public TestModelFactory() throws CalculationException {
 		liborModel = createLIBORMarketModel();
-	}
-
-	@Test
-	public void testModel() {
-
-		// print some model properties
-		TimeDiscretization timeDiscretization = liborModel.getTimeDiscretization();
-		TimeDiscretization liborDiscretization = liborModel.getLiborPeriodDiscretization();
-		System.out.println("TimeDiscretization:" + Arrays.toString(timeDiscretization.getAsDoubleArray()));
-		System.out.println("LiborDiscretization:" + Arrays.toString(liborDiscretization.getAsDoubleArray()));
-
-		boolean [] LiborCalculated = new boolean[liborDiscretization.getNumberOfTimeSteps()];
-		// try to calculate all LIBOR rates
-		for (int i = 0; i < liborDiscretization.getNumberOfTimeSteps(); i++)
-			try {
-				RandomVariable[] libors = liborModel.getLIBORs(i);
-				System.out.println((i+1) + "thLIBOR rate " + libors[i].getAverage());
-				LiborCalculated[i] = true;
-			} catch (CalculationException e) {
-				System.out.println("calculation of libors failed at timepoint" + liborDiscretization.getTime(i));
-				e.printStackTrace();
-				Assert.assertEquals((i+1)+" th LIBOR rates could not be calculated", LiborCalculated[i]=true);
-			}
-		
-		
-		
 	}
 
 	public static LIBORModelMonteCarloSimulationModel createLIBORMarketModel() throws CalculationException {
@@ -186,8 +158,7 @@ public class CreateTestModel {
 
 		return new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModel, process);
 	}
-	
-	
+
 	/**
 	 * @return the lastTime
 	 */
@@ -199,7 +170,7 @@ public class CreateTestModel {
 	 * @param lastTime the lastTime to set
 	 */
 	public static void setLastTime(double lastTime) {
-		CreateTestModel.lastTime = lastTime;
+		TestModelFactory.lastTime = lastTime;
 	}
 
 	/**
@@ -213,7 +184,7 @@ public class CreateTestModel {
 	 * @param dt the timeDiscretizationPeriodLength to set
 	 */
 	public static void setTimeDiscretizationPeriodLength(double timeDiscretizationPeriodLength) {
-		CreateTestModel.timeDiscretizationPeriodLength = timeDiscretizationPeriodLength;
+		TestModelFactory.timeDiscretizationPeriodLength = timeDiscretizationPeriodLength;
 	}
 
 	/**
@@ -227,7 +198,7 @@ public class CreateTestModel {
 	 * @param liborRateTimeHorzion the liborRateTimeHorzion to set
 	 */
 	public static void setLiborRateTimeHorzion(double liborRateTimeHorzion) {
-		CreateTestModel.liborRateTimeHorzion = liborRateTimeHorzion;
+		TestModelFactory.liborRateTimeHorzion = liborRateTimeHorzion;
 	}
 
 	/**
@@ -241,7 +212,7 @@ public class CreateTestModel {
 	 * @param liborPeriodLength the liborPeriodLength to set
 	 */
 	public static void setLiborPeriodLength(double liborPeriodLength) {
-		CreateTestModel.liborPeriodLength = liborPeriodLength;
+		TestModelFactory.liborPeriodLength = liborPeriodLength;
 	}
 
 	/**
@@ -255,7 +226,7 @@ public class CreateTestModel {
 	 * @param numberOfPaths the numberOfPaths to set
 	 */
 	public static void setNumberOfPaths(int numberOfPaths) {
-		CreateTestModel.numberOfPaths = numberOfPaths;
+		TestModelFactory.numberOfPaths = numberOfPaths;
 	}
 
 	/**
@@ -269,7 +240,7 @@ public class CreateTestModel {
 	 * @param numberOfFactors the numberOfFactors to set
 	 */
 	public static void setNumberOfFactors(int numberOfFactors) {
-		CreateTestModel.numberOfFactors = numberOfFactors;
+		TestModelFactory.numberOfFactors = numberOfFactors;
 	}
 
 	/**
@@ -283,7 +254,7 @@ public class CreateTestModel {
 	 * @param seed the seed to set
 	 */
 	public static void setSeed(int seed) {
-		CreateTestModel.seed = seed;
+		TestModelFactory.seed = seed;
 	}
 
 	/**
@@ -294,10 +265,11 @@ public class CreateTestModel {
 	}
 
 	/**
-	 * @param forwardInterpolationTimePoints the forwardInterpolationTimePoints to set
+	 * @param forwardInterpolationTimePoints the forwardInterpolationTimePoints to
+	 *                                       set
 	 */
 	public static void setForwardInterpolationTimePoints(double[] forwardInterpolationTimePoints) {
-		CreateTestModel.forwardInterpolationTimePoints = forwardInterpolationTimePoints;
+		TestModelFactory.forwardInterpolationTimePoints = forwardInterpolationTimePoints;
 	}
 
 	/**
@@ -311,7 +283,7 @@ public class CreateTestModel {
 	 * @param forwardInterpolationRates the forwardInterpolationRates to set
 	 */
 	public static void setForwardInterpolationRates(double[] forwardInterpolationRates) {
-		CreateTestModel.forwardInterpolationRates = forwardInterpolationRates;
+		TestModelFactory.forwardInterpolationRates = forwardInterpolationRates;
 	}
 
 	/**
@@ -325,7 +297,7 @@ public class CreateTestModel {
 	 * @param volatilityA the volatilityA to set
 	 */
 	public static void setVolatilityA(double volatilityA) {
-		CreateTestModel.volatilityA = volatilityA;
+		TestModelFactory.volatilityA = volatilityA;
 	}
 
 	/**
@@ -339,7 +311,7 @@ public class CreateTestModel {
 	 * @param volatilityB the volatilityB to set
 	 */
 	public static void setVolatilityB(double volatilityB) {
-		CreateTestModel.volatilityB = volatilityB;
+		TestModelFactory.volatilityB = volatilityB;
 	}
 
 	/**
@@ -353,7 +325,7 @@ public class CreateTestModel {
 	 * @param volatilityC the volatilityC to set
 	 */
 	public static void setVolatilityC(double volatilityC) {
-		CreateTestModel.volatilityC = volatilityC;
+		TestModelFactory.volatilityC = volatilityC;
 	}
 
 	/**
@@ -367,8 +339,7 @@ public class CreateTestModel {
 	 * @param correlationDecayParam the correlationDecayParam to set
 	 */
 	public static void setCorrelationDecayParam(double correlationDecayParam) {
-		CreateTestModel.correlationDecayParam = correlationDecayParam;
+		TestModelFactory.correlationDecayParam = correlationDecayParam;
 	}
-
 
 }

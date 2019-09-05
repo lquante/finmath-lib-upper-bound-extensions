@@ -6,6 +6,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class ArrayCopyTimeComparison {
+	
+	/**	This class "tests" if the chosen array copy method is indeed faster than the alternative.
+	 * @author Lennart Quante
+	 */	
 
 	@Test
 	public void compareArrayCopyTimes() {
