@@ -5,6 +5,7 @@ import java.util.Map;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
+import net.finmath.marketdata.model.curves.ForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurveInterpolation;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.BrownianMotion;
@@ -20,11 +21,11 @@ import net.finmath.montecarlo.interestrate.models.covariance.LIBORCovarianceMode
 import net.finmath.montecarlo.interestrate.models.covariance.LIBORVolatilityModelFromGivenMatrix;
 import net.finmath.montecarlo.process.EulerSchemeFromProcessModel;
 import net.finmath.montecarlo.process.EulerSchemeFromProcessModel.Scheme;
+import net.finmath.time.TimeDiscretization;
 import net.finmath.time.TimeDiscretizationFromArray;
 
 /**
  * Class to provide a factory to create test LMMs
- * @author Lennart Quante
  *
  */
 public class TestModelFactory {
@@ -73,92 +74,72 @@ public class TestModelFactory {
 	}
 
 	public static LIBORModelMonteCarloSimulationModel createLIBORMarketModel() throws CalculationException {
-
-		/*
-		 * Create the libor tenor structure and the initial values
-		 */
-
+		// Create the libor tenor structure and the initial values
 		TimeDiscretizationFromArray liborPeriodDiscretization = new TimeDiscretizationFromArray(0.0,
 				(int) (liborRateTimeHorzion / liborPeriodLength), liborPeriodLength);
-
 		// Create the forward curve (initial value of the LIBOR market model)
 		ForwardCurveInterpolation forwardCurveInterpolation = ForwardCurveInterpolation.createForwardCurveFromForwards(
 				"forwardCurve" /* name of the curve */, forwardInterpolationTimePoints, forwardInterpolationRates,
 				liborPeriodLength);
-
-		/*
-		 * Create a simulation time discretization
-		 */
-
+		// Create a simulation time discretization
 		TimeDiscretizationFromArray timeDiscretizationFromArray = new TimeDiscretizationFromArray(0.0,
 				(int) (lastTime / timeDiscretizationPeriodLength), timeDiscretizationPeriodLength);
+		// Create a volatility structure v[i][j] = sigma_j(t_i)
+		double[][] volatility = createVolatilityMatrix(volatilityA, volatilityB, volatilityC, forwardCurveInterpolation, timeDiscretizationFromArray, liborPeriodDiscretization);
+		LIBORVolatilityModelFromGivenMatrix volatilityModel = new LIBORVolatilityModelFromGivenMatrix(timeDiscretizationFromArray, liborPeriodDiscretization, volatility);
+		// Create a correlation model rho_{i,j} = exp(-a * abs(T_i-T_j))
+		LIBORCorrelationModelExponentialDecay correlationModel = new LIBORCorrelationModelExponentialDecay(timeDiscretizationFromArray, liborPeriodDiscretization, numberOfFactors, correlationDecayParam);
+		// Combine volatility model and correlation model to a covariance model
+		LIBORCovarianceModelFromVolatilityAndCorrelation covarianceModel = new LIBORCovarianceModelFromVolatilityAndCorrelation(timeDiscretizationFromArray, liborPeriodDiscretization, volatilityModel, correlationModel);
+		// Set model properties
+		Map<String, String> properties = new HashMap<>();
+		// Choose the simulation measure
+		properties.put("measure", measure);
+		// Choose log normal model
+		properties.put("stateSpace", stateSpace);
+		// Empty array of calibration items - hence, model will use given covariance
+		CalibrationProduct[] calibrationItems = new CalibrationProduct[0];
+		// Create corresponding LIBOR Market Model
+		LIBORMarketModel liborMarketModel = new LIBORMarketModelFromCovarianceModel(liborPeriodDiscretization, null,
+				forwardCurveInterpolation, new DiscountCurveFromForwardCurve(forwardCurveInterpolation),
+				randomVariableFactory, covarianceModel, calibrationItems, properties);
+		BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(timeDiscretizationFromArray,numberOfFactors, numberOfPaths, seed /* seed */);
+		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion, scheme);
+		return new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModel, process);
+	}
 
-		/*
-		 * Create a volatility structure v[i][j] = sigma_j(t_i)
-		 */
-		double[][] volatility = new double[timeDiscretizationFromArray.getNumberOfTimeSteps()][liborPeriodDiscretization
-				.getNumberOfTimeSteps()];
+	/**
+	 * Creates a volatility matrix based on the rebonato instant volatility o_i = a+b*exp(-c*T_i)
+	 * @param a parameter a for rebonato inst. volatility
+	 * @param b parameter b for rebonato inst. volatility
+	 * @param c parameter c for rebonato inst. volatility
+	 * @param forwardCurve The forward curve to be used
+	 * @param  The time discretization to be used
+	 * @param The LIBOR discretization to be used
+	 * @return 2dimensional volatility matrix
+	 */
+	private static double[][] createVolatilityMatrix(double a, double b, double c, ForwardCurve forwardCurve, TimeDiscretization timeDiscretization, TimeDiscretization liborDiscretization) {
+		int numberOfTimes = timeDiscretization.getNumberOfTimes();
+		int numberOfLIBORs = liborDiscretization.getNumberOfTimes();
+		double[][] volatility = new double[numberOfTimes][numberOfLIBORs];
 		for (int timeIndex = 0; timeIndex < volatility.length; timeIndex++) {
 			for (int liborIndex = 0; liborIndex < volatility[timeIndex].length; liborIndex++) {
 				// Create a very simple volatility model here
-				double time = timeDiscretizationFromArray.getTime(timeIndex);
-				double maturity = liborPeriodDiscretization.getTime(liborIndex);
+				double time = timeDiscretization.getTime(timeIndex);
+				double maturity = liborDiscretization.getTime(liborIndex);
 				double timeToMaturity = maturity - time;
-
 				double instVolatility;
 				if (timeToMaturity <= 0) {
 					instVolatility = 0; // This forward rate is already fixed, no volatility
 				} else {
-					instVolatility = (volatilityA + volatilityB * Math.exp(-volatilityC * timeToMaturity))
-							* forwardCurveInterpolation.getForward(null, liborPeriodDiscretization.getTime(liborIndex)); // rescale
-					// values
+					instVolatility = (a + b * Math.exp(-c * timeToMaturity))
+							* forwardCurve.getForward(null, liborDiscretization.getTime(liborIndex)); // rescale
 				}
-
-				// Store
 				volatility[timeIndex][liborIndex] = instVolatility;
 			}
 		}
-		LIBORVolatilityModelFromGivenMatrix volatilityModel = new LIBORVolatilityModelFromGivenMatrix(
-				timeDiscretizationFromArray, liborPeriodDiscretization, volatility);
-		/*
-		 * Create a correlation model rho_{i,j} = exp(-a * abs(T_i-T_j))
-		 */
-		LIBORCorrelationModelExponentialDecay correlationModel = new LIBORCorrelationModelExponentialDecay(
-				timeDiscretizationFromArray, liborPeriodDiscretization, numberOfFactors, correlationDecayParam);
-
-		/*
-		 * Combine volatility model and correlation model to a covariance model
-		 */
-		LIBORCovarianceModelFromVolatilityAndCorrelation covarianceModel = new LIBORCovarianceModelFromVolatilityAndCorrelation(
-				timeDiscretizationFromArray, liborPeriodDiscretization, volatilityModel, correlationModel);
-
-		// Set model properties
-		Map<String, String> properties = new HashMap<>();
-
-		// Choose the simulation measure
-		properties.put("measure", measure);
-
-		// Choose log normal model
-		properties.put("stateSpace", stateSpace);
-
-		// Empty array of calibration items - hence, model will use given covariance
-		CalibrationProduct[] calibrationItems = new CalibrationProduct[0];
-
-		/*
-		 * Create corresponding LIBOR Market Model
-		 */
-		LIBORMarketModel liborMarketModel = new LIBORMarketModelFromCovarianceModel(liborPeriodDiscretization, null,
-				forwardCurveInterpolation, new DiscountCurveFromForwardCurve(forwardCurveInterpolation),
-				randomVariableFactory, covarianceModel, calibrationItems, properties);
-
-		BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(timeDiscretizationFromArray,
-				numberOfFactors, numberOfPaths, seed /* seed */);
-
-		EulerSchemeFromProcessModel process = new EulerSchemeFromProcessModel(brownianMotion, scheme);
-
-		return new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModel, process);
+		return volatility;
 	}
-
 	/**
 	 * @return the lastTime
 	 */

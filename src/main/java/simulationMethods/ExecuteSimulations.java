@@ -22,7 +22,6 @@ public class ExecuteSimulations {
 	static double optionPeriodLength = 1;
 
 	public static void main(String[] args) throws CalculationException {
-
 		SimulationFactory testSimulation = new SimulationFactory(lastTimePoint, timeDiscretizationLength, liborPeriodLength,
 				numberOfPaths, numberOfSubsimulationsStepA, numberOfSubsimulationsStepB, numberOfExercisePeriods,
 				optionPeriodLength);
