@@ -109,7 +109,20 @@ public abstract class AbstractUpperBoundEstimation implements BermudanSwaptionVa
 			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
 					throws CalculationException;
 
-
+	/**
+	 * Method to initialize martingale Cache as it is identical in both upper bound methods.
+	 * @param evaluationPeriod
+	 * @param cacheOptionValues
+	 * @return
+	 */
+	protected ArrayList<RandomVariable> initializeMartingaleCache(int evaluationPeriod,
+			RandomVariable[] cacheOptionValues) {
+		ArrayList<RandomVariable> martingaleCache = new ArrayList<RandomVariable>();
+		martingaleCache.add(cacheOptionValues[evaluationPeriod]);
+		if (evaluationPeriod + 1 < cacheOptionValues.length)
+			martingaleCache.add(cacheOptionValues[evaluationPeriod + 1]);
+		return martingaleCache;
+	}
 
 
 	// some getters and setters

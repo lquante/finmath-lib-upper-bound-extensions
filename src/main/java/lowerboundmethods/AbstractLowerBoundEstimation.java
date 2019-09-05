@@ -284,10 +284,9 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 		for (int exerciseIndexUnderlying = exerciseIndex; exerciseIndexUnderlying < fixingDates.length; exerciseIndexUnderlying++) {
 			RandomVariable floatLeg = getValueOfLegAnalytic(evaluationTime, fixingDates, regressionBasisfunctionTimes, model, true, 0.0);
 			RandomVariable annuity = getValueOfLegAnalytic(evaluationTime, fixingDates, regressionBasisfunctionTimes, model, false, 1.0);
-			RandomVariable swapRate = floatLeg.div(annuity);
-			RandomVariable basisFunction = swapRate.mult(discountFactor);
-			basisFunctions.add(basisFunction);
-			basisFunctions.add(basisFunction.squared());
+			RandomVariable dicountedSwapRate = floatLeg.div(annuity).mult(discountFactor);;
+			basisFunctions.add(dicountedSwapRate);
+			basisFunctions.add(dicountedSwapRate.squared());
 		}
 		return basisFunctions;
 	}

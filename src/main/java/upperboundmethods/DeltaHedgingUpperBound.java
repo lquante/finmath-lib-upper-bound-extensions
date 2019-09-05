@@ -52,15 +52,8 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 		double [] fixingDates = this.bermudanSwaption.getFixingDates();
 		int numberOfOptionPeriods = fixingDates.length;
 
-		// initialize martingale as lower bound value for period 0 and 1.
-
-		ArrayList<RandomVariable> martingaleCache = new ArrayList<RandomVariable>();
-		RandomVariable martingale = cacheOptionValues[0];
-		martingaleCache.add(martingale);
-		if (this.bermudanSwaption.getFixingDates().length > 1 && evaluationPeriod + 1 < cacheOptionValues.length) {
-			martingale = cacheOptionValues[evaluationPeriod + 1];
-			martingaleCache.add(martingale);
-		}
+		// initialize martingale as lower bound value for period 0 and 1
+		ArrayList<RandomVariable> martingaleCache = initializeMartingaleCache(evaluationPeriod,cacheOptionValues);
 		// calculate number of LIBOR periods covered by the fixing dates:
 
 		double firstFixingDate= fixingDates[2];
@@ -168,7 +161,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 			RandomVariable indicator = calculateExerciseIndicator  (liborTime,valuationMethod.getExerciseTime());
 			// Create a conditional expectation estimator with some basis functions
 			// (predictor variables) for conditional expectation estimation.
-			ArrayList<RandomVariable> basisFunctions = getRegressionBasisFunctionsBinning(currentRate, indicator);
+			ArrayList<RandomVariable> basisFunctions = getBasisFunctionsBinning(currentRate, indicator);
 			ConditionalExpectationEstimator conditionalExpectationOperator = new MonteCarloConditionalExpectationRegression(
 					basisFunctions.toArray(new RandomVariable[0]));
 			// calculate conditional expectation and store delta in delta array
@@ -222,8 +215,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 	 * @return The basis functions to estimate the conditional expectation of the
 	 *         deltas.
 	 */
-	private ArrayList<RandomVariable> getRegressionBasisFunctionsBinning(RandomVariable underlying,
-			RandomVariable exerciseIndicator) {
+	private ArrayList<RandomVariable> getBasisFunctionsBinning(RandomVariable underlying,RandomVariable exerciseIndicator) {
 		ArrayList<RandomVariable> basisFunctions = new ArrayList<RandomVariable>();
 		if (underlying.isDeterministic()) {
 			basisFunctions.add(underlying);
