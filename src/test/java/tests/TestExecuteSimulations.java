@@ -18,7 +18,7 @@ public class TestExecuteSimulations {
 	static double timeDiscretizationLength = 0.25;
 	static double liborPeriodLength = 0.5;
 	// monte carlo parameters
-	static int numberOfPaths = 100;
+	static int numberOfPaths = 20;
 	static int numberOfSubsimulationsStepA = 1;
 	static int numberOfSubsimulationsStepB = 1;
 	// option parameters
@@ -28,6 +28,7 @@ public class TestExecuteSimulations {
 	@Test
 	public void testExecuteSimulations() throws CalculationException {
 
+		System.out.println("Test of simulation configuration, not accuracy!");
 		SimulationFactory testSimulation = new SimulationFactory(lastTimePoint, timeDiscretizationLength, liborPeriodLength,
 				numberOfPaths, numberOfSubsimulationsStepA, numberOfSubsimulationsStepB, numberOfExercisePeriods,
 				optionPeriodLength);
