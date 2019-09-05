@@ -113,8 +113,6 @@ public class SimulationFactory {
 		System.out.println("Bermudan Swaption prices:\n");
 		System.out.println(
 				"FirstFixingDate\tLower Bound\tUpper Bound(AB)\t\tUpperBound(Deltas)\tDeviation(AB)\tDeviation(Delta subsimfree)");
-		// "EvaluationDate Lower Bound Upper Bound(AB) Deviation(AB) ");
-
 		for (int startIndexLIBOR = 1; startIndexLIBOR < liborModel.getNumberOfLibors()
 				- numberOfExercisePeriods * optionPeriodLength / liborPeriodLength; startIndexLIBOR++) {
 			double firstFixingDate = liborModel.getLiborPeriod(startIndexLIBOR);
