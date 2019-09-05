@@ -30,6 +30,19 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 		this.valuationMethod = valuationMethod;
 	}
 	
+	/**
+	 * Constructs a Bermudan swaption with the input parameters, fixed currency "EURO". 
+	 * @param swaprates       Array of swaprates
+	 * @param valuationMethod The valuation method to be used.
+	 */
+	public BermudanSwaption( boolean[] isPeriodStartDateExerciseDate, double[] fixingDates,
+			double[] periodLengths, double[] paymentDates, double[] periodNotionals, boolean isCallable,
+			double[] swaprates, BermudanSwaptionValueEstimatorInterface valuationMethod) {
+		super("EURO", isPeriodStartDateExerciseDate, fixingDates, periodLengths, paymentDates, periodNotionals,
+				isCallable);
+		this.swaprates = swaprates;
+		this.valuationMethod = valuationMethod;
+	}
 	
 	
 	
@@ -157,4 +170,6 @@ public class BermudanSwaption extends AbstractLIBORBermudanOption {
 		return swaprates;
 
 	}
+
+	
 }
