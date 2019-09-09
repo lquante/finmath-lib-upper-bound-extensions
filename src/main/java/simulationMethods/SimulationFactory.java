@@ -41,6 +41,7 @@ public class SimulationFactory {
 				new DecimalFormatSymbols(Locale.ENGLISH));
 		private static DecimalFormat formatterDeviation = new DecimalFormat(" 0.00000E00;-0.00000E00",
 				new DecimalFormatSymbols(Locale.ENGLISH));
+		private static String sep = ","; // separation string for print methods
 
 	/**
 	 * Factory to provide simulation runners with the given parameters.
@@ -110,9 +111,12 @@ public class SimulationFactory {
 		testSwaptionCreator.setSwaprate(swaprate);
 
 		// print head of comparison table
+		// define separating symbol
+		
 		System.out.println("Bermudan Swaption prices:\n");
 		System.out.println(
-				"FirstFixingDate\tLower Bound\tUpper Bound(AB)\t\tUpperBound(Deltas)\tDeviation(AB)\tDeviation(Delta subsimfree)");
+				"FirstFixingDate"+sep+"LowBound"+sep+"time"+sep+"UppBound(AB)"+sep+"time"+sep+"UppBound(Deltas)"
+						+sep+"time"+sep+"DualityGap(AB)"+sep+"DualityGap(Deltas)");
 		for (int startIndexLIBOR = 1; startIndexLIBOR < liborModel.getNumberOfLibors()
 				- numberOfExercisePeriods * optionPeriodLength / liborPeriodLength; startIndexLIBOR++) {
 			double firstFixingDate = liborModel.getLiborPeriod(startIndexLIBOR);
@@ -121,7 +125,7 @@ public class SimulationFactory {
 			 * Value a bermudan swaption
 			 */
 
-			System.out.print(formatterTime.format(firstFixingDate) + "\t");
+			System.out.print(formatterTime.format(firstFixingDate) + sep);
 
 			SimpleLowerBoundEstimation lowerBound = new SimpleLowerBoundEstimation();
 			BermudanSwaption testSwaption = testSwaptionCreator.constructBermudanSwaption(firstFixingDate, lowerBound);
@@ -137,11 +141,11 @@ public class SimulationFactory {
 
 			// Absolute duality gap AB method
 			double deviationAB = Math.abs(lowerBoundValue - ABupperBoundValue);
-			System.out.print(formatterDeviation.format(deviationAB) + "\t");
+			System.out.print(formatterDeviation.format(deviationAB) + sep);
 
 			// Absolute duality gap delta Hedge method
 			double deviationDeltaHedge = Math.abs(lowerBoundValue - DeltaUpperBoundValue);
-			System.out.println(formatterDeviation.format(deviationDeltaHedge) + "\t");
+			System.out.println(formatterDeviation.format(deviationDeltaHedge) + sep);
 
 		}
 	}
@@ -154,8 +158,8 @@ public class SimulationFactory {
 		double simulatedValue = swaption.getValue(liborModel);
 		long timingValuationEnd = System.currentTimeMillis();
 		double lastOperationTimingValuation = (timingValuationEnd - timingValuationStart) / 1000.0;
-		System.out.print(formatterValue.format(simulatedValue) + "\t");
-		System.out.print(formattterTime.format(lastOperationTimingValuation) + "\t");
+		System.out.print(formatterValue.format(simulatedValue) + sep);
+		System.out.print(formattterTime.format(lastOperationTimingValuation) + sep);
 
 		return simulatedValue;
 	}
