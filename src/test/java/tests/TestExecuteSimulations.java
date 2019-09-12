@@ -18,7 +18,7 @@ public class TestExecuteSimulations {
 	static double timeDiscretizationLength = 0.25;
 	static double liborPeriodLength = 0.5;
 	// monte carlo parameters
-	static int numberOfPaths = 20;
+	static int numberOfPaths = 200;
 	static int numberOfSubsimulationsStepA = 1;
 	static int numberOfSubsimulationsStepB = 1;
 	// option parameters
