@@ -35,9 +35,9 @@ public class SimulationFactory {
 	// formatter for values
 
 		private static DecimalFormat formatterTime = new DecimalFormat("00.00", new DecimalFormatSymbols(Locale.ENGLISH));
-		private static DecimalFormat formatterValue = new DecimalFormat(" ##0.00000%;-##0.00000%",
+		private static DecimalFormat formatterValue = new DecimalFormat(" ##0.00000;-##0.00000",
 				new DecimalFormatSymbols(Locale.ENGLISH));
-		private static DecimalFormat formattterTime = new DecimalFormat(" ##0.000s;-##0.000",
+		private static DecimalFormat formattterTime = new DecimalFormat(" ##0.000;-##0.000",
 				new DecimalFormatSymbols(Locale.ENGLISH));
 		private static DecimalFormat formatterDeviation = new DecimalFormat(" 0.00000E00;-0.00000E00",
 				new DecimalFormatSymbols(Locale.ENGLISH));
@@ -115,8 +115,8 @@ public class SimulationFactory {
 		
 		System.out.println("Bermudan Swaption prices:\n");
 		System.out.println(
-				"FirstFixingDate"+sep+"LowBound"+sep+"time"+sep+"UppBound(AB)"+sep+"time"+sep+"UppBound(Deltas)"
-						+sep+"time"+sep+"DualityGap(AB)"+sep+"DualityGap(Deltas)");
+				"FirstFixingDate"+sep+"LowBound"+sep+"time(L)"+sep+"UppBound(AB)"+sep+"time(AB)"+sep+"UppBound(Delta)"
+						+sep+"time(Delta)"+sep+"DualityGap(AB)"+sep+"DualityGap(Delta)");
 		for (int startIndexLIBOR = 1; startIndexLIBOR < liborModel.getNumberOfLibors()
 				- numberOfExercisePeriods * optionPeriodLength / liborPeriodLength; startIndexLIBOR++) {
 			double firstFixingDate = liborModel.getLiborPeriod(startIndexLIBOR);
@@ -145,7 +145,7 @@ public class SimulationFactory {
 
 			// Absolute duality gap delta Hedge method
 			double deviationDeltaHedge = Math.abs(lowerBoundValue - DeltaUpperBoundValue);
-			System.out.println(formatterDeviation.format(deviationDeltaHedge) + sep);
+			System.out.println(formatterDeviation.format(deviationDeltaHedge));
 
 		}
 	}
