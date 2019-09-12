@@ -35,7 +35,7 @@ public class SimulationFactory {
 	// formatter for values
 
 		private static DecimalFormat formatterTime = new DecimalFormat("00.00", new DecimalFormatSymbols(Locale.ENGLISH));
-		private static DecimalFormat formatterValue = new DecimalFormat(" ##0.00000;-##0.00000",
+		private static DecimalFormat formatterValue = new DecimalFormat(" ##0.0000000;-##0.0000000",
 				new DecimalFormatSymbols(Locale.ENGLISH));
 		private static DecimalFormat formattterTime = new DecimalFormat(" ##0.000;-##0.000",
 				new DecimalFormatSymbols(Locale.ENGLISH));
