@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import net.finmath.exception.CalculationException;
+import net.finmath.montecarlo.process.EulerSchemeFromProcessModel.Scheme;
 import simulationMethods.SimulationFactory;
 
 /**
@@ -31,7 +32,7 @@ public class TestExecuteSimulations {
 		System.out.println("Test of simulation configuration, not accuracy!");
 		SimulationFactory testSimulation = new SimulationFactory(lastTimePoint, timeDiscretizationLength, liborPeriodLength,
 				numberOfPaths, numberOfSubsimulationsStepA, numberOfSubsimulationsStepB, numberOfExercisePeriods,
-				optionPeriodLength);
+				optionPeriodLength, Scheme.EULER_FUNCTIONAL);
 		double swapRate = 0.02;
 	
 		// at the money option
