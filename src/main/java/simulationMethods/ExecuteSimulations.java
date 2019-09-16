@@ -1,6 +1,7 @@
 package simulationMethods;
 
 import net.finmath.exception.CalculationException;
+import net.finmath.montecarlo.process.EulerSchemeFromProcessModel.Scheme;
 
 /**
  * Main class to execute simulations
@@ -20,11 +21,12 @@ public class ExecuteSimulations {
 	// option parameters
 	static int numberOfExercisePeriods = 20;
 	static double optionPeriodLength = 1;
+	private static Scheme subsimulationScheme= Scheme.EULER_FUNCTIONAL;
 
 	public static void main(String[] args) throws CalculationException {
 		SimulationFactory testSimulation = new SimulationFactory(lastTimePoint, timeDiscretizationLength, liborPeriodLength,
 				numberOfPaths, numberOfSubsimulationsStepA, numberOfSubsimulationsStepB, numberOfExercisePeriods,
-				optionPeriodLength);
+				optionPeriodLength, subsimulationScheme);
 		double swapRate = 0.02;
 		// out of the money option
 		double rateShift = -0.005;

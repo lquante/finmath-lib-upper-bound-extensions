@@ -10,6 +10,7 @@ import bermudanswaptionframework.BermudanSwaptionValueEstimatorInterface;
 import lowerboundmethods.SimpleLowerBoundEstimation;
 import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationModel;
+import net.finmath.montecarlo.process.EulerSchemeFromProcessModel.Scheme;
 import upperboundmethods.AndersenBroadieUpperBoundEstimation;
 import upperboundmethods.DeltaHedgingUpperBound;
 
@@ -30,6 +31,7 @@ public class SimulationFactory {
 	// option parameters
 	int numberOfExercisePeriods;
 	double optionPeriodLength;
+	private Scheme subsimulationScheme;
 	
 	
 	// formatter for values
@@ -54,10 +56,11 @@ public class SimulationFactory {
 	 * @param numberOfSubsimulationsStepB
 	 * @param numberOfExercisePeriods
 	 * @param optionPeriodLength
+	 * @param subsimulationScheme 
 	 */
 	public SimulationFactory(double lastTimePoint, double timeDiscretizationLength, double liborPeriodLength,
 			int numberOfPaths, int numberOfSubsimulationsStepA, int numberOfSubsimulationsStepB,
-			int numberOfExercisePeriods, double optionPeriodLength) {
+			int numberOfExercisePeriods, double optionPeriodLength, Scheme subsimulationScheme) {
 		super();
 		this.lastTimePoint = lastTimePoint;
 		this.timeDiscretizationLength = timeDiscretizationLength;
@@ -67,6 +70,7 @@ public class SimulationFactory {
 		this.numberOfSubsimulationsStepB = numberOfSubsimulationsStepB;
 		this.numberOfExercisePeriods = numberOfExercisePeriods;
 		this.optionPeriodLength = optionPeriodLength;
+		this.subsimulationScheme = subsimulationScheme;
 	}
 
 	public void testOptionFlatCurve(double rateShift, double swapRate) throws CalculationException {
@@ -95,6 +99,7 @@ public class SimulationFactory {
 		System.out.println("Initial forward rates: " + Arrays.toString(forwardInterpolationRates));
 		System.out.println("Option period length: " + optionPeriodLength);
 		System.out.println("Option swap rate: " + swaprate);
+		System.out.println("SubsimulationScheme "+subsimulationScheme.toString());
 		executePrintSwaptionValuationMethods(swaprate); // run test
 	}
 	
@@ -133,7 +138,7 @@ public class SimulationFactory {
 			// System.out.print(Arrays.toString(testSwaption.getExerciseProbabilities()));
 			// AB upper bound approximation
 			AndersenBroadieUpperBoundEstimation ABupperBound = new AndersenBroadieUpperBoundEstimation(lowerBound, 1,
-					numberOfSubsimulationsStepA, numberOfSubsimulationsStepB);
+					numberOfSubsimulationsStepA, numberOfSubsimulationsStepB, subsimulationScheme);
 			double ABupperBoundValue = timingValuationTest(ABupperBound, testSwaption, liborModel);
 			// Upper bound using martingale construction via Delta hedging
 			DeltaHedgingUpperBound DeltaUpperBound = new DeltaHedgingUpperBound(lowerBound, 1);

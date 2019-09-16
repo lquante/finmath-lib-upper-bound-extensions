@@ -28,6 +28,7 @@ import net.finmath.montecarlo.interestrate.models.covariance.LIBORCorrelationMod
 import net.finmath.montecarlo.interestrate.models.covariance.LIBORCovarianceModelFromVolatilityAndCorrelation;
 import net.finmath.montecarlo.interestrate.models.covariance.LIBORVolatilityModelFromGivenMatrix;
 import net.finmath.montecarlo.process.EulerSchemeFromProcessModel;
+import net.finmath.montecarlo.process.EulerSchemeFromProcessModel.Scheme;
 import net.finmath.montecarlo.process.MonteCarloProcess;
 import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.TimeDiscretization;
@@ -46,6 +47,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	SimplestExerciseStrategy exerciseStrategy;
 	private int pathsSubsimulationsStepA;
 	private int pathsSubsimulationsStepB;
+	private Scheme subsimulationScheme;
 
 	/** Creates an AndersenBroadieUpperBound estimator.
 	 * @param lowerBoundMethod         The lower bound method to be used as a basis
@@ -60,12 +62,14 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	 */
 
 	public AndersenBroadieUpperBoundEstimation(AbstractLowerBoundEstimationInputForUpperBound lowerBoundMethod, double weightOfMartingale,
-			int pathsSubsimulationsStepA, int pathsSubsimulationsStepB) {
+			int pathsSubsimulationsStepA, int pathsSubsimulationsStepB, Scheme subsimulationScheme) {
 		super(lowerBoundMethod,weightOfMartingale);
 		this.pathsSubsimulationsStepA = pathsSubsimulationsStepA;
 		this.pathsSubsimulationsStepB = pathsSubsimulationsStepB;
 		// fixed exercise strategy, maybe add other implementations
 		exerciseStrategy = new SimplestExerciseStrategy();
+		// adjust discretization scheme for sub-simulations
+		this.subsimulationScheme = subsimulationScheme;
 	}
 	/**
 	 * Creates an AndersenBroadieUpperBound estimator with fixed SimpleLowerBoundEstimation as input, weight of martingale =1 and simplest exercise strategy.
@@ -230,7 +234,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 		BrownianMotion brownianMotion = new net.finmath.montecarlo.BrownianMotionLazyInit(shortenedLiborDiscretization,
 				numberOfFactors, pathsOfSubsimulation, 1234 + path);
 		MonteCarloProcess process = new EulerSchemeFromProcessModel(brownianMotion,
-				EulerSchemeFromProcessModel.Scheme.PREDICTOR_CORRECTOR);
+				subsimulationScheme);
 		return new LIBORMonteCarloSimulationFromLIBORModel(liborMarketModel, process);
 	}
 
