@@ -15,9 +15,9 @@ public class ExecuteSimulations {
 	static double timeDiscretizationLength = 0.25;
 	static double liborPeriodLength = 0.5;
 	// monte carlo parameters
-	static int numberOfPaths = 10000;
-	static int numberOfSubsimulationsStepA = 10000;
-	static int numberOfSubsimulationsStepB = 10000;
+	static int numberOfPaths = 100000;
+	static int numberOfSubsimulationsStepA = 1000;
+	static int numberOfSubsimulationsStepB = 1000;
 	// option parameters
 	static int numberOfExercisePeriods = 20;
 	static double optionPeriodLength = 1;
