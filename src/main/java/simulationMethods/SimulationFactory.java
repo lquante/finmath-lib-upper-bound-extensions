@@ -48,15 +48,15 @@ public class SimulationFactory {
 	/**
 	 * Factory to provide simulation runners with the given parameters.
 	 * 
-	 * @param lastTimePoint
-	 * @param timeDiscretizationLength
-	 * @param liborPeriodLength
-	 * @param numberOfPaths
-	 * @param numberOfSubsimulationsStepA
-	 * @param numberOfSubsimulationsStepB
-	 * @param numberOfExercisePeriods
-	 * @param optionPeriodLength
-	 * @param subsimulationScheme 
+	 * @param lastTimePoint end of simulation time horizon
+	 * @param timeDiscretizationLength length of time discretization periods
+	 * @param liborPeriodLength length of LIBOR discretization periods
+	 * @param numberOfPaths number of paths for monte carlo simulation
+	 * @param numberOfSubsimulationsStepA number of subsimulations in step A of AB algorithm
+	 * @param numberOfSubsimulationsStepB number of subsimulations in step B of AB algorithm
+	 * @param numberOfExercisePeriods number of exercise periods of the option
+	 * @param optionPeriodLength length of option periods
+	 * @param subsimulationScheme scheme used for subsimulations in AB method
 	 */
 	public SimulationFactory(double lastTimePoint, double timeDiscretizationLength, double liborPeriodLength,
 			int numberOfPaths, int numberOfSubsimulationsStepA, int numberOfSubsimulationsStepB,

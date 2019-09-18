@@ -114,8 +114,8 @@ public class TestModelFactory {
 	 * @param b parameter b for rebonato inst. volatility
 	 * @param c parameter c for rebonato inst. volatility
 	 * @param forwardCurve The forward curve to be used
-	 * @param  The time discretization to be used
-	 * @param The LIBOR discretization to be used
+	 * @param timeDiscretization The time discretization to be used
+	 * @param liborDiscretization The LIBOR discretization to be used
 	 * @return 2dimensional volatility matrix
 	 */
 	private static double[][] createVolatilityMatrix(double a, double b, double c, ForwardCurve forwardCurve, TimeDiscretization timeDiscretization, TimeDiscretization liborDiscretization) {
@@ -162,7 +162,7 @@ public class TestModelFactory {
 	}
 
 	/**
-	 * @param dt the timeDiscretizationPeriodLength to set
+	 * @param timeDiscretizationPeriodLength the length of the time discretization to set
 	 */
 	public static void setTimeDiscretizationPeriodLength(double timeDiscretizationPeriodLength) {
 		TestModelFactory.timeDiscretizationPeriodLength = timeDiscretizationPeriodLength;

@@ -16,8 +16,12 @@ public class testModelCreation {
 /**	This class tests if a creation of a LMM using the specified factory suceeds:
 		 *
 		 * @author Lennart Quante
+		 *
 		 */	
 	
+	/**
+	 * @throws CalculationException if some rate calculation fails
+	 */
 	@Test
 	public void testModel() throws CalculationException {
 

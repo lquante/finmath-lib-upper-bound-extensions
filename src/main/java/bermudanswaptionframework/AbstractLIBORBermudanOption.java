@@ -100,7 +100,7 @@ public abstract class AbstractLIBORBermudanOption extends AbstractLIBORMonteCarl
 	}
 	
 	/**
-	 * @param the exerciseProbabilities to set
+	 * @param exerciseProbabilities the exerciseProbabilities to set
 	 */
 	public void setExerciseProbabilities(double [] exerciseProbabilities) {
 		this.exerciseProbabilities = exerciseProbabilities;

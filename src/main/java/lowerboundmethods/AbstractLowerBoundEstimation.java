@@ -63,7 +63,7 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 	 * Valuation of the Bermudan Swaption via the backward valuation algorithm.
 	 * @param evaluationTime The time at which the backwardAlgorthm should evaluate the option.
 	 * @return The value random variable
-	 * @throws CalculationException
+	 * @throws CalculationException if some LIBOR calculation fails
 	 */
 	protected RandomVariable backwardAlgorithmValuation(double evaluationTime) throws CalculationException {
 		int numberOfFixingDates = bermudanSwaption.getFixingDates().length - 1;
@@ -115,29 +115,29 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 
 	/**
 	 * Method to retrieve the LIBOR rate for the input parameters.
-	 * @param fixingDate
-	 * @param paymentDate
+	 * @param fixingDate the fixing date of the rate
+	 * @param paymentDate the payment date of the rate
 	 * @return The LIBOR rate from fixing date to payment date
-	 * @throws CalculationException
+	 * @throws CalculationException if some rate calculation fails
 	 */
 	protected abstract RandomVariable calculateLiborRate(double fixingDate, double paymentDate)
 			throws CalculationException;
 
 	/**
 	 * Returns the triggerValues for the input paramters using the exerciseStrategy of the valuation interface, to be specified by specific method.
-	 * @param period
-	 * @param fixingDate
-	 * @param model
+	 * @param period period for which the trigger values are to be calculated
+	 * @param fixingDate date for which the trigger values are to be calculated
+	 * @param model the LMM to be used
 	 * @return RandomVariable of triggerValues
-	 * @throws CalculationException
+	 * @throws CalculationException if some LIBOR rate can not be calculated
 	 */
 	protected abstract RandomVariable calculateTriggerValues(int period, double fixingDate,
 			LIBORModelMonteCarloSimulationModel model) throws CalculationException;
 
 	/**
 	 * Applies the exercise criteria to the option.
-	 * @param exerciseDate
-	 * @param period
+	 * @param exerciseDate date on which the criteria should be applied
+	 * @param period period for which the criteria should be applied
 	 */
 	abstract void applyExerciseCriteria(double exerciseDate, int period);
 
@@ -202,12 +202,12 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 
 	/**
 	 * Provides basis functions based on a constant 1, a rate to the next period, a long rate and the numeraire
-	 * @param evaluationTime
-	 * @param model
-	 * @param fixingDates
-	 * @param paymentDates
-	 * @return ArrayList<RandomVariable> of the estimated basis functions.
-	 * @throws CalculationException
+	 * @param evaluationTime evaluation time of the basis functions
+	 * @param model LMM to be used
+	 * @param fixingDates vector of fixing dates
+	 * @param paymentDates vector of payment dates
+	 * @return ArrayList of the estimated basis functions.
+	 * @throws CalculationException if some LIBOR rate calculation fails
 	 */
 	private ArrayList<RandomVariable> standardBasisFunctions(double evaluationTime, LIBORModelMonteCarloSimulationModel model,double[] fixingDates, double[] paymentDates)
 			throws CalculationException {
@@ -266,24 +266,24 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 	
 	/**
 	 * Provides basis functions based on a swap rate estimate.
-	 * @param evaluationTime
-	 * @param model
-	 * @param fixingDates
-	 * @param regressionBasisfunctionTimes
-	 * @return ArrayList<RandomVariable> of the estimated basis functions.
-	 * @throws CalculationException
+	 * @param evaluationTime evaluation time of the basis functions
+	 * @param model LMM to be used
+	 * @param fixingDates vector of fixing dates
+	 * @param paymentDates vector of payment dates
+	 * @return ArrayList of the estimated basis functions.
+	 * @throws CalculationException if some LIBOR rate calculation fails
 	 */
-	private ArrayList<RandomVariable> swapRateBasisFunctions(double evaluationTime, LIBORModelMonteCarloSimulationModel model,double[] fixingDates, double[] regressionBasisfunctionTimes)throws CalculationException {
+	private ArrayList<RandomVariable> swapRateBasisFunctions(double evaluationTime, LIBORModelMonteCarloSimulationModel model,double[] fixingDates, double[] paymentDates)throws CalculationException {
 		ArrayList<RandomVariable> basisFunctions = new ArrayList<>();
-		int exerciseIndex = Arrays.binarySearch(regressionBasisfunctionTimes, evaluationTime);
+		int exerciseIndex = Arrays.binarySearch(paymentDates, evaluationTime);
 		if (exerciseIndex < 0) exerciseIndex = -exerciseIndex;
 		if (exerciseIndex >= fixingDates.length) exerciseIndex = fixingDates.length - 1;
 		// Numeraire (adapted to multicurve framework)
 		RandomVariable discountFactor = model.getNumeraire(evaluationTime).invert();
 		// Add swap rates of underlyings.
 		for (int exerciseIndexUnderlying = exerciseIndex; exerciseIndexUnderlying < fixingDates.length; exerciseIndexUnderlying++) {
-			RandomVariable floatLeg = getValueOfLegAnalytic(evaluationTime, fixingDates, regressionBasisfunctionTimes, model, true, 0.0);
-			RandomVariable annuity = getValueOfLegAnalytic(evaluationTime, fixingDates, regressionBasisfunctionTimes, model, false, 1.0);
+			RandomVariable floatLeg = getValueOfLegAnalytic(evaluationTime, fixingDates, paymentDates, model, true, 0.0);
+			RandomVariable annuity = getValueOfLegAnalytic(evaluationTime, fixingDates, paymentDates, model, false, 1.0);
 			RandomVariable dicountedSwapRate = floatLeg.div(annuity).mult(discountFactor);;
 			basisFunctions.add(dicountedSwapRate);
 			basisFunctions.add(dicountedSwapRate.squared());
@@ -318,21 +318,22 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 
 	/**
 	 * Provides basis functions with a cross of the numeraire and a long rate.
-	 * @param evaluationTime
-	 * @param model
-	 * @param fixingDates
-	 * @param regressionBasisfunctionTimes
-	 * @return ArrayList of RandomVariable of the estimated basis functions.
-	 * @throws CalculationException
+	 * @param evaluationTime evaluation time of the basis functions
+	 * @param model LMM to be used
+	 * @param paymentDates vector of payment dates
+	 * @param swapEndDate last date of the swaption
+	 * @param numberOfPeriods number of option periods
+	 * @return ArrayList of the estimated basis functions.
+	 * @throws CalculationException if some LIBOR rate calculation fails
 	 */
 	private ArrayList<RandomVariable> crossBasisFunctions(double swapEndDate, double evaluationTime,
-			LIBORModelMonteCarloSimulationModel model, double[] regressionBasisfunctionTimes, int numberOfPeriods) throws CalculationException {
+			LIBORModelMonteCarloSimulationModel model, double[] paymentDates, int numberOfPeriods) throws CalculationException {
 		ArrayList<RandomVariable> basisFunctions = new ArrayList<>();
-		int exerciseIndex = Arrays.binarySearch(regressionBasisfunctionTimes, evaluationTime);
+		int exerciseIndex = Arrays.binarySearch(paymentDates, evaluationTime);
 		if (exerciseIndex < 0) exerciseIndex = -exerciseIndex;
 		if (exerciseIndex >= numberOfPeriods) exerciseIndex = numberOfPeriods - 1;
 		// forward rate to the end of the product
-		RandomVariable rateLong = model.getLIBOR(evaluationTime, regressionBasisfunctionTimes[exerciseIndex],swapEndDate);
+		RandomVariable rateLong = model.getLIBOR(evaluationTime, paymentDates[exerciseIndex],swapEndDate);
 		basisFunctions.add(rateLong);
 		basisFunctions.add(rateLong.pow(2.0));
 		// Numeraire (adapted to multicurve framework)
@@ -344,14 +345,14 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 	
 	/**
 	 * Helper method to calculate analytic leg value for swap rate estimate.
-	 * @param evaluationTime
-	 * @param exerciseDates
-	 * @param paymentDates
-	 * @param model
-	 * @param paysFloatingRate
-	 * @param fixRate
+	 * @param evaluationTime time to evaluate the leg
+	 * @param exerciseDates vector of exercise dates
+	 * @param paymentDates vector of payment dates
+	 * @param model LMM to be used
+	 * @param paysFloatingRate true if floating leg, false if fixed leg
+	 * @param fixRate fixed rate of the swap
 	 * @return The value of the floating leg.
-	 * @throws CalculationException
+	 * @throws CalculationException if some rate calculation fails
 	 */
 	public RandomVariable getValueOfLegAnalytic(double evaluationTime, double[] exerciseDates, double[] paymentDates,
 			LIBORModelMonteCarloSimulationModel model, boolean paysFloatingRate, double fixRate)

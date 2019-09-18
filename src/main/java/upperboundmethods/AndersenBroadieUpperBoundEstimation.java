@@ -59,6 +59,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	 * @param pathsSubsimulationsStepB number of subsimulation Paths in case 2b of
 	 *                                 A-B algorithm, i.e. if no exercise at current
 	 *                                 simulation time.
+	 * @param subsimulationScheme The discretization scheme to be used.
 	 */
 
 	public AndersenBroadieUpperBoundEstimation(AbstractLowerBoundEstimationInputForUpperBound lowerBoundMethod, double weightOfMartingale,
@@ -128,17 +129,16 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	/**
 	 * Method for subsimulations to be called by parallelized execution interface 
 	 * 
-	 * @param model
-	 * @param path
-	 * @param optionPeriod
-	 * @param liborPeriod
-	 * @param currentFixingDate
-	 * @param triggerValues
-	 * @param numberOfOptionPeriods
-	 * @param cacheUnderlying
+	 * @param model the LMM used
+	 * @param path path on which the subsimulation is performed
+	 * @param optionPeriod optionPeriod in which the subsimulation is performed
+	 * @param liborPeriod LIBOR period in which the subsimulation is performed
+	 * @param triggerValues trigger values from lower bound method
+	 * @param numberOfOptionPeriods number of periods of the option
+	 * @param cacheUnderlying cached exercise values from lower bound method
 	 * @return The triple
 	 *         {discountedExerciseValue,discountedFutureExerciseValue,previousExerciseIndicator}
-	 * @throws CalculationException
+	 * @throws CalculationException if some LIBOR rate calculation fails
 	 */
 	double[] executeSubsimulation(LIBORModelMonteCarloSimulationModel model, int path, int optionPeriod,
 			int liborPeriod , RandomVariable[] triggerValues, int numberOfOptionPeriods,
@@ -212,7 +212,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	 *                             starting values.
 	 * @param pathsOfSubsimulation Number of paths for the new model.
 	 * @return The model to be used for subsimulations.
-	 * @throws CalculationException
+	 * @throws CalculationException if some rate calculation fails
 	 */
 	private LIBORModelMonteCarloSimulationModel createSubsimulationModelTerminating(
 			LIBORModelMonteCarloSimulationModel model, int startingPeriod, int endPeriod, int path,
@@ -244,7 +244,7 @@ public class AndersenBroadieUpperBoundEstimation extends AbstractUpperBoundEstim
 	 * @param forwardCurve The initial forward curve of the model
 	 * @param model The original model from which the model is derived
 	 * @return A LIBORMarketmodel with fixed volatility and correlation.
-	 * @throws CalculationException
+	 * @throws CalculationException if some stochastic driver calculation fails
 	 */
 	private LIBORMarketModel liborModelCreator(TimeDiscretization shortenedLiborDiscretization,
 			ForwardCurve forwardCurve, LIBORModelMonteCarloSimulationModel model) throws CalculationException {

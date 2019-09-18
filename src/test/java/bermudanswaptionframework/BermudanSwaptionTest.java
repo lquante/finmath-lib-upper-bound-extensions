@@ -65,6 +65,7 @@ public class BermudanSwaptionTest {
 	
 	
 	/** help method to create swaption
+	 * @return a Bermudan swaption for testing with numberOfPeriods periods
 	*/
 	BermudanSwaption constructTestSwaption () {
 		boolean isCallable = true;

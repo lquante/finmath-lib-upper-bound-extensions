@@ -103,7 +103,7 @@ public abstract class AbstractUpperBoundEstimation implements BermudanSwaptionVa
 	 * @param triggerValues     The cached trigger values from the lower bound
 	 *                          method.
 	 * @return The Monte Carlo estimate of the martingale component, as a double.
-	 * @throws CalculationException
+	 * @throws CalculationException if calculation of some LIBOR fails
 	 */
 	protected abstract ArrayList<RandomVariable> calculateMartingaleApproximation(int period, LIBORModelMonteCarloSimulationModel model,
 			RandomVariable[] cacheUnderlying, RandomVariable[] cacheOptionValues, RandomVariable[] triggerValues)
@@ -111,9 +111,9 @@ public abstract class AbstractUpperBoundEstimation implements BermudanSwaptionVa
 
 	/**
 	 * Method to initialize martingale Cache as it is identical in both upper bound methods.
-	 * @param evaluationPeriod
-	 * @param cacheOptionValues
-	 * @return
+	 * @param evaluationPeriod Period of evaluation of the option
+	 * @param cacheOptionValues cached lower bound values
+	 * @return The initialized martingale as an ArrayList
 	 */
 	protected ArrayList<RandomVariable> initializeMartingaleCache(int evaluationPeriod,
 			RandomVariable[] cacheOptionValues) {

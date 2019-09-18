@@ -80,7 +80,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 	 * @param firstLIBORIndex 		The first LIBOR period for which the martingale shall be approximated.
 	 * @param lastLIBORIndex 		The last LIBOR period for which the martingale shall be approximated.
 	 * @return An array list with all estimated martingale RandomVariables
-	 * @throws CalculationException
+	 * @throws CalculationException if some rate calculation fails
 	 */
 	private Map<Double, RandomVariable> deltaMartingaleApproximation(double evaluationTime,
 			RandomVariable cacheOptionValue, int firstLIBORIndex, int lastLIBORIndex) throws CalculationException {
@@ -129,7 +129,7 @@ public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 	 * @param firstLIBORIndex The index of the first LIBOR rate to be considered.
 	 * @param lastLIBORIndex The index of the last LIBOR rate to be considered.
 	 * @return The delta approximation as a RandomVariable.
-	 * @throws CalculationException
+	 * @throws CalculationException if some rate calculation fails
 	 */
 	private RandomVariable[] getDeltas(Map<Long, RandomVariable> gradient, double liborTime, int firstLIBORIndex, int lastLIBORIndex)
 			throws CalculationException {

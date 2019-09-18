@@ -8,11 +8,11 @@ public class TestSwaptionFactory {
 	private int numberOfExercisePeriods;
 
 	/**
-	 * Constructs a factory to provide swaptions with the floowing parameters fixed:
+	 * Constructs a factory to provide swaptions with the following parameters fixed:
 	 * 
-	 * @param numberOfExercisePeriods
-	 * @param periodLength
-	 * @param swaprate
+	 * @param numberOfExercisePeriods number of exercise periods
+	 * @param periodLength length of option periods
+	 * @param swaprate swaprate to be used
 	 */
 	public TestSwaptionFactory(int numberOfExercisePeriods, double periodLength, double swaprate) {
 		super();
@@ -30,9 +30,6 @@ public class TestSwaptionFactory {
 	 * notional ==1 and constant swaprate
 	 * 
 	 * @param firstFixingDate         first fixing date of the swaption
-	 * @param numberOfExercisePeriods
-	 * @param periodLength
-	 * @param swaprate                the constant swaprate
 	 * @param valuationMethod         valuation method to be used
 	 * @return A Bermudan Swaption with the given parameters
 	 */
