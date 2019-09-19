@@ -60,7 +60,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.19</version>
 				<configuration>
-					<argLine>-Xmx48g</argLine>
+					<argLine>-Xmx60g</argLine>
 				</configuration>
 			</plugin>
 			<plugin>
