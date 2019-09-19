@@ -16,10 +16,10 @@ public class TestExecuteSimulations {
 
 	// model parameters
 	static double lastTimePoint = 30;
-	static double timeDiscretizationLength = 0.25;
+	static double timeDiscretizationLength = 0.5;
 	static double liborPeriodLength = 0.5;
 	// monte carlo parameters
-	static int numberOfPaths = 200;
+	static int numberOfPaths = 1000;
 	static int numberOfSubsimulationsStepA = 1;
 	static int numberOfSubsimulationsStepB = 1;
 	// option parameters
