@@ -6,7 +6,7 @@ import net.finmath.montecarlo.process.EulerSchemeFromProcessModel.Scheme;
 /**
  * Main class to execute simulations
  * @author Lennart Quante
- *
+ * @version 1.0
  */
 public class ExecuteSimulations {
 

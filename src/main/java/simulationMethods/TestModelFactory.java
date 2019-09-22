@@ -26,7 +26,8 @@ import net.finmath.time.TimeDiscretizationFromArray;
 
 /**
  * Class to provide a factory to create test LMMs
- *
+ * @author Lennart Quante based on finmath-lib, L. Torricelli & C.Fries
+ * @version 1.0
  */
 public class TestModelFactory {
 

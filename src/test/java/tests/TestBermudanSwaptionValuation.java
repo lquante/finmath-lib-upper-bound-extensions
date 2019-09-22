@@ -22,6 +22,7 @@ import upperboundmethods.DeltaHedgingUpperBound;
  * This class tests if a valuation of a swaption using the different valuation methods suceeds:
  *
  * @author Lennart Quante
+ *  @version 1.0
  */
 
 public class TestBermudanSwaptionValuation {

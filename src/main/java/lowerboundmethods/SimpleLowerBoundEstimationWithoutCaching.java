@@ -13,14 +13,12 @@ import net.finmath.stochastic.RandomVariable;
  * caching.
  * 
  * @author (c)Christian P. Fries, modified by Lennart Quante
- * 
+ *  @version 1.0
  */
 public class SimpleLowerBoundEstimationWithoutCaching extends AbstractLowerBoundEstimationWithoutCaching
 		implements RegressionBasisFunctionsProvider {
 
-	public enum BasisFunctionType {
-		SwapRates, ForwardRates
-	}
+	
 
 	RandomVariable triggerValues;
 	RegressionBasisFunctionsProvider regressionBasisFunctionsProvider;

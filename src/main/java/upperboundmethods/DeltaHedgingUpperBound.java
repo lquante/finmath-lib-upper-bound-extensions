@@ -21,7 +21,7 @@ import net.finmath.stochastic.RandomVariable;
  * by Joshi and Tang 2014
  * 
  * @author Lennart Quante
- *
+ *  @version 1.0
  */
 public class DeltaHedgingUpperBound extends AbstractUpperBoundEstimation {
 

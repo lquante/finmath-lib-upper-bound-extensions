@@ -17,8 +17,9 @@ import lowerboundmethods.SimpleLowerBoundEstimation;
 import upperboundmethods.DeltaHedgingUpperBound;
 
 /**
- * @author Lennart
- *
+ * Tests some methods of BermudanSwaption class.
+ * @author Lennart Quante
+ * @version 1.0
  */
 public class BermudanSwaptionTest {
 

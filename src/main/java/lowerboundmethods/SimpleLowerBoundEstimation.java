@@ -13,15 +13,12 @@ import net.finmath.stochastic.RandomVariable;
  * values for reuse in upper bound methods.
  * 
  * @author (c)Christian P. Fries, modified by Lennart Quante
- * 
+ *  @version 1.0
  */
 public class SimpleLowerBoundEstimation extends AbstractLowerBoundEstimationInputForUpperBound
 		implements RegressionBasisFunctionsProvider {
 
-	public enum BasisFunctionType {
-		SwapRates, ForwardRates
-	}
-
+	
 	RandomVariable triggerValues;
 	RegressionBasisFunctionsProvider regressionBasisFunctionsProvider;
 

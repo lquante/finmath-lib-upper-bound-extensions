@@ -10,6 +10,7 @@ import simulationMethods.SimulationFactory;
 /**
  * Test to test simulation runner specifications with a low number of paths to avoid missspecification e.g of the model
  * @author Lennart Quante
+ *  @version 1.0
  *
  */
 public class TestExecuteSimulations {

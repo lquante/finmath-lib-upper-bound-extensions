@@ -35,6 +35,16 @@ public abstract class AbstractLowerBoundEstimation implements BermudanSwaptionVa
 
 	RandomVariable exerciseTime;
 	protected LIBORModelMonteCarloSimulationModel model;
+	
+	/**
+	Choice of alternative basis function compositions:
+		 * @author Lennart Quante
+		 * @version 1.0
+		 */
+	
+	public enum BasisFunctionType {
+		SwapRates, ForwardRates
+	}
 
 	/*
 	 * (non-Javadoc)

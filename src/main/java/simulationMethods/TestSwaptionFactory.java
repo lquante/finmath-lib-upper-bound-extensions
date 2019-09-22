@@ -3,6 +3,11 @@ package simulationMethods;
 import bermudanswaptionframework.BermudanSwaption;
 import bermudanswaptionframework.BermudanSwaptionValueEstimatorInterface;
 
+/**
+ * Class to construct a factory for test swaptions.
+ * @author Lennart Quante
+ *  @version 1.0
+ */
 public class TestSwaptionFactory {
 
 	private int numberOfExercisePeriods;

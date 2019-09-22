@@ -11,19 +11,20 @@ import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.TimeDiscretization;
 import simulationMethods.TestModelFactory;
 
-public class testModelCreation {
-
 /**	This class tests if a creation of a LMM using the specified factory suceeds:
-		 *
-		 * @author Lennart Quante
-		 *
-		 */	
+*
+* @author Lennart Quante
+*  @version 1.0
+*/	
+public class TestModelCreation {
+
+
 	
 	/**
 	 * @throws CalculationException if some rate calculation fails
 	 */
 	@Test
-	public void testModel() throws CalculationException {
+	public void testModelCreation() throws CalculationException {
 
 		TestModelFactory modelFactory = new TestModelFactory();
 		LIBORModelMonteCarloSimulationModel liborModel = TestModelFactory.createLIBORMarketModel();

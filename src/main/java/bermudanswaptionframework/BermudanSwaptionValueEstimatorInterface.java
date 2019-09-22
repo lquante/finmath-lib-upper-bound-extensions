@@ -6,7 +6,7 @@ import net.finmath.stochastic.RandomVariable;
 
 /**
  * Interface to enable valuation using different methods through this interface.
- * 
+ * @version 1.0
  * @author Lennart Quante
  *
  */

@@ -5,11 +5,14 @@ import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**	This class tests if the chosen array copy method using the System library is indeed faster than the alternative via Array library.
+ * @author Lennart Quante
+ *  @version 1.0
+ */	
+
 public class ArrayCopyTimeComparison {
 	
-	/**	This class "tests" if the chosen array copy method is indeed faster than the alternative.
-	 * @author Lennart Quante
-	 */	
+	
 
 	@Test
 	public void compareArrayCopyTimes() {

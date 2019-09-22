@@ -17,7 +17,7 @@ import upperboundmethods.DeltaHedgingUpperBound;
 /**
  * Class to generate simulation factories.
  * @author Lennart Quante
- *
+ * @version 1.0
  */
 public class SimulationFactory {
 	// model parameters
